@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:draft_futbol/models/Gameweek.dart';
 import 'package:http/http.dart' as http;
 
@@ -36,7 +34,7 @@ class Api {
     final response =
         await http.get(Uri.parse('$baseUrl/api/league/$leagueId/details'));
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return Commons.returnResponse(response);
     } else {
       print(response.statusCode);
       print("failed to get response");
@@ -74,7 +72,7 @@ class Api {
     final response =
         await http.get(Uri.parse('$baseUrl/api/entry/$teamId/event/$gameweek'));
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return Commons.returnResponse(response);
     } else {
       print(response.statusCode);
       print("failed to get response");
@@ -100,7 +98,7 @@ class Api {
           Commons.baseUrl + '/api/league/${leagueId.toString()}/details'));
 
       if (response.statusCode == 200) {
-        var _resp = jsonDecode(response.body);
+        var _resp = Commons.returnResponse(response);
         String LeagueName = _resp['league']['name'];
         if (_resp['league']['draft_status'] == 'post') {
           final league = {
