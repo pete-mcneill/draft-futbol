@@ -118,6 +118,9 @@ class PlMatchesNotifier extends StateNotifier<PlMatches> {
   List<Bps> get1BPSPlayers(
       List<Bps> players, List<Bps> threeBPS, List<Bps> twoBPS) {
     List<Bps> oneBP = [];
+    if(threeBPS.length > 2){
+      return oneBP;
+    }
     if (threeBPS.length == 2) {
       Bps firstOneBP = players[2];
       oneBP = players

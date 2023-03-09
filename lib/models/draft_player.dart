@@ -7,6 +7,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class DraftPlayersNotifier extends StateNotifier<DraftPlayers> {
   DraftPlayersNotifier() : super(DraftPlayers());
 
+  void setPlayerStatus(var elementStatus, String leagueId){
+    try{
+       for(var _player in elementStatus){
+        try{
+             state.players[_player["element"]]!.playerStatus![leagueId] = _player["status"].toString();
+      if(_player["owner"] != null){
+        state.players[_player["element"]]!.draftTeamId![leagueId] = _player["owner"].toString();
+      }
+    }
+    catch (e) {
+    print(e);
+  }
+       }
+    } catch (e) {
+    print(e);
+  }
+   
+  }
+
   void createAllDraftPlayers(var staticPlayers) {
     for (var player in staticPlayers) {
       DraftPlayer _player = DraftPlayer.fromJson(player);
@@ -85,6 +104,8 @@ class DraftPlayer {
   String? position;
   String? teamId;
   String? playerCode;
+  Map<String, String>? playerStatus;
+  Map<String, String>? draftTeamId;
   List<Match>? matches;
 
   DraftPlayer(
@@ -92,7 +113,9 @@ class DraftPlayer {
       this.playerName,
       this.position,
       this.teamId,
-      this.playerCode});
+      this.playerCode,
+      this.playerStatus,
+      this.draftTeamId});
 
   void updateMatches(List<Match> _matches) {
     matches = _matches;
@@ -118,6 +141,8 @@ class DraftPlayer {
         playerName: json['web_name'],
         position: position,
         playerCode: json["code"].toString(),
-        teamId: json['team'].toString());
+        teamId: json['team'].toString(),
+        draftTeamId: {},
+        playerStatus: {});
   }
 }

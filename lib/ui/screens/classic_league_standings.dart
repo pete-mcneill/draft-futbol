@@ -265,7 +265,7 @@ class _ClassicLeagueStandingsState
 
     return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        // mainAxisAlignment: MainAxisAlignment.start,
         children: [
           if (!ref.watch(purchasesProvider).noAdverts!)
             Center(

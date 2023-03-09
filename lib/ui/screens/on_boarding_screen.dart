@@ -292,7 +292,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                   const SizedBox(
                     height: 10,
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _api
