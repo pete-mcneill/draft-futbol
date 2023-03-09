@@ -4,11 +4,13 @@ import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/Gameweek.dart';
 import 'package:draft_futbol/models/draft_leagues.dart';
 import 'package:draft_futbol/models/draft_player.dart';
+import 'package:draft_futbol/models/draft_squad.dart';
 import 'package:draft_futbol/models/fixture.dart';
 import 'package:draft_futbol/models/league_standing.dart';
 import 'package:draft_futbol/models/pl_match.dart';
 import 'package:draft_futbol/models/pl_teams.dart';
 import 'package:draft_futbol/models/purchases.dart';
+import 'package:draft_futbol/models/transactions.dart';
 import 'package:draft_futbol/services/api_service.dart';
 import 'package:draft_futbol/services/utils_service.dart';
 import 'package:draft_futbol/utils/utilities.dart';
@@ -24,6 +26,16 @@ class GameweekNotifier extends StateNotifier<Gameweek?> {
     state = gameweek;
   }
 }
+
+final squadsProvider = 
+    StateNotifierProvider<DraftSquadsNotifier, DraftSquads>((ref) {
+  return DraftSquadsNotifier();
+    });
+
+final transactionsProvider = 
+    StateNotifierProvider<TransactionsNotifier, Transactions>((ref) {
+  return TransactionsNotifier();
+    });
 
 final purchasesProvider =
     StateNotifierProvider<PurchasesNotifier, DraftPurchases>((ref) {
@@ -85,11 +97,12 @@ Future handleH2HLeague(String leagueId, var leagueData, Gameweek gameweek,
   await ref
       .read(draftTeamsProvider.notifier)
       .getLeagueSquads(leagueData, gameweek.currentGameweek, leagueId);
-  ref.read(fixturesProvider.notifier).getGwFixtures(
-      int.parse(gameweek.currentGameweek), leagueData['matches'], leagueId);
+  // ref.read(fixturesProvider.notifier).getGwFixtures(
+  //     int.parse(gameweek.currentGameweek), leagueData['matches'], leagueId);
+  ref.read(fixturesProvider.notifier).getAllFixtures(leagueData['matches'], leagueId);
   Map<String, Map<int, DraftTeam>> _squads =
       ref.read(draftTeamsProvider).teams!;
-  Map<String, List<Fixture>> GwFixtures = ref.read(fixturesProvider).fixtures;
+  Map<String, List<Fixture>> GwFixtures = ref.read(fixturesProvider).fixtures[leagueId]!;
   List staticStandings = leagueData['standings'];
   ref
       .read(h2hStandingsProvider.notifier)
@@ -97,7 +110,7 @@ Future handleH2HLeague(String leagueId, var leagueData, Gameweek gameweek,
   if (gameweek.gameweekFinished) {
     ref
         .read(draftTeamsProvider.notifier)
-        .updateFinishedTeamScores(GwFixtures[leagueId]!, leagueId);
+        .updateFinishedTeamScores(GwFixtures[gameweek.currentGameweek]!, leagueId);
   } else {
     ref
         .read(draftTeamsProvider.notifier)
@@ -114,9 +127,9 @@ Future handleH2HLeague(String leagueId, var leagueData, Gameweek gameweek,
     List bonusStandings = json.decode(json.encode(staticStandings));
     ref
         .read(h2hStandingsProvider.notifier)
-        .getLiveStandings(liveStandings, leagueId, GwFixtures, _squads);
+        .getLiveStandings(liveStandings, leagueId, GwFixtures, _squads, gameweek.currentGameweek);
     ref.read(h2hStandingsProvider.notifier).getLiveBonusPointStandings(
-        bonusStandings, leagueId, GwFixtures, _squads);
+        bonusStandings, leagueId, GwFixtures, _squads, gameweek.currentGameweek);
   }
 }
 
@@ -250,7 +263,9 @@ final futureLiveDataProvider = FutureProvider((ref) async {
     // For Each league get League Data
     for (String leagueId in leagueIds.keys) {
       var leagueDetails = await _api.getLeagueDetails(leagueId);
-
+      var playerStatus = await _api.getPlayerStatus(leagueId);
+      ref.read(draftPlayersProvider.notifier)
+        .setPlayerStatus(playerStatus!['element_status'], leagueId);
       DraftLeague _league = DraftLeague.fromJson(leagueDetails);
       ref.read(draftLeaguesProvider.notifier).addLeague(_league);
       String leagueType = leagueDetails['league']['scoring'];
@@ -273,4 +288,32 @@ final futureLiveDataProvider = FutureProvider((ref) async {
   } catch (e) {
     print(e);
   }
+});
+
+
+final allTransactions = FutureProvider((ref) async {
+  try {
+    Map<String, DraftLeague> leagues = ref.read(draftLeaguesProvider).leagues;
+    for (String leagueId in leagues.keys) {
+      var transactions = await _api.getTransactions(leagueId);
+      ref.read(transactionsProvider.notifier).addAllTransactions(transactions!['transactions'], leagueId);
+      // var trades = await _api.getLeagueTrades(leagueId);
+      // ref.read(transactionsProvider.notifier).addAllTrades(trades['transactions'], leagueId);
+    }
+  }catch(Exception){
+    print(Exception);
+  }
+
+final allSquads = FutureProvider((ref) async {
+  try {
+    Map<String, DraftLeague> leagues = ref.read(draftLeaguesProvider).leagues;
+    Map<int, DraftPlayer> players = ref.read(draftPlayersProvider).players;
+    for (String leagueId in leagues.keys) {
+      var playersStatus = await _api.getPlayerStatus(leagueId);
+      ref.read(squadsProvider.notifier).getAllSquads(playersStatus, leagueId, players);
+    }
+  }catch(Exception){
+    print(Exception);
+  }
+
 });

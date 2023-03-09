@@ -38,7 +38,7 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
     activeLeague = ref.watch(
         utilsProvider.select((connection) => connection.activeLeagueId!));
     gameweek = ref.read(gameweekProvider);
-    fixtures = ref.read(fixturesProvider).fixtures[activeLeague];
+    fixtures = ref.read(fixturesProvider).fixtures[activeLeague]![gameweek!.currentGameweek];
     teams = ref.watch(draftTeamsProvider).teams![activeLeague];
 
     return ListView(children: <Widget>[

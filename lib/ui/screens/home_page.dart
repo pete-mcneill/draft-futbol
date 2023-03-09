@@ -141,9 +141,12 @@ class _HomePageState extends ConsumerState<HomePage> {
         } else {
           showBottomNav = true;
         }
-        fixtures = ref.read(fixturesProvider).fixtures[activeLeague];
+        
         teams = ref.read(draftTeamsProvider).teams![activeLeague];
         String leagueType = leagueData.scoring;
+        if(leagueType == "h"){
+          fixtures = ref.read(fixturesProvider).fixtures[activeLeague]![gameweek!.currentGameweek];
+        }
         bool noAdverts = ref.watch(
             purchasesProvider.select((connection) => connection.noAdverts!));
         if (advertRefresh >= 9 && !noAdverts) {
@@ -152,7 +155,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         }
         return Scaffold(
             key: _scaffoldKey,
-            appBar: DraftAppBar(),
+            appBar: DraftAppBar(bps: true, settings: true,),
             drawer: const DraftDrawer(),
             bottomNavigationBar: showBottomNav
                 ? DraftBottomBar(

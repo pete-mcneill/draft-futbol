@@ -1,6 +1,7 @@
-import 'package:draft_futbol/models/Gameweek.dart';
+
 import 'package:http/http.dart' as http;
 
+import '../models/Gameweek.dart';
 import '../utils/commons.dart';
 
 class Api {
@@ -9,6 +10,52 @@ class Api {
   Api() {
     baseUrl = 'https://draft.premierleague.com';
   }
+
+Future<Map?> getLeagueTrades(leagueId) async {
+    try {
+      final response =
+          await http.get((Uri.parse(Commons.baseUrl + "/api/draft/league/$leagueId/trades")));
+      if (response.statusCode == 200) {
+        return Commons.returnResponse(response);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+Future<Map?> getPlayerStatus(leagueId) async {
+    try {
+      final response =
+          await http.get((Uri.parse(Commons.baseUrl + "/api/league/$leagueId/element-status")));
+      if (response.statusCode == 200) {
+        return Commons.returnResponse(response);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+ Future<Map?> getTransactions(leagueId) async {
+    try {
+      final response =
+          await http.get((Uri.parse(Commons.baseUrl + "/api/draft/league/$leagueId/transactions")));
+      if (response.statusCode == 200) {
+        return Commons.returnResponse(response);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
 
   Future<Gameweek?> getCurrentGameweek() async {
     try {
@@ -19,7 +66,7 @@ class Api {
         // Gameweek _gameweek =
         //     Gameweek(gwResponse['current_event'].toString(), false);
         Gameweek _gameweek = Gameweek(gwResponse['current_event'].toString(),
-            gwResponse['current_event_finished']);
+            gwResponse['current_event_finished'], gwResponse['waivers_processed']);
         return _gameweek;
       } else {
         return null;

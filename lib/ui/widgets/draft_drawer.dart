@@ -1,7 +1,13 @@
 import 'package:draft_futbol/providers/providers.dart';
+import 'package:draft_futbol/ui/screens/draft_fixtures_results.dart';
 import 'package:draft_futbol/ui/screens/settings_screen.dart';
+import 'package:draft_futbol/ui/screens/transactions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../screens/player_pool.dart';
 
 class DraftDrawer extends ConsumerStatefulWidget {
   const DraftDrawer({Key? key}) : super(key: key);
@@ -16,8 +22,8 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
     bool isLightTheme = ref
         .watch(utilsProvider.select((connection) => connection.isLightTheme!));
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
+        // padding: EdgeInsets.zero,
         children: <Widget>[
           DrawerHeader(
             child: Container(),
@@ -28,6 +34,81 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
                         ? const AssetImage("assets/images/app_logo.png")
                         : const AssetImage("assets/images/app_logo_dark.png"),
                     fit: BoxFit.cover)),
+          ),
+          // Divider(),
+          Container(
+            padding: const EdgeInsets.only(left: 20),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                "Draft Leagues",
+                style: Theme.of(context).textTheme.caption,
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ),
+          ListTile(
+            title: const Center(
+              child: Text('Fixtures & Results'),
+            ),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DraftFixturesResults()));
+            },
+          ),
+          ListTile(
+            title: const Center(
+              child: Text('Transactions'),
+            ),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => new Transactions()));
+            },
+          ),
+          // ListTile(
+          //   title: const Center(
+          //     child: Text('Player Pool'),
+          //   ),
+          //   onTap: () {
+          //     Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => PlayerPoolScreen()));
+          //   },
+          // ),
+          // Divider(),
+          // Container(
+          //   padding: const EdgeInsets.only(left: 20),
+          //   child: Align(
+          //     alignment: AlignmentDirectional.centerStart,
+          //     child: Text(
+          //       "Premier League",
+          //       style: Theme.of(context).textTheme.caption,
+          //       textAlign: TextAlign.start,
+          //     ),
+          //   ),
+          // ),
+          // ListTile(
+          //   title: const Center(
+          //     child: Text('Fixtures & Results'),
+          //   ),
+          //   onTap: () {
+          //     ref.watch(purchasesProvider.notifier).makePurchases();
+          //   },
+          // ),
+          Divider(),
+          Container(
+            padding: const EdgeInsets.only(left: 20),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                "Utilities",
+                style: Theme.of(context).textTheme.caption,
+                textAlign: TextAlign.start,
+              ),
+            ),
           ),
           if (!ref.watch(purchasesProvider).noAdverts!)
             ListTile(
@@ -47,6 +128,52 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
                   MaterialPageRoute(builder: (context) => SettingsScreen()));
             },
           ),
+          Spacer(),
+          Divider(),
+          Text("Issues or queries:"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                  // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
+                  icon: FaIcon(
+                    FontAwesomeIcons.squareGithub,
+                    color: Theme.of(context).primaryColor,
+                    size: 50,
+                  ),
+                  onPressed: () {
+                    launchUrl(Uri.parse("https://github.com/PSJMcNeill/draft-futbol/issues"));
+                  }),
+              IconButton(
+                  // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
+                  icon: FaIcon(
+                    FontAwesomeIcons.envelope,
+                    color: Theme.of(context).primaryColor,
+                    size: 50,
+                  ),
+                  onPressed: () {
+                    final Uri params = Uri(
+                        scheme: 'mailto',
+                        path: 'psjmcneill@gmail.com',
+                        query: 'subject=Draft Futbol', //add subject and body here
+                      );
+                    launchUrl(params);
+                  }),
+              // IconButton(
+              //     // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
+              //     icon: FaIcon(
+              //       FontAwesomeIcons.twitter,
+              //       color: Theme.of(context).primaryColor,
+              //       size: 50,
+              //     ),
+              //     onPressed: () {
+              //      launchUrl(Uri.parse("https://github.com/PSJMcNeill/draft-futbol/issues"))
+              //     }),
+            ],
+          ),
+          SizedBox(
+            height: 20,
+          )
         ],
       ),
     );

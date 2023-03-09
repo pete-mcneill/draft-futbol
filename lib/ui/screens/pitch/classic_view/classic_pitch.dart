@@ -23,7 +23,7 @@ class _ClassicPitchState extends State<ClassicPitch> {
     double subsLength = (pitchHeight - (pitchHeight / 10) * 7);
     double lineLength = pitchHeight - subsLength;
     return Scaffold(
-      appBar: DraftAppBar(),
+      appBar: DraftAppBar(bps: true, settings: true,),
       body: Container(
         child: DefaultTabController(
           animationDuration: Duration.zero,

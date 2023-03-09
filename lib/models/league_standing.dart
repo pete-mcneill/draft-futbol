@@ -1,5 +1,6 @@
 import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/fixture.dart';
+import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class H2HLeagueStandingsNotifier extends StateNotifier<H2HLeagueStandings> {
@@ -33,10 +34,11 @@ class H2HLeagueStandingsNotifier extends StateNotifier<H2HLeagueStandings> {
       List standings,
       String leagueId,
       Map<String, List<Fixture>> fixtures,
-      Map<String, Map<int, DraftTeam>> draftTeams) async {
+      Map<String, Map<int, DraftTeam>> draftTeams,
+      String gameweek) async {
     state.liveStandings[leagueId] = [];
     try {
-      for (Fixture _fixture in fixtures[leagueId]!) {
+      for (Fixture _fixture in fixtures[gameweek]!) {
         var homeStanding;
         var awayStanding;
         DraftTeam homeTeam = draftTeams[leagueId]![_fixture.homeTeamId]!;
@@ -99,17 +101,20 @@ class H2HLeagueStandingsNotifier extends StateNotifier<H2HLeagueStandings> {
         int rank = i + 1;
         state.liveStandings[leagueId]![i].rank = rank;
       }
-    } catch (error) {}
+    } catch (error) {
+      print(error);
+    }
   }
 
   void getLiveBonusPointStandings(
       List standings,
       String leagueId,
       Map<String, List<Fixture>> fixtures,
-      Map<String, Map<int, DraftTeam>> draftTeams) async {
+      Map<String, Map<int, DraftTeam>> draftTeams,
+      String gameweek) async {
     state.liveBpsStandings[leagueId] = [];
     try {
-      for (Fixture _fixture in fixtures[leagueId]!) {
+      for (Fixture _fixture in fixtures[gameweek]!) {
         var homeStanding;
         var awayStanding;
         DraftTeam homeTeam = draftTeams[leagueId]![_fixture.homeTeamId]!;
