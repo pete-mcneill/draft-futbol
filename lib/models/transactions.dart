@@ -7,25 +7,33 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
     for (var transaction in transactions) {
       Transaction _transaction = Transaction.fromJson(transaction);
       try {
-        if(state.transactions[leagueId]![transaction['event'].toString()] != null){
-          state.transactions[leagueId]![transaction['event'].toString()]!.add(_transaction);
+        if (state.transactions[leagueId]![transaction['event'].toString()] !=
+            null) {
+          state.transactions[leagueId]![transaction['event'].toString()]!
+              .add(_transaction);
         } else {
-          state.transactions[leagueId]![transaction['event'].toString()] = [_transaction];
+          state.transactions[leagueId]![transaction['event'].toString()] = [
+            _transaction
+          ];
         }
       } catch (e) {
         print(e);
       }
     }
   }
-    void addAllTrades(var trades, String leagueId) {
+
+  void addAllTrades(var trades, String leagueId) {
     state.trades[leagueId] = {};
     for (var transaction in trades) {
       Transaction _transaction = Transaction.fromJson(transaction);
       try {
-        if(state.trades[leagueId]![transaction['event'].toString()] != null){
-          state.trades[leagueId]![transaction['event'].toString()]!.add(_transaction);
+        if (state.trades[leagueId]![transaction['event'].toString()] != null) {
+          state.trades[leagueId]![transaction['event'].toString()]!
+              .add(_transaction);
         } else {
-          state.trades[leagueId]![transaction['event'].toString()] = [_transaction];
+          state.trades[leagueId]![transaction['event'].toString()] = [
+            _transaction
+          ];
         }
       } catch (e) {
         print(e);
@@ -38,7 +46,6 @@ class Transactions {
   Transactions() : super();
   Map<String, Map<String, List<Transaction>>> transactions = {};
   Map<String, Map<String, List<Transaction>>> trades = {};
-
 }
 
 class Transaction {
@@ -50,7 +57,7 @@ class Transaction {
       required this.priority,
       required this.result,
       required this.type,
-      this.visible=true});
+      this.visible = true});
 
   final String playerInId;
   final String playerOutId;

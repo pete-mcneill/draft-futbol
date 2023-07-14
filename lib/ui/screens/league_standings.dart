@@ -5,7 +5,13 @@ import 'package:draft_futbol/models/league_standing.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+
+import '../widgets/adverts/adverts.dart';
+import '../widgets/filter_ui.dart';
 
 class LeagueStandings extends ConsumerStatefulWidget {
   const LeagueStandings({Key? key}) : super(key: key);
@@ -43,60 +49,68 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
     if (standing.rank == 1) {
       rowColor = Colors.green;
     }
+    // if (standing.rank!.isEven) {
+    //   rowColor = Theme.of(context).;
+    // }
     return Container(
       height: 50,
-      color: rowColor,
-      child: Row(
-        children: [
-          Expanded(
-              flex: 1,
-              child: Text(
-                standing.rank.toString(),
-                style: standing.rank == 1
-                    ? const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)
-                    : const TextStyle(fontSize: 14),
-                textAlign: TextAlign.left,
-              )),
-          Expanded(
-              flex: 4,
-              child: Text(
-                team!.teamName!,
-                style: standing.rank == 1
-                    ? const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)
-                    : const TextStyle(fontSize: 14),
-                textAlign: TextAlign.left,
-              )),
-          Expanded(
-              flex: 2,
-              child: Text(
-                standing.pointsFor.toString(),
-                style: standing.rank == 1
-                    ? const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)
-                    : const TextStyle(fontSize: 14),
-                textAlign: TextAlign.center,
-              )),
-          Expanded(
-              flex: 2,
-              child: Text(
-                standing.leaguePoints.toString(),
-                style: standing.rank == 1
-                    ? const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)
-                    : const TextStyle(fontSize: 14),
-                textAlign: TextAlign.center,
-              ))
-        ],
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
+        margin: EdgeInsets.all(0),
+        color: rowColor,
+        elevation: 10,
+        child: Row(
+          children: [
+            Expanded(
+                flex: 1,
+                child: Text(
+                  standing.rank.toString(),
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.left,
+                )),
+            Expanded(
+                flex: 4,
+                child: Text(
+                  team!.teamName!,
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.left,
+                )),
+            Expanded(
+                flex: 2,
+                child: Text(
+                  standing.pointsFor.toString(),
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                )),
+            Expanded(
+                flex: 2,
+                child: Text(
+                  standing.leaguePoints.toString(),
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ))
+          ],
+        ),
       ),
     );
   }
@@ -105,6 +119,34 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
     setState(() {
       view = index!;
     });
+  }
+
+  List<ChipOptions> getFilterOptions() {
+    List<ChipOptions> options = [
+      // if (!gameweek!.gameweekFinished)
+      ChipOptions(
+          label: "Live Bonus Points",
+          selected: liveBps,
+          onSelected: (bool selected) {
+            ref.read(utilsProvider.notifier).updateLiveBps(selected);
+          }),
+      // if (!gameweek!.gameweekFinished)
+      //   ChipOptions(
+      //       label: "Remaining Players",
+      //       selected: remainingPlayersFilter,
+      //       onSelected: (bool selected) {
+      //         ref
+      //             .read(utilsProvider.notifier)
+      //             .setRemainingPlayersView(selected);
+      //       }),
+      // ChipOptions(
+      //     label: "Icons Summary",
+      //     selected: iconsSummaryFilter,
+      //     onSelected: (bool selected) {
+      //       ref.read(utilsProvider.notifier).setIconSummaryView(selected);
+      //     })
+    ];
+    return options;
   }
 
   @override
@@ -134,6 +176,44 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (!ref.watch(purchasesProvider).noAdverts!)
+            SizedBox(
+              height: 120,
+              // color: Colors.deepOrange,
+              child: FutureBuilder<Widget>(
+                future: getBannerWidget(
+                    context: context,
+                    adSize: AdSize.banner,
+                    noAdverts: ref.watch(purchasesProvider).noAdverts!),
+                builder: (_, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: const CircularProgressIndicator());
+                  } else {
+                    return Column(
+                      children: [
+                        Center(
+                            child: ValueListenableBuilder<Box>(
+                          valueListenable: Hive.box('adverts')
+                              .listenable(keys: ['adCounter']),
+                          builder: (context, box, _) {
+                            int adRefresh = box.get('adCounter');
+                            adRefresh = 10 - adRefresh;
+                            return Text(
+                                "Video Advert will appear in $adRefresh refreshes",
+                                style: const TextStyle(fontSize: 12));
+                          },
+                        )),
+                        SizedBox(
+                          height: 100,
+                          width: MediaQuery.of(context).size.width,
+                          child: snapshot.data,
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+            ),
           if (!gameweek.gameweekFinished)
             ToggleSwitch(
               customWidths: const [120.0, 90.0, 120.0],
@@ -143,52 +223,20 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                 [Theme.of(context).buttonTheme.colorScheme!.secondary],
                 [Theme.of(context).buttonTheme.colorScheme!.secondary]
               ],
+              inactiveBgColor: Theme.of(context).cardColor,
               inactiveFgColor: Colors.white,
+              borderColor: [Theme.of(context).dividerColor],
+              borderWidth: 1.0,
+              // inactiveFgColor: Colors.white,
               initialLabelIndex: view,
               totalSwitches: 2,
               labels: ["GW $lastGw", 'Live'],
               onToggle: (index) => updateView(index),
             ),
-          // if (!ref.watch(purchasesProvider).noAdverts!)
-          //   SizedBox(
-          //     height: 120,
-          //     // color: Colors.deepOrange,
-          //     child: FutureBuilder<Widget>(
-          //       future: getBannerWidget(
-          //           context: context,
-          //           adSize: AdSize.largeBanner,
-          //           noAdverts: ref.watch(purchasesProvider).noAdverts!),
-          //       builder: (_, snapshot) {
-          //         if (!snapshot.hasData) {
-          //           return const CircularProgressIndicator();
-          //         } else {
-          //           return Column(
-          //             children: [
-          //               Center(
-          //                   child: ValueListenableBuilder<Box>(
-          //                 valueListenable: Hive.box('adverts')
-          //                     .listenable(keys: ['adCounter']),
-          //                 builder: (context, box, _) {
-          //                   int adRefresh = box.get('adCounter');
-          //                   adRefresh = 10 - adRefresh;
-          //                   return Text(
-          //                       "Video Advert will appear in $adRefresh refreshes",
-          //                       style: const TextStyle(fontSize: 12));
-          //                 },
-          //               )),
-          //               SizedBox(
-          //                 height: 100,
-          //                 width: MediaQuery.of(context).size.width,
-          //                 child: snapshot.data,
-          //               ),
-          //             ],
-          //           );
-          //         }
-          //       },
-          //     ),
-          //   ),
+          if (!gameweek.gameweekFinished)
+            FilterH2HMatches(options: getFilterOptions()),
           Container(
-            color: Theme.of(context).cardColor,
+            // color: Theme.of(context).cardColor,
             child: Row(
               children: const [
                 Expanded(

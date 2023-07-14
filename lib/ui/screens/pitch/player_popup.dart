@@ -217,7 +217,7 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
               left: 16.0,
               right: 16.0,
               child: CircleAvatar(
-                  // backgroundColor: bonusColour,
+                  backgroundColor: Theme.of(context).primaryColor,
                   radius: 55.0,
                   child: SizedBox(
                       width: 110,

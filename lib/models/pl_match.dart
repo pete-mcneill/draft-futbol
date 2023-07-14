@@ -8,6 +8,58 @@ class PlMatchesNotifier extends StateNotifier<PlMatches> {
     state = state..plMatches!.addAll({match.matchId!: match});
   }
 
+  Future<void> getPlFixtures(dynamic staticData, String gameweek) async {
+    Map<String, PlMatch> _matches = {};
+    try {
+      for (var _match in staticData['fixtures'][gameweek]) {
+        String homeTeamName = "";
+        String awayTeamName = "";
+        String homeCode = "";
+        String awayCode = "";
+        int homeId = 0;
+        int awayId = 0;
+        String homeShortName = "";
+        String awayShortName = "";
+        Map<int, List<Bps>> bpsPlayers = {};
+
+        for (var _team in staticData["teams"]) {
+          if (_team["id"] == _match['team_h']) {
+            homeTeamName = _team['name'];
+            homeCode = _team['code'].toString();
+            homeId = _team['id'];
+            homeShortName = _team['short_name'];
+          }
+          if (_team["id"] == _match['team_a']) {
+            awayTeamName = _team['name'];
+            awayCode = _team['code'].toString();
+            awayId = _team['id'];
+            awayShortName = _team['short_name'];
+          }
+        }
+        PlMatch match = PlMatch.fromJson(
+            _match['id'].toString(),
+            homeTeamName,
+            awayTeamName,
+            homeId.toString(),
+            awayId.toString(),
+            homeCode,
+            awayCode,
+            _match['started'],
+            _match['finished'],
+            _match['finished_provisional'],
+            bpsPlayers,
+            homeShortName,
+            awayShortName,
+            _match['team_h_score'] ?? 0,
+            _match['team_a_score'] ?? 0, []);
+        _matches[_match['id'].toString()] = match;
+      }
+    } on Exception catch (e) {
+      print(e);
+    }
+    state = state.copyWith(plMatches: _matches);
+  }
+
   Future<void> getLivePlFixtures(dynamic staticData, dynamic liveData) async {
     try {
       Map<String, PlMatch> _matches = {};
@@ -56,6 +108,7 @@ class PlMatchesNotifier extends StateNotifier<PlMatches> {
             awayCode,
             _match['started'],
             _match['finished'],
+            _match['finished_provisional'],
             bpsPlayers,
             homeShortName,
             awayShortName,
@@ -118,7 +171,7 @@ class PlMatchesNotifier extends StateNotifier<PlMatches> {
   List<Bps> get1BPSPlayers(
       List<Bps> players, List<Bps> threeBPS, List<Bps> twoBPS) {
     List<Bps> oneBP = [];
-    if(threeBPS.length > 2){
+    if (threeBPS.length > 2) {
       return oneBP;
     }
     if (threeBPS.length == 2) {
@@ -158,6 +211,7 @@ class PlMatch {
   String? awayCode;
   bool? started;
   bool? finished;
+  bool? finishedProvisional;
   Map<int, List<Bps>> bpsPlayers;
   String? homeShortName;
   String? awayShortName;
@@ -175,6 +229,7 @@ class PlMatch {
       this.awayCode,
       this.started,
       this.finished,
+      this.finishedProvisional,
       required this.bpsPlayers,
       this.homeShortName,
       this.awayShortName,
@@ -192,12 +247,14 @@ class PlMatch {
       String awayCode,
       bool started,
       bool finished,
+      bool finishedProvisional,
       Map<int, List<Bps>> bpsPlayers,
       String homeShortName,
       String awayShortName,
       int homeScore,
       int awayScore,
       List<dynamic> stats) {
+    print("FROM JSON");
     return PlMatch(
         matchId: matchId,
         homeTeam: homeTeam,
@@ -208,6 +265,7 @@ class PlMatch {
         awayCode: awayCode,
         started: started,
         finished: finished,
+        finishedProvisional: finishedProvisional,
         bpsPlayers: bpsPlayers,
         homeShortName: homeShortName,
         awayShortName: awayShortName,

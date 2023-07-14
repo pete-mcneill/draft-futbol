@@ -3,6 +3,7 @@ import 'package:draft_futbol/services/utils_service.dart';
 import 'package:draft_futbol/ui/screens/home_page.dart';
 import 'package:draft_futbol/ui/screens/on_boarding_screen.dart';
 import 'package:draft_futbol/ui/widgets/loading.dart';
+import 'package:draft_futbol/utils/color_scheme.dart';
 import 'package:draft_futbol/utils/utilities.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -61,9 +62,14 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
       Package package;
       Offerings offerings = await Purchases.getOfferings();
       if (offerings.current != null) {
-        package = offerings.current!.availablePackages[0];
-        String price = package.product.priceString;
-        ref.read(purchasesProvider.notifier).updateSubscriptionPrice(price);
+        try {
+          package = offerings.current!.availablePackages[0];
+          String price = package.product.priceString;
+          ref.read(purchasesProvider.notifier).updateSubscriptionPrice(price);
+        } on Exception catch (e) {
+          print("Failed to get subscription price");
+          ref.read(purchasesProvider.notifier).updateSubscriptionPrice("");
+        }
       }
       PurchaserInfo purchaserInfo = await Purchases.getPurchaserInfo();
       if (purchaserInfo.entitlements.all["noAdverts"]!.isActive) {
@@ -76,13 +82,22 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
       print(e);
       print("Failed to get entitlements");
       ref.read(purchasesProvider.notifier).updateNoAdvertsStatus(false);
-      ref.read(purchasesProvider.notifier).updateSubscriptionPrice("");
     }
+  }
+
+  bool checkLeagueIdsValid(Map<String, dynamic> leagueIds) {
+    for (var league in leagueIds.values) {
+      if (league['season'] == null) {
+        clearLeagueIds();
+        return false;
+      }
+    }
+    return true;
   }
 
   Widget checkLeagueIdsSet() {
     Utilities utils = ref.read(utilsProvider);
-    if (utils.leagueIds!.isEmpty) {
+    if (utils.leagueIds!.isEmpty || !checkLeagueIdsValid(utils.leagueIds!)) {
       return const OnBoardingScreen();
     } else {
       return HomePage(leagueType: "h");
@@ -91,51 +106,92 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeMode theme;
-    bool isLightTheme = ref
-        .watch(utilsProvider.select((connection) => connection.isLightTheme!));
-    if (isLightTheme) {
-      theme = ThemeMode.light;
-    } else {
-      theme = ThemeMode.dark;
-    }
-    // config = ref.watch(futureLiveDataProvider);
+    ThemeMode theme = ThemeMode.dark;
+    bool isLightTheme = false;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Light Dark Theme',
+      // Theme config for FlexColorScheme version 7.1.x. Make sure you use
+// same or higher package version, but still same major version. If you
+// use a lower package version, some properties may not be supported.
+// In that case remove them after copying this theme to your app.
       theme: FlexThemeData.light(
-        scheme: FlexScheme.outerSpace,
-        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-        blendLevel: 20,
-        appBarOpacity: 0.95,
+        colors: const FlexSchemeColor(
+          primary: Color(0xff023047),
+          primaryContainer: Color(0xff8edbce),
+          secondary: Color(0xfff86541),
+          secondaryContainer: Color(0xffffad91),
+          tertiary: Color(0xfff07e24),
+          tertiaryContainer: Color(0xffffbf93),
+          appBarColor: Color(0xffffad91),
+          error: Color(0xffb00020),
+        ),
+        surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+        blendLevel: 7,
         subThemesData: const FlexSubThemesData(
-          blendOnLevel: 20,
+          blendOnLevel: 10,
           blendOnColors: false,
-          bottomNavigationBarElevation: 9.5,
+          useTextTheme: true,
+          useM2StyleDividerInM3: true,
+          chipRadius: 9.0,
         ),
         useMaterial3ErrorColors: true,
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
         useMaterial3: true,
-        // To use the playground font, add GoogleFonts package and uncomment
-        fontFamily: GoogleFonts.notoSans().fontFamily,
+        swapLegacyOnMaterial3: true,
+        // To use the Playground font, add GoogleFonts package and uncomment
+        // fontFamily: GoogleFonts.notoSans().fontFamily,
       ),
       darkTheme: FlexThemeData.dark(
-        scheme: FlexScheme.outerSpace,
-        surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-        blendLevel: 15,
-        appBarStyle: FlexAppBarStyle.background,
-        appBarOpacity: 0.90,
+        colors: const FlexSchemeColor(
+          primary: Color(0xff385564),
+          primaryContainer: Color(0xff2a9d8f),
+          secondary: Color(0xfff57859),
+          secondaryContainer: Color(0xfff57859),
+          tertiary: Color(0xffed7f29),
+          tertiaryContainer: Color(0xff994600),
+          appBarColor: Color(0xfff57859),
+          error: Color(0xffcf6679),
+        ),
+        surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+        blendLevel: 13,
         subThemesData: const FlexSubThemesData(
-          blendOnLevel: 30,
-          bottomNavigationBarElevation: 9.5,
+          blendOnLevel: 20,
+          useTextTheme: true,
+          useM2StyleDividerInM3: true,
+          chipRadius: 9.0,
+          textButtonSchemeColor: SchemeColor.onPrimary,
+          elevatedButtonSchemeColor: SchemeColor.onPrimaryContainer,
+          navigationBarSelectedLabelSchemeColor: SchemeColor.secondary,
+          navigationBarIndicatorSchemeColor: SchemeColor.secondaryContainer,
+          navigationBarIndicatorOpacity: 1.00,
+          navigationBarElevation: 10.0,
+          tabBarItemSchemeColor: SchemeColor.secondaryContainer,
         ),
         useMaterial3ErrorColors: true,
         visualDensity: FlexColorScheme.comfortablePlatformDensity,
         useMaterial3: true,
-        // To use the playground font, add GoogleFonts package and uncomment
-        fontFamily: GoogleFonts.notoSans().fontFamily,
+        swapLegacyOnMaterial3: true,
+        // To use the Playground font, add GoogleFonts package and uncomment
+        // fontFamily: GoogleFonts.notoSans().fontFamily,
       ),
+// If you do not have a themeMode switch, uncomment this line
+// to let the device system mode control the theme mode:
+// themeMode: ThemeMode.system,
+
+// If you do not have a themeMode switch, uncomment this line
+// to let the device system mode control the theme mode:
+// themeMode: ThemeMode.system,
+
+// If you do not have a themeMode switch, uncomment this line
+// to let the device system mode control the theme mode:
+// themeMode: ThemeMode.system,
+
+// If you do not have a themeMode switch, uncomment this line
+// to let the device system mode control the theme mode:
+// themeMode: ThemeMode.system,
+
       // If you do not have a themeMode switch, uncomment this line
       // to let the device system mode control the theme mode:
       // themeMode: ThemeMode.system,
@@ -156,6 +212,7 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
               if (snapshot.hasError) {
                 return Text("Error," + snapshot.error.toString());
               } else {
+                // return Loading();
                 return checkLeagueIdsSet();
               }
           }

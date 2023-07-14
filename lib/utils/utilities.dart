@@ -51,6 +51,14 @@ class UtilitiesProvider extends StateNotifier<Utilities> {
   void setIconSummaryView(bool value) {
     state = state.copyWith(iconSummaryView: value);
   }
+
+  void setSubModeEnabled(bool value){
+    state = state.copyWith(subModeEnabled: value);
+  }
+
+    void setSubsReset(bool value){
+    state = state.copyWith(subsReset: value);
+  }
 }
 
 class Utilities {
@@ -63,6 +71,8 @@ class Utilities {
   bool? showBpsButton = true;
   bool? isLightTheme = true;
   String? subscriptionPrice = "";
+  bool? subModeEnabled = false;
+  bool? subsReset = false;
   Utilities(
       {this.activeLeagueId = "",
       this.noAdverts = false,
@@ -72,7 +82,9 @@ class Utilities {
       this.isLightTheme = true,
       this.subscriptionPrice = "",
       this.remainingPlayersView = false,
-      this.iconSummaryView = false});
+      this.iconSummaryView = false,
+      this.subModeEnabled = false,
+      this.subsReset = false});
 
   void setLiveBps(bool bps) {
     liveBps = bps;
@@ -87,7 +99,9 @@ class Utilities {
       bool? isLightTheme,
       String? subscriptionPrice,
       bool? remainingPlayersView,
-      bool? iconSummaryView}) {
+      bool? iconSummaryView,
+      bool? subModeEnabled,
+      bool? subsReset}) {
     return Utilities(
         activeLeagueId: activeLeagueId ?? this.activeLeagueId,
         noAdverts: noAdverts ?? this.noAdverts,
@@ -97,7 +111,9 @@ class Utilities {
         isLightTheme: isLightTheme ?? this.isLightTheme,
         subscriptionPrice: subscriptionPrice ?? this.subscriptionPrice,
         remainingPlayersView: remainingPlayersView ?? this.remainingPlayersView,
-        iconSummaryView: iconSummaryView ?? this.iconSummaryView);
+        iconSummaryView: iconSummaryView ?? this.iconSummaryView,
+        subModeEnabled: subModeEnabled ?? this.subModeEnabled,
+        subsReset: subsReset ?? this.subsReset);
   }
 
   Map<String, dynamic> toMap() {

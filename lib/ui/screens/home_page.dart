@@ -6,6 +6,7 @@ import 'package:draft_futbol/ui/screens/classic_league_standings.dart';
 import 'package:draft_futbol/ui/screens/h2h_draft_matches_screen.dart';
 import 'package:draft_futbol/ui/screens/league_standings.dart';
 import 'package:draft_futbol/ui/screens/pl_matches_screen.dart';
+import 'package:draft_futbol/ui/screens/settings_screen.dart';
 import 'package:draft_futbol/ui/widgets/adverts/adverts.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/draft_bottom_bar.dart';
@@ -16,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive/hive.dart';
+
+import '../widgets/more.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final List squads = [];
@@ -109,12 +112,14 @@ class _HomePageState extends ConsumerState<HomePage> {
   List<Widget> h2hOptions = <Widget>[
     const H2hDraftMatchesScreen(),
     const LeagueStandings(),
-    const PlMatchesScreen()
+    const PlMatchesScreen(),
+    const More()
   ];
 
   List<Widget> classicOptions = <Widget>[
     const ClassicLeagueStandings(),
-    const PlMatchesScreen()
+    const PlMatchesScreen(),
+    const More()
   ];
 
   updateIndex(int index) {
@@ -125,69 +130,82 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    AsyncValue config = ref.watch(futureLiveDataProvider);
-    return config.when(
-      loading: () => const Loading(),
-      error: (err, stack) => Text('Error: $err'),
-      data: (config) {
-        int advertRefresh = advertsBox!.get("adCounter");
-        activeLeague = ref.watch(
-            utilsProvider.select((connection) => connection.activeLeagueId!));
-        var leagueData = ref.watch(draftLeaguesProvider).leagues[activeLeague]!;
-        gameweek = ref.watch(gameweekProvider);
-        String draftStatus = leagueData.draftStatus;
-        if (draftStatus == "pre" || gameweek!.currentGameweek == "null") {
-          showBottomNav = false;
-        } else {
-          showBottomNav = true;
-        }
-        
-        teams = ref.read(draftTeamsProvider).teams![activeLeague];
-        String leagueType = leagueData.scoring;
-        if(leagueType == "h"){
-          fixtures = ref.read(fixturesProvider).fixtures[activeLeague]![gameweek!.currentGameweek];
-        }
-        bool noAdverts = ref.watch(
-            purchasesProvider.select((connection) => connection.noAdverts!));
-        if (advertRefresh >= 9 && !noAdverts) {
-          _showInterstitialAd();
-          advertsBox!.put('adCounter', 0);
-        }
-        return Scaffold(
-            key: _scaffoldKey,
-            appBar: DraftAppBar(bps: true, settings: true,),
-            drawer: const DraftDrawer(),
-            bottomNavigationBar: showBottomNav
-                ? DraftBottomBar(
-                    updateIndex: updateIndex,
-                    leagueType: leagueType,
-                  )
-                : const SizedBox(),
-            body: SafeArea(
-                child: DefaultTextStyle(
-              style: Theme.of(context).textTheme.headline2!,
-              textAlign: TextAlign.center,
-              child: Container(
-                margin:
-                    const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
-                alignment: FractionalOffset.center,
-                child: draftStatus == "pre" ||
-                        gameweek!.currentGameweek == "null"
-                    ? DraftPlaceholder(
-                        leagueData: leagueData,
+    return ref.watch(futureLiveDataProvider).when(
+          loading: () => const Loading(),
+          error: (err, stack) => Text('Error: $err'),
+          data: (config) {
+            int advertRefresh = advertsBox!.get("adCounter");
+            activeLeague = ref.watch(utilsProvider
+                .select((connection) => connection.activeLeagueId!));
+            var test = ref.watch(draftLeaguesProvider).leagues;
+            var leagueData =
+                ref.watch(draftLeaguesProvider).leagues[activeLeague]!;
+            if (leagueData.scoring == 'c' && navBarIndex > 2) {
+              updateIndex(2);
+            }
+            gameweek = ref.watch(gameweekProvider);
+            String draftStatus = leagueData.draftStatus;
+            if (draftStatus == "pre" || gameweek!.currentGameweek == "null") {
+              showBottomNav = false;
+            } else {
+              showBottomNav = true;
+              if (leagueData.scoring == "h") {
+                fixtures = ref
+                    .read(fixturesProvider)
+                    .fixtures[activeLeague]![gameweek!.currentGameweek];
+              }
+            }
+            teams = ref.read(draftTeamsProvider).teams![activeLeague];
+
+            bool noAdverts = ref.watch(purchasesProvider
+                .select((connection) => connection.noAdverts!));
+            if (advertRefresh >= 9 && !noAdverts) {
+              _showInterstitialAd();
+              advertsBox!.put('adCounter', 0);
+            }
+            return Scaffold(
+                key: _scaffoldKey,
+                appBar: DraftAppBar(
+                  settings: true,
+                ),
+                drawer: const DraftDrawer(),
+                bottomNavigationBar: showBottomNav
+                    ? DraftBottomBar(
+                        updateIndex: updateIndex,
+                        leagueType: leagueData.scoring,
+                        currentIndex: navBarIndex,
                       )
-                    : RefreshIndicator(
-                        child: leagueType == 'h'
-                            ? h2hOptions[navBarIndex]
-                            : classicOptions[navBarIndex],
-                        onRefresh: () async {
-                          ref.refresh(refreshFutureLiveDataProvider);
-                          await ref.read(refreshFutureLiveDataProvider.future);
-                        },
-                      ),
-              ),
-            )));
-      },
-    );
+                    : const SizedBox(),
+                body: SafeArea(
+                    child: DefaultTextStyle(
+                  style: Theme.of(context).textTheme.headline2!,
+                  textAlign: TextAlign.center,
+                  child: Container(
+                    // color: Theme.of(context).scaffoldBackgroundColor,
+                    // margin:
+                    //     const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
+                    alignment: FractionalOffset.center,
+                    child: draftStatus == "pre" ||
+                            gameweek!.currentGameweek == "null"
+                        ? DraftPlaceholder(
+                            leagueData: leagueData,
+                          )
+                        : RefreshIndicator(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
+                            child: leagueData.scoring == 'h'
+                                ? h2hOptions[navBarIndex]
+                                : classicOptions[navBarIndex],
+                            onRefresh: () async {
+                              ref.refresh(refreshFutureLiveDataProvider);
+                              await ref
+                                  .read(refreshFutureLiveDataProvider.future);
+                            },
+                          ),
+                  ),
+                )));
+          },
+        );
   }
 }

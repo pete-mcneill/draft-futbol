@@ -38,10 +38,10 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
       try {
         leagueIds = _prefs.getString('league_ids');
         leagueMap = json.decode(leagueIds!);
-        leagueMap![leagueId] = {"name": leagueName};
+        leagueMap![leagueId] = {"name": leagueName, "season": "23/24"};
       } catch (e) {
         leagueMap = {
-          leagueId: {"name": leagueName}
+          leagueId: {"name": leagueName, "season": "23/24"}
         };
       }
       await _prefs.setString('league_ids', json.encode(leagueMap));
@@ -53,36 +53,40 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String price = ref.read(purchasesProvider).subscriptionPrice!;
+    ref.read(purchasesProvider);
+    String price = "2.99";
+    // String price = ref.watch(purchasesProvider).subscriptionPrice!;
+    bool noAdverts = ref.watch(purchasesProvider).noAdverts!;
     Api _api = Api();
     return Container(
       child: SafeArea(
         child: IntroductionScreen(
           key: introKey,
+          showSkipButton: true,
+          skip: Text("Know your league ID?"),
           pages: [
             PageViewModel(
-              title: "",
+              title: "Welcome to Draft Futbol",
+              image: Center(
+                  child: Image(
+                      image: AssetImage('assets/images/app_icon.png'),
+                      height: 200,
+                      width: 200)),
               decoration: PageDecoration(
-                  pageColor: Theme.of(context).backgroundColor,
-                  titleTextStyle: const TextStyle(
-                      color: Color(0xffFFB302), fontWeight: FontWeight.bold)),
+                pageColor: Theme.of(context).cardColor,
+              ),
+              // titleTextStyle: const TextStyle(
+              //     color: Color(0xffFFB302), fontWeight: FontWeight.bold)),
               bodyWidget: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                // mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Image(image: AssetImage('assets/images/app_logo.png')),
+                  // const Image(image: AssetImage('assets/images/logo.png')),
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: TextStyle(
                           color: Theme.of(context).textTheme.bodyMedium!.color),
                       children: const <TextSpan>[
-                        TextSpan(
-                          style: TextStyle(
-                              // color: Color(0xffFFB302),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                          text: "Welcome to Draft Futbol",
-                        ),
                         TextSpan(
                           text:
                               "\n \n This app will help you keep track of live scores in your FPL Draft Leagues",
@@ -100,7 +104,6 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
             PageViewModel(
               title: "Note from the developer!",
               decoration: PageDecoration(
-                  pageColor: Theme.of(context).backgroundColor,
                   titleTextStyle: const TextStyle(fontWeight: FontWeight.bold)),
               bodyWidget: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -137,13 +140,17 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                       onPressed: () {
                         ref.read(purchasesProvider.notifier).makePurchases();
                       },
-                      child: ref.read(purchasesProvider).noAdverts!
+                      child: !noAdverts
                           ? const Text("Remove Ads")
                           : const Text("Thanks for supporting the app")),
                   const SizedBox(
                     height: 20,
                   ),
-                  const Image(image: AssetImage('assets/images/app_logo.png')),
+                  const Image(
+                    image: AssetImage('assets/images/1024_1024-icon.png'),
+                    height: 100,
+                    width: 100,
+                  ),
                 ],
               ),
             ),
@@ -379,7 +386,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
           ],
           onDone: () => _onIntroEnd(context),
           //onSkip: () => _onIntroEnd(context), // You can override onSkip callback
-          showSkipButton: false,
+          // showSkipButton: false,
 
           // skipFlex: 0,
           nextFlex: 0,

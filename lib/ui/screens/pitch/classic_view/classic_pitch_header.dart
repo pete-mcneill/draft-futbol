@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ClassicPitchHeader extends ConsumerStatefulWidget
-    with PreferredSizeWidget {
+    implements PreferredSizeWidget {
   DraftTeam team;
   ClassicPitchHeader({Key? key, required this.team}) : super(key: key);
 

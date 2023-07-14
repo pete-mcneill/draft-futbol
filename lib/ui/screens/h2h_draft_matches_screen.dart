@@ -4,6 +4,7 @@ import 'package:draft_futbol/models/fixture.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_screen.dart';
 import 'package:draft_futbol/ui/widgets/adverts/adverts.dart';
+import 'package:draft_futbol/ui/widgets/filter_ui.dart';
 import 'package:draft_futbol/ui/widgets/h2h_match_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +24,10 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
   Map<int, DraftTeam>? teams;
   String? viewType;
   String activeLeague = "";
+  bool liveBonus = false;
+  bool remainingPlayersFilter = false;
+  bool iconsSummaryFilter = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,12 +38,47 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
     super.dispose();
   }
 
+  List<ChipOptions> getFilterOptions() {
+    List<ChipOptions> options = [
+      // if (!gameweek!.gameweekFinished)
+      ChipOptions(
+          label: "Live Bonus Points",
+          selected: liveBonus,
+          onSelected: (bool selected) {
+            ref.read(utilsProvider.notifier).updateLiveBps(selected);
+          }),
+      // if (!gameweek!.gameweekFinished)
+      //   ChipOptions(
+      //       label: "Remaining Players",
+      //       selected: remainingPlayersFilter,
+      //       onSelected: (bool selected) {
+      //         ref
+      //             .read(utilsProvider.notifier)
+      //             .setRemainingPlayersView(selected);
+      //       }),
+      // ChipOptions(
+      //     label: "Icons Summary",
+      //     selected: iconsSummaryFilter,
+      //     onSelected: (bool selected) {
+      //       ref.read(utilsProvider.notifier).setIconSummaryView(selected);
+      //     })
+    ];
+    return options;
+  }
+
   @override
   Widget build(BuildContext context) {
+    remainingPlayersFilter = ref.watch(
+        utilsProvider.select((connection) => connection.remainingPlayersView!));
+    iconsSummaryFilter = ref.watch(
+        utilsProvider.select((connection) => connection.iconSummaryView!));
+    liveBonus = ref.watch(utilsProvider).liveBps!;
     activeLeague = ref.watch(
         utilsProvider.select((connection) => connection.activeLeagueId!));
     gameweek = ref.read(gameweekProvider);
-    fixtures = ref.read(fixturesProvider).fixtures[activeLeague]![gameweek!.currentGameweek];
+    fixtures = ref
+        .read(fixturesProvider)
+        .fixtures[activeLeague]![gameweek!.currentGameweek];
     teams = ref.watch(draftTeamsProvider).teams![activeLeague];
 
     return ListView(children: <Widget>[
@@ -53,7 +93,7 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
                 noAdverts: ref.watch(purchasesProvider).noAdverts!),
             builder: (_, snapshot) {
               if (!snapshot.hasData) {
-                return const CircularProgressIndicator();
+                return Center(child: const CircularProgressIndicator());
               } else {
                 return Column(
                   children: [
@@ -80,6 +120,8 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
             },
           ),
         ),
+      if (!gameweek!.gameweekFinished)
+        FilterH2HMatches(options: getFilterOptions()),
       ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
@@ -92,6 +134,7 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
               children: [
                 GestureDetector(
                   onTap: () {
+                    print("Pitch Change");
                     Navigator.push(
                         context,
                         MaterialPageRoute(

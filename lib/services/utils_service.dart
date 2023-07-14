@@ -14,3 +14,12 @@ Future<Map<String, dynamic>> setLeagueIds() async {
   }
   return leagueIds;
 }
+
+void clearLeagueIds() async {
+  try {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _prefs.clear();
+  } catch (e) {
+    print(e);
+  }
+}

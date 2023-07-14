@@ -1,14 +1,17 @@
 import 'package:draft_futbol/models/fixture.dart';
+import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/screens/pitch/line_painter.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_background.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_header.dart';
 import 'package:draft_futbol/ui/screens/pitch/squad.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/DraftTeam.dart';
+import '../../widgets/pitch_app_bar.dart';
 
-class Pitch extends StatefulWidget {
+class Pitch extends ConsumerStatefulWidget {
   Fixture fixture;
   DraftTeam homeTeam;
   DraftTeam awayTeam;
@@ -20,28 +23,38 @@ class Pitch extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<Pitch> createState() => _PitchState();
+  _PitchState createState() => _PitchState();
 }
 
-class _PitchState extends State<Pitch> {
+class _PitchState extends ConsumerState<Pitch> {
   @override
   Widget build(BuildContext context) {
+    bool subModeEnabled = ref.watch(utilsProvider).subModeEnabled!;
+    if (ref.watch(utilsProvider).subsReset!) {
+      Map<String, Map<int, DraftTeam>>? allTeams =
+          ref.read(draftTeamsProvider).teams;
+      widget.homeTeam =
+          allTeams![widget.homeTeam.leagueId.toString()]![widget.homeTeam.id]!;
+      widget.awayTeam =
+          allTeams![widget.awayTeam.leagueId.toString()]![widget.awayTeam.id]!;
+    }
     double pitchHeight =
         (MediaQuery.of(context).size.height - AppBar().preferredSize.height);
     double subsLength = (pitchHeight - (pitchHeight / 10) * 7);
     double lineLength = pitchHeight - subsLength;
     return Scaffold(
-      appBar: DraftAppBar(bps: true, settings: true,),
+      appBar: PitchAppBar(),
       body: DefaultTabController(
-        animationDuration: Duration.zero,
+        animationDuration: Duration(seconds: 1),
         length: 2,
         child: Scaffold(
           appBar: PitchHeader(
-            homeTeam: widget.homeTeam,
-            awayTeam: widget.awayTeam,
-            fixture: widget.fixture,
-          ),
+              homeTeam: widget.homeTeam,
+              awayTeam: widget.awayTeam,
+              fixture: widget.fixture,
+              subModeEnabled: subModeEnabled),
           body: TabBarView(
+            physics: subModeEnabled ? NeverScrollableScrollPhysics() : null,
             children: [
               SingleChildScrollView(
                 child: Stack(

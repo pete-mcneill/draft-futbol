@@ -10,7 +10,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Player extends ConsumerStatefulWidget {
   DraftPlayer player;
-  Player({Key? key, required this.player}) : super(key: key);
+  bool subModeEnabled;
+  bool subValid;
+  bool? subHighlighted;
+  Player(
+      {Key? key,
+      required this.player,
+      required this.subModeEnabled,
+      required this.subValid,
+      this.subHighlighted = false})
+      : super(key: key);
 
   @override
   _PlayerState createState() => _PlayerState();
@@ -21,6 +30,7 @@ class _PlayerState extends ConsumerState<Player> {
   bool matchesFinished = false;
   bool liveBonus = false;
   late Map<String, PlMatch> matches;
+
   int calculatePlayerScore() {
     int playerScore = 0;
     bool matchesStarted = false;
@@ -101,6 +111,9 @@ class _PlayerState extends ConsumerState<Player> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.subHighlighted! == true) {
+      print("test");
+    }
     Color bonusColour = Theme.of(context).canvasColor;
     matches = ref.watch(plMatchesProvider).plMatches!;
     bool bonus = false;
@@ -138,6 +151,17 @@ class _PlayerState extends ConsumerState<Player> {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-outfield.png';
     }
+
+    Color? playerBackgroundColor = null;
+
+    if (widget.subModeEnabled && widget.subValid) {
+      playerBackgroundColor = const Color(0xFF008000);
+    } else if (widget.subModeEnabled && !widget.subValid) {
+      playerBackgroundColor = Colors.red;
+    }
+    if (widget.subHighlighted! && widget.subValid) {
+      playerBackgroundColor = Colors.blue;
+    }
     return ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: 50,
@@ -151,73 +175,86 @@ class _PlayerState extends ConsumerState<Player> {
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             children: <Widget>[
-              Column(
-                children: [
-                  Image.asset(
-                    playerImage,
-                    height: (MediaQuery.of(context).size.height -
-                            AppBar().preferredSize.height) /
-                        15,
-                  ),
-                ],
-              ),
               Container(
-                margin: const EdgeInsets.all(2.0),
-                padding: const EdgeInsets.all(3.0),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5.0),
-                    // border: !bonus && !liveBonus ? Border.all() : null,
-                    boxShadow: [
-                      bonus && (liveBonus || matchesFinished)
-                          ? BoxShadow(
-                              color: bonusColour,
-                              spreadRadius: 10.0,
-                              blurRadius: 5.0,
-                              offset: const Offset(0.0, 0.0),
-                            )
-                          : BoxShadow(
-                              color: bonusColour,
-                              blurRadius: 0.0,
-                              offset: const Offset(0.0, 0.0),
-                            )
-                    ],
-                    color: Theme.of(context).canvasColor),
-                constraints: const BoxConstraints(
-                    minWidth: 11, maxWidth: 110, minHeight: 45),
+                  color: widget.subModeEnabled ? playerBackgroundColor : null,
+                  border: widget.subModeEnabled
+                      ? Border.all(color: Theme.of(context).hintColor)
+                      : null,
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AutoSizeText.rich(
-                      TextSpan(text: widget.player.playerName),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        // color: Theme.of(context).accentColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      minFontSize: 10,
-                      maxLines: 1,
-                      maxFontSize: 11,
+                    Image.asset(
+                      playerImage,
+                      height: (MediaQuery.of(context).size.height -
+                              AppBar().preferredSize.height) /
+                          15,
                     ),
-                    Column(children: [
-                      Column(children: getPlayerFixtures()),
-                    ]),
-                    if (matchesStarted)
-                      Row(
+                    Container(
+                      constraints: BoxConstraints(minHeight: 50, minWidth: 100),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        // border: if(!bonus && !liveBonus) Border.all(),
+                        boxShadow: [
+                          if (bonus &&
+                              (liveBonus || matchesFinished) &&
+                              !widget.subModeEnabled)
+                            BoxShadow(
+                              color: bonusColour,
+                              spreadRadius: 5.0,
+                              blurRadius: 7.5,
+                              offset: const Offset(0.0, 0.0),
+                            ),
+                        ],
+                      ),
+                      child: Card(
+                        // color: Colors.yellow,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4.0)),
+                        elevation: 10,
+                        // margin: const EdgeInsets.all(2.0),
+                        // padding: const EdgeInsets.all(3.0),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             AutoSizeText.rich(
-                              TextSpan(text: calculatePlayerScore().toString()),
+                              TextSpan(text: widget.player.playerName),
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  fontSize: 14,
-                                  // color: Theme.of(context).accentColor,
-                                  fontWeight: FontWeight.bold),
-                              minFontSize: 7,
+                                fontSize: 14,
+                                // color: Theme.of(context).accentColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              minFontSize: 10,
                               maxLines: 1,
                               maxFontSize: 11,
                             ),
-                          ]),
+                            Column(children: [
+                              Column(children: getPlayerFixtures()),
+                            ]),
+                            if (matchesStarted)
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    AutoSizeText.rich(
+                                      TextSpan(
+                                          text: calculatePlayerScore()
+                                              .toString()),
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          // color: Theme.of(context).accentColor,
+                                          fontWeight: FontWeight.bold),
+                                      minFontSize: 7,
+                                      maxLines: 1,
+                                      maxFontSize: 11,
+                                    ),
+                                  ]),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

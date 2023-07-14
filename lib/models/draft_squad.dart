@@ -1,18 +1,26 @@
+import 'package:draft_futbol/models/players/match.dart';
+import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'draft_player.dart';
 
 class DraftSquadsNotifier extends StateNotifier<DraftSquads> {
   DraftSquadsNotifier() : super(DraftSquads());
-  void getAllSquads(var players, String leagueId, Map<int, DraftPlayer> draftPlayers) {
+  void getAllSquads(
+      var players, String leagueId, Map<int, DraftPlayer> draftPlayers) {
     state.squads[leagueId] = {};
-    for (var player in players) {
+    for (var player in players['element_status']) {
       try {
         DraftPlayer _player = draftPlayers[player['element']]!;
-        if(state.squads[leagueId]![player['element'].toString()] != null){
-          state.squads[leagueId]![player['element'].toString()]!.players.add(_player);
-        } else {
-          state.squads[leagueId]![player['element'].toString()]!.players = [_player];
+        if (player['owner'] != null) {
+          if (state.squads[leagueId]![player['owner'].toString()] != null) {
+            state.squads[leagueId]![player['owner'].toString()]!.players
+                .add(_player);
+          } else {
+            state.squads[leagueId] = {
+              player['owner']: DraftSquad(players: [_player])
+            };
+          }
         }
       } catch (e) {
         print(e);
@@ -28,8 +36,7 @@ class DraftSquads {
 }
 
 class DraftSquad {
-  DraftSquad(
-      {required this.players});
+  DraftSquad({required this.players});
 
   List<DraftPlayer> players;
 }

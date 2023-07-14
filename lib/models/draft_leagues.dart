@@ -26,18 +26,29 @@ class DraftLeague {
       {required this.leagueId,
       required this.scoring,
       required this.leagueName,
-      required this.draftStatus});
+      required this.draftStatus,
+      required this.teams});
 
   final String leagueId;
   final String scoring;
   final String leagueName;
   final String draftStatus;
+  final List<dynamic> teams;
 
   factory DraftLeague.fromJson(var leagueData) {
+    List<dynamic> teams = [];
+    for (var team in leagueData['league_entries']) {
+      teams.add({
+        "name": team['entry_name'],
+        "manager": "${team['player_first_name']} ${team['player_last_name']}",
+        "id": team['entry_id']
+      });
+    }
     return DraftLeague(
         leagueId: leagueData['league']['id'].toString(),
         scoring: leagueData['league']['scoring'],
         leagueName: leagueData['league']['name'],
-        draftStatus: leagueData['league']['draft_status']);
+        draftStatus: leagueData['league']['draft_status'],
+        teams: teams);
   }
 }
