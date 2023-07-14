@@ -8,67 +8,16 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Player extends ConsumerStatefulWidget {
+class SquadPlayer extends ConsumerStatefulWidget {
   DraftPlayer player;
-  bool subModeEnabled;
-  bool subValid;
-  bool? subHighlighted;
-  Player(
-      {Key? key,
-      required this.player,
-      required this.subModeEnabled,
-      required this.subValid,
-      this.subHighlighted = false})
-      : super(key: key);
+  SquadPlayer({Key? key, required this.player}) : super(key: key);
 
   @override
-  _PlayerState createState() => _PlayerState();
+  _SquadPlayerState createState() => _SquadPlayerState();
 }
 
-class _PlayerState extends ConsumerState<Player> {
-  bool matchesStarted = false;
-  bool matchesFinished = false;
-  bool liveBonus = false;
+class _SquadPlayerState extends ConsumerState<SquadPlayer> {
   late Map<String, PlMatch> matches;
-
-  int calculatePlayerScore() {
-    int playerScore = 0;
-    bool matchesStarted = false;
-    for (Match _match in widget.player.matches!) {
-      if (matches[_match.matchId.toString()]!.started!) {
-        matchesStarted = true;
-      }
-      for (Stat stat in _match.stats!) {
-        if (stat.statName == "Live Bonus Points") {
-          if (liveBonus) {
-            playerScore += stat.fantasyPoints!.toInt();
-          }
-        } else {
-          playerScore += stat.fantasyPoints!.toInt();
-        }
-      }
-    }
-    return playerScore;
-  }
-
-  List<Icon> getPlayerIcons() {
-    List<Icon> icons = [];
-    for (Match _match in widget.player.matches!) {
-      for (Stat stat in _match.stats!) {
-        switch (stat.statName) {
-          case "Goals scored":
-            icons.add(
-              const Icon(
-                Icons.sports_soccer,
-                size: 15.0,
-              ),
-            );
-            break;
-        }
-      }
-    }
-    return icons;
-  }
 
   List<Widget> getPlayerFixtures() {
     List<Widget> fixtures = [];
@@ -111,35 +60,7 @@ class _PlayerState extends ConsumerState<Player> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.subHighlighted! == true) {
-      print("test");
-    }
-    Color bonusColour = Theme.of(context).canvasColor;
-    matches = ref.watch(plMatchesProvider).plMatches!;
-    bool bonus = false;
-    liveBonus = ref.watch(utilsProvider).liveBps!;
-    for (Match match in widget.player.matches!) {
-      if (matches[match.matchId.toString()]!.started!) {
-        matchesStarted = true;
-      }
-      if (matches[match.matchId.toString()]!.finished!) {
-        matchesFinished = true;
-      }
-      for (Stat stat in match.stats!) {
-        if (stat.statName == "Bonus" || stat.statName == "Live Bonus Points") {
-          if (stat.value == 3) {
-            bonusColour = const Color(0xFFd4af37);
-            bonus = true;
-          } else if (stat.value == 2) {
-            bonusColour = const Color(0xFFc0c0c0);
-            bonus = true;
-          } else if (stat.value == 1) {
-            bonusColour = const Color(0xFFcd7f32);
-            bonus = true;
-          }
-        }
-      }
-    }
+    // matches = ref.watch(plMatchesProvider).plMatches!;
     String playerImage;
     // Store team metadata
     PlTeam team =
@@ -150,17 +71,6 @@ class _PlayerState extends ConsumerState<Player> {
     } else {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-outfield.png';
-    }
-
-    Color? playerBackgroundColor = null;
-
-    if (widget.subModeEnabled && widget.subValid) {
-      playerBackgroundColor = const Color(0xFF008000);
-    } else if (widget.subModeEnabled && !widget.subValid) {
-      playerBackgroundColor = Colors.red;
-    }
-    if (widget.subHighlighted! && widget.subValid) {
-      playerBackgroundColor = Colors.blue;
     }
     return ConstrainedBox(
         constraints: BoxConstraints(
@@ -177,10 +87,6 @@ class _PlayerState extends ConsumerState<Player> {
             children: <Widget>[
               Container(
                 decoration: BoxDecoration(
-                  color: widget.subModeEnabled ? playerBackgroundColor : null,
-                  border: widget.subModeEnabled
-                      ? Border.all(color: Theme.of(context).hintColor)
-                      : null,
                   borderRadius: BorderRadius.circular(5.0),
                 ),
                 child: Column(
@@ -196,17 +102,17 @@ class _PlayerState extends ConsumerState<Player> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.0),
                         // border: if(!bonus && !liveBonus) Border.all(),
-                        boxShadow: [
-                          if (bonus &&
-                              (liveBonus || matchesFinished) &&
-                              !widget.subModeEnabled)
-                            BoxShadow(
-                              color: bonusColour,
-                              spreadRadius: 5.0,
-                              blurRadius: 7.5,
-                              offset: const Offset(0.0, 0.0),
-                            ),
-                        ],
+                        // boxShadow: [
+                        //   if (bonus &&
+                        //       (liveBonus || matchesFinished) &&
+                        //       !widget.subModeEnabled)
+                        //     BoxShadow(
+                        //       color: bonusColour,
+                        //       spreadRadius: 5.0,
+                        //       blurRadius: 7.5,
+                        //       offset: const Offset(0.0, 0.0),
+                        //     ),
+                        // ],
                       ),
                       child: Card(
                         // color: Colors.yellow,
@@ -227,30 +133,30 @@ class _PlayerState extends ConsumerState<Player> {
                                 fontWeight: FontWeight.bold,
                               ),
                               minFontSize: 10,
-                              maxLines: 1,
+                              maxLines: 2,
                               maxFontSize: 11,
                             ),
-                            Column(children: [
-                              Column(children: getPlayerFixtures()),
-                            ]),
-                            if (matchesStarted)
-                              Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    AutoSizeText.rich(
-                                      TextSpan(
-                                          text: calculatePlayerScore()
-                                              .toString()),
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          // color: Theme.of(context).accentColor,
-                                          fontWeight: FontWeight.bold),
-                                      minFontSize: 7,
-                                      maxLines: 1,
-                                      maxFontSize: 11,
-                                    ),
-                                  ]),
+                            // Column(children: [
+                            //   Column(children: getPlayerFixtures()),
+                            // ]),
+                            // if (matchesStarted)
+                            //   Row(
+                            //       mainAxisAlignment: MainAxisAlignment.center,
+                            //       children: [
+                            //         AutoSizeText.rich(
+                            //           TextSpan(
+                            //               text: calculatePlayerScore()
+                            //                   .toString()),
+                            //           textAlign: TextAlign.center,
+                            //           style: const TextStyle(
+                            //               fontSize: 14,
+                            //               // color: Theme.of(context).accentColor,
+                            //               fontWeight: FontWeight.bold),
+                            //           minFontSize: 7,
+                            //           maxLines: 1,
+                            //           maxFontSize: 11,
+                            //         ),
+                            //       ]),
                           ],
                         ),
                       ),

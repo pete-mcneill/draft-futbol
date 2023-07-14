@@ -132,9 +132,11 @@ class _TransactionsState extends ConsumerState<Transactions> {
             visibleWaivers.sort((a, b) =>
                 int.parse(a.priority).compareTo(int.parse(b.priority)));
 
-
             return Scaffold(
-              appBar: DraftAppBar(),
+              appBar: DraftAppBar(
+                leading: true,
+                settings: false,
+              ),
               body: DefaultTabController(
                   length: 2, // length of tabs
                   initialIndex: 0,
@@ -152,15 +154,36 @@ class _TransactionsState extends ConsumerState<Transactions> {
                         ),
                         Expanded(
                           child: TabBarView(children: <Widget>[
-                            waiversTab(_draftTeamFilters, transactions,
-                                activeLeague, currentGameweek, teams, players),
-                            freeAgentsTab(
-                              _draftTeamFilters,
-                              players,
-                              teams,
-                              transactions,
-                              activeLeague,
-                              currentGameweek,
+                            RefreshIndicator(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer,
+                              onRefresh: () async {
+                                ref.refresh(allTransactions);
+                              },
+                              child: waiversTab(
+                                  _draftTeamFilters,
+                                  transactions,
+                                  activeLeague,
+                                  currentGameweek,
+                                  teams,
+                                  players),
+                            ),
+                            RefreshIndicator(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer,
+                              onRefresh: () async {
+                                ref.refresh(allTransactions);
+                              },
+                              child: freeAgentsTab(
+                                _draftTeamFilters,
+                                players,
+                                teams,
+                                transactions,
+                                activeLeague,
+                                currentGameweek,
+                              ),
                             ),
                             // const Center(child: Text("Coming soon..."))
                           ]),
@@ -232,8 +255,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
             shrinkWrap: true,
             itemCount: visibleFreeAgents.length,
             itemBuilder: (context, i) {
-              Transaction _transaction =
-                  visibleFreeAgents[i];
+              Transaction _transaction = visibleFreeAgents[i];
               DraftPlayer playerIn =
                   players[int.parse(_transaction.playerInId)]!;
               DraftPlayer playerOut =
@@ -388,8 +410,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
             itemCount: visibleWaivers.length,
             itemBuilder: (context, i) {
               List<Transaction> _transactions = [];
-              Transaction _transaction =
-                  visibleWaivers[i];
+              Transaction _transaction = visibleWaivers[i];
               DraftPlayer playerIn =
                   players[int.parse(_transaction.playerInId)]!;
               DraftPlayer playerOut =

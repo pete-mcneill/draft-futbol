@@ -8,6 +8,9 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:badges/badges.dart' as badges;
+
+import '../../models/Gameweek.dart';
 
 class H2hMatchPreview extends ConsumerStatefulWidget {
   final DraftTeam homeTeam;
@@ -21,6 +24,8 @@ class H2hMatchPreview extends ConsumerStatefulWidget {
 }
 
 class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
+  bool liveBonus = false;
+
   Widget iconsSummary(int goals, int assists, int cleanSheets) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -61,82 +66,157 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
     );
   }
 
+  List<Expanded> getTeamAndScores(
+      String bonusScore, String score, String teamName, String team) {
+    Expanded scoreWidget = Expanded(
+      flex: 1,
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 50,
+              child: Center(
+                child: AutoSizeText(
+                  liveBonus ? bonusScore : score,
+                  style: const TextStyle(fontFamily: 'Inter-Bold'),
+                  minFontSize: 20,
+                  maxLines: 1,
+                ),
+              ),
+            )
+          ]),
+    );
+
+    Expanded teamWidget = Expanded(
+      flex: 2,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 50,
+            child: Center(
+              child: AutoSizeText(
+                teamName,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+                textAlign: TextAlign.center,
+                minFontSize: 10,
+                maxLines: 2,
+              ),
+            ),
+          ),
+          // if (remainingPlayersView)
+          //   remainingPlayers(remainingMatchesAway, completedMatchesAway,
+          //       remainingSubsMatchesAway, completedSubsMatchesAway),
+          // if (iconsSummaryView)
+          //   iconsSummary(awayGoals, awayAssists, awayCleanSheets)
+        ],
+      ),
+    );
+    if (team == "home") {
+      return [teamWidget, scoreWidget];
+    } else {
+      return [scoreWidget, teamWidget];
+    }
+  }
+
+  Expanded getRemainingPlayers(DraftTeam homeTeam, DraftTeam awayTeam) {
+    return Expanded(
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const Text("Live",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Expanded(
+              child: Text("${homeTeam.livePlayers} - ${awayTeam.livePlayers}",
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold)),
+            ),
+            const Text(
+              "Starting XI",
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+                "${homeTeam.remainingPlayersMatches} - ${awayTeam.remainingPlayersMatches}",
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+            const Text("Subs",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Text(
+                "${homeTeam.remainingSubsMatches} - ${awayTeam.remainingSubsMatches}",
+                style:
+                    const TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
+            // Expanded(
+            //     child: VerticalDivider(
+            //   thickness: 1,
+            // )),
+            // Expanded(
+            //     child: VerticalDivider(
+            //   thickness: 1,
+            // )),
+          ]),
+    );
+  }
+
+  getTeamSummaryStats(DraftTeam team, Map<int, DraftPlayer> players) {
+    int goals = 0;
+    int assists = 0;
+    int cleanSheets = 0;
+    int bonusPoints = 0;
+    int topPlayerPoints = 0;
+    DraftPlayer? topPlayer;
+    for (int _id in team.squad!.keys) {
+      if (team.squad![_id]! < 12) {
+        DraftPlayer player = players[_id]!;
+        int score = 0;
+        for (Match match in player.matches!) {
+          for (Stat stat in match.stats!) {
+            score += stat.fantasyPoints!;
+            if (stat.statName == "Goals scored") {
+              goals += stat.value!;
+            }
+            if (stat.statName == "Assists") {
+              assists += stat.value!;
+            }
+            if (stat.statName == "Clean sheets" &&
+                (player.position == "DEF" || player.position == "GK")) {
+              cleanSheets += stat.value!;
+            }
+            if (stat.statName == "Bonus") {
+              bonusPoints += stat.value!;
+            }
+          }
+        }
+        if (score > topPlayerPoints) {
+          topPlayer = player;
+          topPlayerPoints = score;
+        }
+      }
+    }
+    return {
+      "goals": goals,
+      "assists": assists,
+      "cleanSheets": cleanSheets,
+      "bonus": bonusPoints,
+      "topPlayer": topPlayer,
+      "topPlayerPoints": topPlayerPoints
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     Map<int, DraftPlayer> players = ref.watch(draftPlayersProvider).players;
-    int homeGoals = 0;
-    int homeAssists = 0;
-    int homeCleanSheets = 0;
-    for (int _id in widget.homeTeam.squad!.keys) {
-      if (widget.homeTeam.squad![_id]! < 12) {
-        DraftPlayer player = players[_id]!;
-        for (Match match in player.matches!) {
-          for (Stat stat in match.stats!) {
-            if (stat.statName == "Goals scored") {
-              homeGoals += stat.value!;
-            }
-            if (stat.statName == "Assists") {
-              homeAssists += stat.value!;
-            }
-            if (stat.statName == "Clean sheets" &&
-                (player.position == "DEF" || player.position == "GK")) {
-              homeCleanSheets += stat.value!;
-            }
-          }
-        }
-      }
-    }
-    int awayGoals = 0;
-    int awayAssists = 0;
-    int awayCleanSheets = 0;
-    for (int _id in widget.awayTeam.squad!.keys) {
-      if (widget.awayTeam.squad![_id]! < 12) {
-        DraftPlayer player = players[_id]!;
-        for (Match match in player.matches!) {
-          for (Stat stat in match.stats!) {
-            if (stat.statName == "Goals scored") {
-              awayGoals += stat.value!;
-            }
-            if (stat.statName == "Assists") {
-              awayAssists += stat.value!;
-            }
-            if (stat.statName == "Clean sheets" &&
-                (player.position == "DEF" || player.position == "GK")) {
-              awayCleanSheets += stat.value!;
-            }
-          }
-        }
-      }
-    }
-    bool liveBonus = ref.watch(utilsProvider).liveBps!;
+    liveBonus = ref.watch(utilsProvider).liveBps!;
+    bool gameweekFinished = ref.watch(gameweekProvider)!.gameweekFinished;
     final String score1 = widget.homeTeam.points.toString();
     final String score2 = widget.awayTeam.points.toString();
     final String bonusScore1 = widget.homeTeam.bonusPoints.toString();
     final String bonusScore2 = widget.awayTeam.bonusPoints.toString();
     final String homeTeam = widget.homeTeam.teamName.toString();
     final String awayTeam = widget.awayTeam.teamName.toString();
-    final String homeManager = widget.homeTeam.managerName.toString();
-    final String awayManager = widget.awayTeam.managerName.toString();
-    final String remainingMatchesHome =
-        widget.homeTeam.remainingPlayersMatches.toString();
-    final String completedMatchesHome =
-        widget.homeTeam.completedPlayersMatches.toString();
-    final String remainingMatchesAway =
-        widget.awayTeam.remainingPlayersMatches.toString();
-    final String completedMatchesAway =
-        widget.awayTeam.completedPlayersMatches.toString();
-    final String remainingSubsMatchesHome =
-        widget.homeTeam.remainingSubsMatches.toString();
-    final String completedSubsMatchesHome =
-        widget.homeTeam.completedSubsMatches.toString();
-    final String remainingSubsMatchesAway =
-        widget.awayTeam.remainingSubsMatches.toString();
-    final String completedSubsMatchesAway =
-        widget.awayTeam.completedSubsMatches.toString();
-    bool remainingPlayersView = ref.watch(
-        utilsProvider.select((connection) => connection.remainingPlayersView!));
-    bool iconsSummaryView = ref.watch(
-        utilsProvider.select((connection) => connection.iconSummaryView!));
 
     Row remainingPlayers(String remainingXi, String completedXi,
         String remainingSubs, String completedSubs) {
@@ -147,7 +227,7 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
             decoration: null,
             showDuration: const Duration(seconds: 3),
             message: "Starting XI: Remaining/Played",
-            child: Badge(
+            child: badges.Badge(
                 toAnimate: false,
                 shape: BadgeShape.square,
                 badgeColor: Theme.of(context).chipTheme.backgroundColor!,
@@ -166,7 +246,7 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
           Tooltip(
             showDuration: const Duration(seconds: 3),
             message: "Subs: Remaining/Played",
-            child: Badge(
+            child: badges.Badge(
                 toAnimate: false,
                 shape: BadgeShape.square,
                 badgeColor: Theme.of(context).chipTheme.backgroundColor!,
@@ -183,135 +263,191 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
       );
     }
 
-    return Container(
-        color: Theme.of(context).cardColor,
-        padding: const EdgeInsets.all(8.0),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 5,
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 20,
-                        child: AutoSizeText(
-                          homeTeam,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
-                          minFontSize: 10,
-                          maxLines: 1,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                        child: AutoSizeText(
-                          homeManager,
-                          style: const TextStyle(fontSize: 15),
-                          minFontSize: 10,
-                          maxLines: 2,
-                        ),
-                      ),
-                      if (remainingPlayersView)
-                        remainingPlayers(
-                            remainingMatchesHome,
-                            completedMatchesHome,
-                            remainingSubsMatchesHome,
-                            completedSubsMatchesHome),
-                      if (iconsSummaryView)
-                        iconsSummary(homeGoals, homeAssists, homeCleanSheets)
-                    ]),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 20,
-                      child: AutoSizeText(
-                        liveBonus ? bonusScore1 : score1,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                        minFontSize: 10,
-                        maxLines: 2,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: const <Widget>[
-                      Expanded(
-                          child: VerticalDivider(
-                        thickness: 1,
-                      )),
-                      Expanded(
-                          child: VerticalDivider(
-                        thickness: 1,
-                      )),
-                    ]),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        height: 20,
-                        child: AutoSizeText(
-                          liveBonus ? bonusScore2 : score2,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w600),
-                          minFontSize: 10,
-                          maxLines: 2,
+    getMatchSummary(DraftTeam homeTeam, DraftTeam awayTeam) {
+      String topPlayerName = '';
+      String topPlayerTeam = '';
+      String topPoints = '';
+      DraftPlayer topPlayer;
+      var homeStats = getTeamSummaryStats(homeTeam, players);
+      var awayStats = getTeamSummaryStats(awayTeam, players);
+      if (homeStats['topPlayerPoints'] == awayStats['topPlayerPoints']) {
+        topPlayerName = "Multiple Players";
+        topPlayerTeam = '';
+        topPoints = homeStats['topPlayerPoints'].toString();
+      } else if (homeStats['topPlayerPoints'] < awayStats['topPlayerPoints']) {
+        topPlayerName = awayStats['topPlayer'].playerName!;
+        topPlayerTeam = awayTeam.teamName!;
+        topPoints = awayStats['topPlayerPoints'].toString();
+      } else {
+        topPlayerName = homeStats['topPlayer'].playerName!;
+        topPlayerTeam = homeTeam.teamName!;
+        topPoints = homeStats['topPlayerPoints'].toString();
+      }
+      return Expanded(
+        flex: 2,
+        child: Column(
+          children: [
+            const Text("Top Player",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Text(
+              topPlayerName + "(${topPoints})",
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            Text(topPlayerTeam,
+                style:
+                    const TextStyle(fontSize: 9, fontWeight: FontWeight.bold)),
+            const Text("Goals",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(homeStats['goals'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold)),
+                const Text(" - "),
+                Text(awayStats['goals'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold))
+              ],
+            ),
+            const Text("Assists",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(homeStats['assists'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold)),
+                const Text(" - "),
+                Text(awayStats['assists'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold))
+              ],
+            ),
+            const Text("Clean Sheets",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(homeStats['cleanSheets'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold)),
+                const Text(" - "),
+                Text(awayStats['cleanSheets'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold))
+              ],
+            ),
+            const Text("Bonus Points",
+                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(homeStats['bonus'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold)),
+                const Text(" - "),
+                Text(awayStats['bonus'].toString(),
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold))
+              ],
+            )
+          ],
+        ),
+      );
+    }
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+      shadowColor: Colors.transparent,
+      elevation: 10,
+      child: IntrinsicHeight(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                gameweekFinished
+                    ? const Center(
+                        child: Text(
+                          "Summary",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                       )
-                    ]),
+                    : const Center(
+                        child: Text(
+                          "Remaining Players",
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      )
+              ],
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  ...getTeamAndScores(bonusScore1, score1, homeTeam, "home"),
+                  gameweekFinished
+                      ? getMatchSummary(widget.homeTeam, widget.awayTeam)
+                      : getRemainingPlayers(widget.homeTeam, widget.awayTeam),
+                  ...getTeamAndScores(bonusScore2, score2, awayTeam, "away")
+                  //   flex: 2,
+                  //   child: Column(
+                  //       mainAxisAlignment: MainAxisAlignment.center,
+                  //       crossAxisAlignment: CrossAxisAlignment.center,
+                  //       children: [
+                  //         SizedBox(
+                  //           height: 50,
+                  //           child: Center(
+                  //             child: AutoSizeText(
+                  //               liveBonus ? bonusScore2 : score2,
+                  //               style:
+                  //                   const TextStyle(fontFamily: 'Inter-Bold'),
+                  //               minFontSize: 14,
+                  //               maxLines: 1,
+                  //             ),
+                  //           ),
+                  //         )
+                  //       ]),
+                  // ),
+                  // Expanded(
+                  //   flex: 2,
+                  //   child: Column(
+                  //     mainAxisAlignment: MainAxisAlignment.center,
+                  //     crossAxisAlignment: CrossAxisAlignment.center,
+                  //     children: [
+                  //       SizedBox(
+                  //         height: 50,
+                  //         child: Center(
+                  //           child: AutoSizeText(
+                  //             awayTeam,
+                  //             style: const TextStyle(
+                  //                 fontSize: 12, fontWeight: FontWeight.w600),
+                  //             textAlign: TextAlign.center,
+                  //             minFontSize: 10,
+                  //             maxLines: 2,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       if (remainingPlayersView)
+                  //         remainingPlayers(
+                  //             remainingMatchesAway,
+                  //             completedMatchesAway,
+                  //             remainingSubsMatchesAway,
+                  //             completedSubsMatchesAway),
+                  //       if (iconsSummaryView)
+                  //         iconsSummary(awayGoals, awayAssists, awayCleanSheets)
+                  //     ],
+                  //   ),
+                  // ),
+                ],
               ),
-              Expanded(
-                flex: 5,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 20,
-                      child: AutoSizeText(
-                        awayTeam,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
-                        minFontSize: 10,
-                        maxLines: 1,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                      child: AutoSizeText(
-                        awayManager,
-                        style: const TextStyle(fontSize: 15),
-                        minFontSize: 10,
-                        maxLines: 2,
-                      ),
-                    ),
-                    if (remainingPlayersView)
-                      remainingPlayers(
-                          remainingMatchesAway,
-                          completedMatchesAway,
-                          remainingSubsMatchesAway,
-                          completedSubsMatchesAway),
-                    if (iconsSummaryView)
-                      iconsSummary(awayGoals, awayAssists, awayCleanSheets)
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

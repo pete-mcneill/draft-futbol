@@ -1,4 +1,3 @@
-
 import 'package:http/http.dart' as http;
 
 import '../models/Gameweek.dart';
@@ -11,10 +10,10 @@ class Api {
     baseUrl = 'https://draft.premierleague.com';
   }
 
-Future<Map?> getLeagueTrades(leagueId) async {
+  Future<Map?> getLeagueTrades(leagueId) async {
     try {
-      final response =
-          await http.get((Uri.parse(Commons.baseUrl + "/api/draft/league/$leagueId/trades")));
+      final response = await http.get(
+          (Uri.parse(Commons.baseUrl + "/api/draft/league/$leagueId/trades")));
       if (response.statusCode == 200) {
         return Commons.returnResponse(response);
       } else {
@@ -26,10 +25,10 @@ Future<Map?> getLeagueTrades(leagueId) async {
     }
   }
 
-Future<Map?> getPlayerStatus(leagueId) async {
+  Future<Map?> getPlayerStatus(leagueId) async {
     try {
-      final response =
-          await http.get((Uri.parse(Commons.baseUrl + "/api/league/$leagueId/element-status")));
+      final response = await http.get((Uri.parse(
+          Commons.baseUrl + "/api/league/$leagueId/element-status")));
       if (response.statusCode == 200) {
         return Commons.returnResponse(response);
       } else {
@@ -41,10 +40,10 @@ Future<Map?> getPlayerStatus(leagueId) async {
     }
   }
 
- Future<Map?> getTransactions(leagueId) async {
+  Future<Map?> getTransactions(leagueId) async {
     try {
-      final response =
-          await http.get((Uri.parse(Commons.baseUrl + "/api/draft/league/$leagueId/transactions")));
+      final response = await http.get((Uri.parse(
+          Commons.baseUrl + "/api/draft/league/$leagueId/transactions")));
       if (response.statusCode == 200) {
         return Commons.returnResponse(response);
       } else {
@@ -55,7 +54,6 @@ Future<Map?> getPlayerStatus(leagueId) async {
       return null;
     }
   }
-
 
   Future<Gameweek?> getCurrentGameweek() async {
     try {
@@ -65,8 +63,10 @@ Future<Map?> getPlayerStatus(leagueId) async {
         var gwResponse = Commons.returnResponse(response);
         // Gameweek _gameweek =
         //     Gameweek(gwResponse['current_event'].toString(), false);
-        Gameweek _gameweek = Gameweek(gwResponse['current_event'].toString(),
-            gwResponse['current_event_finished'], gwResponse['waivers_processed']);
+        Gameweek _gameweek = Gameweek(
+            gwResponse['current_event'].toString(),
+            gwResponse['current_event_finished'],
+            gwResponse['waivers_processed']);
         return _gameweek;
       } else {
         return null;

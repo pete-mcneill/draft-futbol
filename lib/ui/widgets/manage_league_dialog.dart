@@ -22,6 +22,7 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
   String newLeagueName = "";
   bool leagueIdExists = false;
   bool loading = false;
+  bool success = false;
 
   @override
   void initState() {
@@ -65,10 +66,10 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
     try {
       leagueIds = _prefs.getString('league_ids');
       leagueMap = json.decode(leagueIds!);
-      leagueMap![leagueId] = {"name": newLeagueName};
+      leagueMap![leagueId] = {"name": newLeagueName, "season": "23/24"};
     } catch (e) {
       leagueMap = {
-        leagueId: {"name": newLeagueName}
+        leagueId: {"name": newLeagueName, "season": "23/24"}
       };
     }
     await _prefs.setString('league_ids', json.encode(leagueMap));
@@ -136,6 +137,9 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
                     onPressed: leagueId == ""
                         ? null
                         : () {
+                            setState(() {
+                              success = false;
+                            });
                             _api.checkLeagueExists(leagueId).then((value) => {
                                   if (value['valid'])
                                     {
@@ -186,17 +190,20 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
                                   builder: (_) => OnBoardingScreen()),
                               (Route<dynamic> route) => false);
                         } else {
-                          _showAddedToast(context);
+                          setState(() {
+                            success = true;
+                          });
                         }
                         setState(() {
                           loading = false;
                         });
-                        Navigator.pop(context);
+                        // Navigator.pop(context);
                       },
                       child: Center(
                           child: loading
                               ? const CircularProgressIndicator()
-                              : const Text("Save New League")))
+                              : const Text("Save New League"))),
+                  if (success) Text("${newLeagueName} succesfully added")
                 ],
                 if (leagueIdExists)
                   ElevatedButton(

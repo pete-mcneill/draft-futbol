@@ -1,14 +1,20 @@
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/ui_settings_dialog.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DraftAppBar extends ConsumerStatefulWidget with PreferredSizeWidget {
-  final bool bps;
+import '../../screens/settings_screen.dart';
+
+class DraftAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   final bool settings;
-  DraftAppBar({Key? key, this.bps = false, this.settings = false})
+  final bool leading;
+  String? title;
+  DraftAppBar(
+      {Key? key, this.settings = false, this.title, this.leading = false})
       : super(key: key);
 
   @override
@@ -35,46 +41,64 @@ class _DraftAppBarState extends ConsumerState<DraftAppBar> {
     setupBpsButtonListener();
     setLeagueNamesForDropdown();
     return AppBar(
-      elevation: 0,
-      title: getDropdownTitle(),
-      actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [showBonusPointsButton(), showUISettingsButton()],
+      centerTitle: true,
+      // leadingWidth: 0,
+      // titleSpacing: 0,
+      // leading:
+      //     Image.asset("assets/images/1024_1024-icon.png", height: 5, width: 5),
+      automaticallyImplyLeading: widget.leading,
+      elevation: 3,
+      title: Container(
+        child: Row(
+          children: [
+            Expanded(
+                flex: 2,
+                child: Image.asset("assets/images/1024_1024-icon.png",
+                    height: 30, width: 30)),
+            Expanded(
+              flex: 10,
+              child: getDropdownTitle(),
+            )
+          ],
         ),
+      ),
+
+      // getDropdownTitle(),
+      actions: [
+        if (widget.settings)
+          IconButton(
+            icon: Icon(
+              Icons.settings,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()));
+            },
+          )
       ],
     );
   }
 
   Widget getDropdownTitle() {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2(
-        iconEnabledColor: Theme.of(context).secondaryHeaderColor,
-        isExpanded: true,
-        items: menuOptions,
-        onChanged: (value) {
-          ref.read(utilsProvider.notifier).updateActiveLeague(value.toString());
-        },
-        value: dropdownValue,
-        dropdownDecoration:
-            BoxDecoration(color: Theme.of(context).appBarTheme.backgroundColor),
-      ),
-    );
-  }
-
-  Widget showBonusPointsButton() {
-    if (widget.bps) {
-      return AdvancedSwitch(
-        activeChild: const Text('BPS'),
-        inactiveChild: const Text('BPS'),
-        width: 56,
-        height: 28,
-        controller: _controller03,
-        activeColor: Theme.of(context).buttonTheme.colorScheme!.secondary,
-      );
+    if (widget.title != null) {
+      return (Text(widget.title!));
     } else {
-      return const SizedBox();
+      return DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          iconEnabledColor: Theme.of(context).colorScheme.secondaryContainer,
+          isExpanded: true,
+          items: menuOptions,
+          onChanged: (value) {
+            ref
+                .read(utilsProvider.notifier)
+                .updateActiveLeague(value.toString());
+          },
+          value: dropdownValue,
+          // dropdownDecoration:
+          //     BoxDecoration(color: Theme.of(context).primaryColorDark),
+        ),
+      );
     }
   }
 

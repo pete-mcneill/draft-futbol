@@ -318,6 +318,22 @@ class LeagueStanding {
       this.gwScore,
       this.bpsScore});
 
+  factory LeagueStanding.fromFirestoreJson(
+      var json, Map<String, dynamic>? team) {
+    return LeagueStanding(
+        teamId: int.parse(json['team_id']),
+        teamName: team!['alias'],
+        matchesWon: json['wins'] ?? 0,
+        matchesDrawn: json['draws'] ?? 0,
+        matchesLost: json['losses'] ?? 0,
+        pointsFor: json['fpl_points'] ?? 0,
+        pointsAgainst: 0,
+        leaguePoints: json['points'] ?? 0,
+        rank: json['rank'],
+        gwScore: json['fpl_points'],
+        bpsScore: 0);
+  }
+
   factory LeagueStanding.fromJson(var json, DraftTeam team) {
     return LeagueStanding(
         teamId: json['league_entry'],

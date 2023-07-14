@@ -3,26 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class FixturesNotifier extends StateNotifier<Fixtures> {
   FixturesNotifier() : super(Fixtures());
 
-  void getAllFixtures(
-  List<dynamic> league_fixtures, String leagueId
-) async {
+  void getAllFixtures(List<dynamic> league_fixtures, String leagueId) async {
     try {
       state.fixtures[leagueId] = {};
       for (var match in league_fixtures) {
-          Fixture _fixture = Fixture.fromJson(match);
-          if(state.fixtures[leagueId]![match['event'].toString()] != null){
-            state.fixtures[leagueId]![match['event'].toString()]!.add(_fixture);
-          } else {
-            state.fixtures[leagueId]![match['event'].toString()] = [_fixture];
-          }
+        Fixture _fixture = Fixture.fromJson(match);
+        if (state.fixtures[leagueId]![match['event'].toString()] != null) {
+          state.fixtures[leagueId]![match['event'].toString()]!.add(_fixture);
+        } else {
+          state.fixtures[leagueId]![match['event'].toString()] = [_fixture];
+        }
       }
     } catch (error) {
       print(error);
     }
+  }
 }
-}
-
-
 
 class Fixtures {
   Map<String, Map<String, List<Fixture>>> fixtures = {};

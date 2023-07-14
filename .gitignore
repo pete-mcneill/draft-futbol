@@ -126,3 +126,5 @@ app.*.symbols
 mock_server
 
 /android/app/src/main/AndroidManifest.xml
+
+functions

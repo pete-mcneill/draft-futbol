@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 class DraftBottomBar extends StatefulWidget {
   final Function(int index) updateIndex;
+  final int currentIndex;
   final String leagueType;
   const DraftBottomBar(
-      {Key? key, required this.updateIndex, required this.leagueType})
+      {Key? key,
+      required this.updateIndex,
+      required this.leagueType,
+      required this.currentIndex})
       : super(key: key);
 
   @override
@@ -21,39 +25,56 @@ class _DraftBottomBarState extends State<DraftBottomBar> {
     widget.updateIndex(index);
   }
 
-  List<BottomNavigationBarItem> h2hOptions = const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.sports_soccer),
+  List<NavigationDestination> h2hOptions = const [
+    NavigationDestination(
+      icon: Icon(Icons.home),
       label: 'Matches',
     ),
-    BottomNavigationBarItem(
+    NavigationDestination(
       icon: Icon(Icons.table_rows),
       label: 'Standings',
     ),
-    BottomNavigationBarItem(
+    NavigationDestination(
       icon: Icon(Icons.sports),
       label: 'PL Matches',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.more_horiz),
+      label: 'More',
     ),
   ];
 
-  List<BottomNavigationBarItem> classicOptions = const [
-    BottomNavigationBarItem(
+  List<NavigationDestination> classicOptions = [
+    NavigationDestination(
       icon: Icon(Icons.table_rows),
       label: 'Standings',
     ),
-    BottomNavigationBarItem(
+    NavigationDestination(
       icon: Icon(Icons.sports),
       label: 'PL Matches',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.more_horiz),
+      label: 'More',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      elevation: 0,
-      items: widget.leagueType == 'h' ? h2hOptions : classicOptions,
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
+    _selectedIndex = widget.currentIndex;
+    return NavigationBar(
+      // backgroundColor: const Color(0xFF1a1c23),
+      // selectedFontSize: 18,
+      // unselectedFontSize: 14,
+      // selectedIconTheme: IconThemeData(
+      //     color: Theme.of(context).navigationBarTheme.indicatorColor),
+      // unselectedIconTheme: IconThemeData(
+      //     color: Theme.of(context).navigationBarTheme.backgroundColor),
+      // selectedItemColor: Theme.of(context).navigationBarTheme.indicatorColor,
+      // elevation: 50,
+      destinations: widget.leagueType == 'h' ? h2hOptions : classicOptions,
+      selectedIndex: _selectedIndex,
+      onDestinationSelected: _onItemTapped,
     );
   }
 }
