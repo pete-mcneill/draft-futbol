@@ -6,7 +6,6 @@ import 'package:draft_futbol/ui/screens/classic_league_standings.dart';
 import 'package:draft_futbol/ui/screens/h2h_draft_matches_screen.dart';
 import 'package:draft_futbol/ui/screens/league_standings.dart';
 import 'package:draft_futbol/ui/screens/pl_matches_screen.dart';
-import 'package:draft_futbol/ui/screens/settings_screen.dart';
 import 'package:draft_futbol/ui/widgets/adverts/adverts.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/draft_bottom_bar.dart';
@@ -137,7 +136,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             int advertRefresh = advertsBox!.get("adCounter");
             activeLeague = ref.watch(utilsProvider
                 .select((connection) => connection.activeLeagueId!));
-            var test = ref.watch(draftLeaguesProvider).leagues;
             var leagueData =
                 ref.watch(draftLeaguesProvider).leagues[activeLeague]!;
             if (leagueData.scoring == 'c' && navBarIndex > 2) {
@@ -184,7 +182,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     // color: Theme.of(context).scaffoldBackgroundColor,
                     // margin:
                     //     const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
-                    alignment: FractionalOffset.center,
+                    // alignment: FractionalOffset.center,
                     child: draftStatus == "pre" ||
                             gameweek!.currentGameweek == "null"
                         ? DraftPlaceholder(

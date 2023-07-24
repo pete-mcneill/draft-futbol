@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/services/api_service.dart';
+import 'package:draft_futbol/ui/screens/initialise_home_screen.dart';
 import 'package:draft_futbol/ui/screens/on_boarding_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,7 +74,7 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
       };
     }
     await _prefs.setString('league_ids', json.encode(leagueMap));
-    ref.watch(utilsProvider.notifier).setLeagueIds(leagueMap);
+    ref.read(utilsProvider.notifier).setLeagueIds(leagueMap);
     return leagueMap;
   }
 
@@ -85,7 +86,8 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
     leagueMap = json.decode(leagueIds!);
     leagueMap!.remove(key);
     await _prefs.setString('league_ids', json.encode(leagueMap));
-    ref.watch(utilsProvider.notifier).setLeagueIds(leagueMap);
+    ref.read(draftLeaguesProvider.notifier).deleteLeague(key);
+    ref.read(utilsProvider.notifier).setLeagueIds(leagueMap);
     return leagueMap;
   }
 
@@ -98,6 +100,21 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         // backgroundColor: Colors.transparent,
 
         child: Stack(children: <Widget>[
+          Positioned(
+            top: 0.0,
+            right: 0.0,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: new IconButton(
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+            ),
+          ),
           Container(
             margin: const EdgeInsets.all(10),
             child: Column(
@@ -187,7 +204,7 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
                         if (ref.watch(utilsProvider).leagueIds!.isEmpty) {
                           Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
-                                  builder: (_) => OnBoardingScreen()),
+                                  builder: (_) => const InitialiseHomeScreen()),
                               (Route<dynamic> route) => false);
                         } else {
                           setState(() {
@@ -226,6 +243,21 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         elevation: 0.0,
         // backgroundColor: Colors.transparent,
         child: Stack(children: <Widget>[
+          Positioned(
+            top: 0.0,
+            right: 0.0,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: new IconButton(
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+            ),
+          ),
           Container(
             margin: const EdgeInsets.all(10),
             child: Column(
@@ -264,7 +296,7 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
                             if (ref.watch(utilsProvider).leagueIds!.isEmpty) {
                               Navigator.of(context).pushAndRemoveUntil(
                                   MaterialPageRoute(
-                                      builder: (_) => OnBoardingScreen()),
+                                      builder: (_) => InitialiseHomeScreen()),
                                   (Route<dynamic> route) => false);
                             }
                             setState(() {
@@ -301,9 +333,9 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
     Api _api = Api();
     Map<String, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
     if (widget.type == "add") {
-      return addLeagueWidget(leagueIds, _api);
+      return SingleChildScrollView(child: addLeagueWidget(leagueIds, _api));
     } else if (widget.type == "remove") {
-      return removeLeagueWidget(leagueIds, _api);
+      return SingleChildScrollView(child: removeLeagueWidget(leagueIds, _api));
     }
     return Container();
   }

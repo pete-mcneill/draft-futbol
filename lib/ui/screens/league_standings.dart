@@ -176,15 +176,17 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(
+            height: 10,
+          ),
           if (!ref.watch(purchasesProvider).noAdverts!)
             SizedBox(
               height: 120,
               // color: Colors.deepOrange,
               child: FutureBuilder<Widget>(
-                future: getBannerWidget(
-                    context: context,
-                    adSize: AdSize.banner,
-                    noAdverts: ref.watch(purchasesProvider).noAdverts!),
+                future: Ads.buildBannerWidget(
+                  context: context,
+                ),
                 builder: (_, snapshot) {
                   if (!snapshot.hasData) {
                     return Center(child: const CircularProgressIndicator());

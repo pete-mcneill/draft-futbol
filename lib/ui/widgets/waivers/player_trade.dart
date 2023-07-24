@@ -47,7 +47,7 @@ class _TradeState extends ConsumerState<Trade> {
       // height: 50,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: EdgeInsets.all(0),
+        margin: const EdgeInsets.all(0),
         elevation: 10,
         child: Column(
           children: [
@@ -57,7 +57,7 @@ class _TradeState extends ConsumerState<Trade> {
                 Expanded(
                     child: Text("${teams![trade.offeringTeam]!.teamName}",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold))),
                 Expanded(
                   child: Column(
@@ -67,7 +67,7 @@ class _TradeState extends ConsumerState<Trade> {
                           color:
                               Theme.of(context).colorScheme.secondaryContainer,
                           // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
-                          icon: FaIcon(FontAwesomeIcons.rightLeft),
+                          icon: const FaIcon(FontAwesomeIcons.rightLeft),
                           onPressed: () {
                             print("Pressed");
                           }),
@@ -77,12 +77,12 @@ class _TradeState extends ConsumerState<Trade> {
                 Expanded(
                     child: Text("${teams![trade.receivingTeam]!.teamName}",
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold)))
               ],
             ),
             for (var set in trade.players) getPlayers(set),
-            SizedBox(
+            const SizedBox(
               height: 5,
             )
           ],
@@ -156,34 +156,41 @@ class _TradeState extends ConsumerState<Trade> {
               },
               child: SingleChildScrollView(
                 child: Column(children: [
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        flex: 6,
-                        child: Text(
-                          "Offered",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Expanded(
-                        flex: 6,
-                        child: Text(
-                          "Requested",
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                  for (var trade in _trades) ...[
-                    generateTrade(trade),
-                    SizedBox(
+                  if (_trades.isNotEmpty) ...[
+                    const SizedBox(
                       height: 10,
-                    )
-                  ],
+                    ),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          flex: 6,
+                          child: Text(
+                            "Offered",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 6,
+                          child: Text(
+                            "Requested",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    for (var trade in _trades) ...[
+                      generateTrade(trade),
+                      const SizedBox(
+                        height: 10,
+                      )
+                    ],
+                  ] else ...[
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Center(child: const Text("No Trades completed yet"))
+                  ]
                 ]),
               ),
             ),
