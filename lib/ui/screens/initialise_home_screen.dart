@@ -2,8 +2,8 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/services/utils_service.dart';
 import 'package:draft_futbol/ui/screens/home_page.dart';
 import 'package:draft_futbol/ui/screens/on_boarding_screen.dart';
+import 'package:draft_futbol/ui/widgets/custom_error.dart';
 import 'package:draft_futbol/ui/widgets/loading.dart';
-import 'package:draft_futbol/utils/color_scheme.dart';
 import 'package:draft_futbol/utils/utilities.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -31,21 +31,21 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
   }
 
   Future<void> _asyncmethodCall() async {
-    try {
-      final settings = await Hive.openBox('settings');
-      bool isLightTheme = settings.get('isLightTheme') ?? false;
-      isLightTheme
-          ? ref.read(utilsProvider.notifier).updateIsLightTheme(true)
-          : ref.read(utilsProvider.notifier).updateIsLightTheme(false);
-      bool remainingPlayersView = settings.get("remainingPlayersView");
-      bool iconsSummaryView = settings.get("iconSummaryView");
-      ref
-          .read(utilsProvider.notifier)
-          .setRemainingPlayersView(remainingPlayersView);
-      ref.read(utilsProvider.notifier).setIconSummaryView(iconsSummaryView);
-    } catch (e) {
-      print(e);
-    }
+    // try {
+    //   final settings = await Hive.openBox('settings');
+    //   bool isLightTheme = settings.get('isLightTheme') ?? false;
+    //   isLightTheme
+    //       ? ref.read(utilsProvider.notifier).updateIsLightTheme(true)
+    //       : ref.read(utilsProvider.notifier).updateIsLightTheme(false);
+    //   bool remainingPlayersView = settings.get("remainingPlayersView");
+    //   bool iconsSummaryView = settings.get("iconSummaryView");
+    //   ref
+    //       .read(utilsProvider.notifier)
+    //       .setRemainingPlayersView(remainingPlayersView);
+    //   ref.read(utilsProvider.notifier).setIconSummaryView(iconsSummaryView);
+    // } catch (e) {
+    //   print(e);
+    // }
 
     try {
       await getLeagueIds();
@@ -79,8 +79,8 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
         ref.read(purchasesProvider.notifier).updateNoAdvertsStatus(false);
       }
     } catch (e) {
-      print(e);
-      print("Failed to get entitlements");
+      // print(e);
+      print("No Entitlements, enabling adverts");
       ref.read(purchasesProvider.notifier).updateNoAdvertsStatus(false);
     }
   }

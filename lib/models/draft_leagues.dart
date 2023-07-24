@@ -5,6 +5,10 @@ class DraftLeaguesNotifier extends StateNotifier<DraftLeagues> {
   void addLeague(DraftLeague league) {
     state = state..leagues.addAll({league.leagueId: league});
   }
+
+  void deleteLeague(String leagueId) {
+    state = state..leagues.remove(leagueId);
+  }
 }
 
 class DraftLeagues {

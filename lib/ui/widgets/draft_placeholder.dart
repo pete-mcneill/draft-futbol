@@ -101,10 +101,9 @@ class DraftPlaceholder extends ConsumerWidget {
               ? SizedBox(
                   height: 120,
                   child: FutureBuilder<Widget>(
-                    future: getBannerWidget(
-                        context: context,
-                        adSize: AdSize.banner,
-                        noAdverts: ref.watch(purchasesProvider).noAdverts!),
+                    future: Ads.buildBannerWidget(
+                      context: context,
+                    ),
                     builder: (_, snapshot) {
                       if (!snapshot.hasData) {
                         return const CircularProgressIndicator();
@@ -114,7 +113,7 @@ class DraftPlaceholder extends ConsumerWidget {
                             SizedBox(
                               height: 100,
                               width: MediaQuery.of(context).size.width,
-                              child: snapshot.data,
+                              child: Center(child: snapshot.data),
                             ),
                           ],
                         );
@@ -147,10 +146,9 @@ class DraftPlaceholder extends ConsumerWidget {
               ? SizedBox(
                   height: 120,
                   child: FutureBuilder<Widget>(
-                    future: getBannerWidget(
-                        context: context,
-                        adSize: AdSize.banner,
-                        noAdverts: ref.watch(purchasesProvider).noAdverts!),
+                    future: Ads.buildBannerWidget(
+                      context: context,
+                    ),
                     builder: (_, snapshot) {
                       if (!snapshot.hasData) {
                         return const CircularProgressIndicator();
@@ -169,7 +167,7 @@ class DraftPlaceholder extends ConsumerWidget {
                   ),
                 )
               : SizedBox(
-                  height: 5,
+                  height: 10,
                 ),
           Center(
             child: AutoSizeText(

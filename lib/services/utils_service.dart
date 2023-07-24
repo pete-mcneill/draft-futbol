@@ -10,7 +10,7 @@ Future<Map<String, dynamic>> setLeagueIds() async {
     String? sharedPrefIds = _prefs.getString('league_ids');
     leagueIds = json.decode(sharedPrefIds!);
   } catch (e) {
-    print(e);
+    print("No League ids: ${e}");
   }
   return leagueIds;
 }

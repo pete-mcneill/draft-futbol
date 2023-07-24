@@ -396,10 +396,9 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
               height: 120,
               // color: Colors.deepOrange,
               child: FutureBuilder<Widget>(
-                future: getBannerWidget(
-                    context: context,
-                    adSize: AdSize.largeBanner,
-                    noAdverts: ref.watch(purchasesProvider).noAdverts!),
+                future: Ads.buildBannerWidget(
+                  context: context,
+                ),
                 builder: (_, snapshot) {
                   if (!snapshot.hasData) {
                     return const CircularProgressIndicator();

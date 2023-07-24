@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class CustomError extends StatelessWidget {
-  const CustomError({Key? key}) : super(key: key);
+  String? errorMessage;
+  CustomError({Key? key, this.errorMessage = ''}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,8 @@ class CustomError extends StatelessWidget {
                 children: [
                   const Center(
                     child: Text("An error occurred, please restart the app"),
-                  )
+                  ),
+                  if (this.errorMessage!.isNotEmpty) Text(errorMessage!)
                 ],
               )),
         )));

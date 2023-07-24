@@ -82,15 +82,17 @@ class _H2hDraftMatchesScreenState extends ConsumerState<H2hDraftMatchesScreen> {
     teams = ref.watch(draftTeamsProvider).teams![activeLeague];
 
     return ListView(children: <Widget>[
+      const SizedBox(
+        height: 10,
+      ),
       if (!ref.watch(purchasesProvider).noAdverts!)
         SizedBox(
           height: 120,
           // color: Colors.deepOrange,
           child: FutureBuilder<Widget>(
-            future: getBannerWidget(
-                context: context,
-                adSize: AdSize.banner,
-                noAdverts: ref.watch(purchasesProvider).noAdverts!),
+            future: Ads.buildBannerWidget(
+              context: context,
+            ),
             builder: (_, snapshot) {
               if (!snapshot.hasData) {
                 return Center(child: const CircularProgressIndicator());

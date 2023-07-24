@@ -119,12 +119,15 @@ class _TransactionsState extends ConsumerState<Transactions> {
               _draftTeams = teams.keys.toList();
               visibleWaivers = [];
               visibleFreeAgents = [];
-              for (Transaction transaction
-                  in transactions[activeLeague]![currentGameweek]!) {
-                if (transaction.type == "w") {
-                  visibleWaivers.add(transaction);
-                } else if (transaction.type == "f") {
-                  visibleFreeAgents.add(transaction);
+
+              if (transactions[activeLeague]![currentGameweek] != null) {
+                for (Transaction transaction
+                    in transactions[activeLeague]![currentGameweek]!) {
+                  if (transaction.type == "w") {
+                    visibleWaivers.add(transaction);
+                  } else if (transaction.type == "f") {
+                    visibleFreeAgents.add(transaction);
+                  }
                 }
               }
             }
@@ -138,7 +141,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
                 settings: false,
               ),
               body: DefaultTabController(
-                  length: 2, // length of tabs
+                  length: 2, // length of tabsDraft not complete
                   initialIndex: 0,
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -195,7 +198,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
             );
           });
     } catch (e) {
-      return const CustomError();
+      return CustomError();
     }
   }
 
@@ -213,77 +216,85 @@ class _TransactionsState extends ConsumerState<Transactions> {
           const SizedBox(
             height: 15,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Expanded(
-                child: Center(
-                    child: Text("Player In",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ),
-              Expanded(
-                child: Center(
-                    child: Text("Player Out",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ),
-              Text("Draft Teams",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              // MultiSelectBottomSheetField(
-              //   initialChildSize: 0.5,
-              //   title: const Text("Draft Teams"),
-              //   buttonText: const Text("Draft Teams"),
-              //   chipDisplay:
-              //       MultiSelectChipDisplay.none(),
-              //   items: _draftTeamFilters,
-              //   listType: MultiSelectListType.LIST,
-              //   onConfirm: (values) {
-              //     // _selectedAnimals = values;
-              //   },
-              // ),
-              // Expanded(
-              //   child: Center(child: Text("Team", style: TextStyle(fontWeight: FontWeight.bold))),
-              // ),
-              Expanded(
-                child: Center(
-                    child: Text("Result",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              )
-            ],
-          ),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: visibleFreeAgents.length,
-            itemBuilder: (context, i) {
-              Transaction _transaction = visibleFreeAgents[i];
-              DraftPlayer playerIn =
-                  players[int.parse(_transaction.playerInId)]!;
-              DraftPlayer playerOut =
-                  players[int.parse(_transaction.playerOutId)]!;
-              DraftTeam? _team;
-              for (DraftTeam team in teams.values) {
-                if (team.entryId.toString() == _transaction.teamId.toString()) {
-                  _team = team;
+          if (visibleFreeAgents.isNotEmpty) ...[
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Center(
+                      child: Text("Player In",
+                          style: TextStyle(fontWeight: FontWeight.bold))),
+                ),
+                Expanded(
+                  child: Center(
+                      child: Text("Player Out",
+                          style: TextStyle(fontWeight: FontWeight.bold))),
+                ),
+                Text("Draft Teams",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                // MultiSelectBottomSheetField(
+                //   initialChildSize: 0.5,
+                //   title: const Text("Draft Teams"),
+                //   buttonText: const Text("Draft Teams"),
+                //   chipDisplay:
+                //       MultiSelectChipDisplay.none(),
+                //   items: _draftTeamFilters,
+                //   listType: MultiSelectListType.LIST,
+                //   onConfirm: (values) {
+                //     // _selectedAnimals = values;
+                //   },
+                // ),
+                // Expanded(
+                //   child: Center(child: Text("Team", style: TextStyle(fontWeight: FontWeight.bold))),
+                // ),
+                Expanded(
+                  child: Center(
+                      child: Text("Result",
+                          style: TextStyle(fontWeight: FontWeight.bold))),
+                )
+              ],
+            ),
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: visibleFreeAgents.length,
+              itemBuilder: (context, i) {
+                Transaction _transaction = visibleFreeAgents[i];
+                DraftPlayer playerIn =
+                    players[int.parse(_transaction.playerInId)]!;
+                DraftPlayer playerOut =
+                    players[int.parse(_transaction.playerOutId)]!;
+                DraftTeam? _team;
+                for (DraftTeam team in teams.values) {
+                  if (team.entryId.toString() ==
+                      _transaction.teamId.toString()) {
+                    _team = team;
+                  }
                 }
-              }
-              if (_transaction.type == "f") {
-                return Column(
-                  children: [
-                    Divider(
-                      thickness: 2,
-                    ),
-                    Waiver(
-                      transaction: _transaction,
-                      playerIn: playerIn,
-                      playerOut: playerOut,
-                      team: _team,
-                    ),
-                  ],
-                );
-              }
-              return SizedBox.shrink();
-            },
-          ),
+                if (_transaction.type == "f") {
+                  return Column(
+                    children: [
+                      const Divider(
+                        thickness: 2,
+                      ),
+                      Waiver(
+                        transaction: _transaction,
+                        playerIn: playerIn,
+                        playerOut: playerOut,
+                        team: _team,
+                      ),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ] else ...[
+            const SizedBox(
+              height: 10,
+            ),
+            Center(child: const Text("No Free Agents this week"))
+          ]
         ],
       ),
     );
@@ -302,144 +313,154 @@ class _TransactionsState extends ConsumerState<Transactions> {
           const SizedBox(
             height: 15,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Expanded(
-                flex: 2,
-                child: Center(
-                    child: Text("Player In",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ),
-              Expanded(
-                flex: 2,
-                child: Center(
-                    child: Text("Player Out",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ),
-              Expanded(
-                flex: 3,
-                child: Center(
-                    child: Text("Draft Teams",
-                        style: TextStyle(fontWeight: FontWeight.bold))
+          if (visibleWaivers.isNotEmpty) ...[
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                      child: Text("Player In",
+                          style: TextStyle(fontWeight: FontWeight.bold))),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                      child: Text("Player Out",
+                          style: TextStyle(fontWeight: FontWeight.bold))),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Center(
+                      child: Text("Draft Teams",
+                          style: TextStyle(fontWeight: FontWeight.bold))
 
-                    // MultiSelectBottomSheetField(
-                    //   initialChildSize: 0.5,
-                    //   title: const Text("Draft Teams"),
-                    //   buttonText: const Text("Draft Teams",
-                    //       style: TextStyle(
-                    //           fontWeight: FontWeight.bold)),
-                    //   searchable: true,
-                    //   chipDisplay:
-                    //       MultiSelectChipDisplay.none(),
-                    //   items: _draftTeamFilters,
-                    //   initialValue: _draftTeams,
-                    //   listType: MultiSelectListType.CHIP,
-                    //   onConfirm: (values) {
-                    //     filterWaiversAndFreeAgents(
-                    //         values,
-                    //         transactions,
-                    //         activeLeague,
-                    //         currentGameweek,
-                    //         teams);
-                    //   },
-                    // ),
-                    ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Center(
-                    child: Text("Result",
-                        style: TextStyle(fontWeight: FontWeight.bold))
-                    // MultiSelectBottomSheetField(
-                    //   initialChildSize: 0.5,
-                    //   title: const Text("Result"),
-                    //   buttonText: const Text("Result"),
-                    //   chipDisplay:
-                    //       MultiSelectChipDisplay.none(),
-                    //   items: waiverResults,
-                    //   initialValue: _waiverResults,
-                    //   listType: MultiSelectListType.CHIP,
-                    //   onConfirm: (values) {
-                    //     print(values);
+                      // MultiSelectBottomSheetField(
+                      //   initialChildSize: 0.5,
+                      //   title: const Text("Draft Teams"),
+                      //   buttonText: const Text("Draft Teams",
+                      //       style: TextStyle(
+                      //           fontWeight: FontWeight.bold)),
+                      //   searchable: true,
+                      //   chipDisplay:
+                      //       MultiSelectChipDisplay.none(),
+                      //   items: _draftTeamFilters,
+                      //   initialValue: _draftTeams,
+                      //   listType: MultiSelectListType.CHIP,
+                      //   onConfirm: (values) {
+                      //     filterWaiversAndFreeAgents(
+                      //         values,
+                      //         transactions,
+                      //         activeLeague,
+                      //         currentGameweek,
+                      //         teams);
+                      //   },
+                      // ),
+                      ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                      child: Text("Result",
+                          style: TextStyle(fontWeight: FontWeight.bold))
+                      // MultiSelectBottomSheetField(
+                      //   initialChildSize: 0.5,
+                      //   title: const Text("Result"),
+                      //   buttonText: const Text("Result"),
+                      //   chipDisplay:
+                      //       MultiSelectChipDisplay.none(),
+                      //   items: waiverResults,
+                      //   initialValue: _waiverResults,
+                      //   listType: MultiSelectListType.CHIP,
+                      //   onConfirm: (values) {
+                      //     print(values);
 
-                    //     if ((values.contains("a") && values.contains("r")) || values.isEmpty) {
-                    //       for (Transaction _transaction
-                    //           in transactions[
-                    //                   activeLeague]![
-                    //               currentGameweek]!) {
-                    //         _transaction.visible = true;
-                    //       }
-                    //     } else if (values.contains("a")) {
-                    //       for (Transaction _transaction
-                    //           in transactions[
-                    //                   activeLeague]![
-                    //               currentGameweek]!) {
-                    //         if (_transaction.result ==
-                    //             "a") {
-                    //           _transaction.visible = true;
-                    //         } else {
-                    //           _transaction.visible = false;
-                    //         }
-                    //       }
-                    //     } else if (values.contains("r")) {
-                    //       for (Transaction _transaction
-                    //           in transactions[
-                    //                   activeLeague]![
-                    //               currentGameweek]!) {
-                    //         if (_transaction.result !=
-                    //             "a") {
-                    //           _transaction.visible = true;
-                    //         } else {
-                    //           _transaction.visible = false;
-                    //         }
-                    //       }
-                    //     }
-                    //     setState(() {
+                      //     if ((values.contains("a") && values.contains("r")) || values.isEmpty) {
+                      //       for (Transaction _transaction
+                      //           in transactions[
+                      //                   activeLeague]![
+                      //               currentGameweek]!) {
+                      //         _transaction.visible = true;
+                      //       }
+                      //     } else if (values.contains("a")) {
+                      //       for (Transaction _transaction
+                      //           in transactions[
+                      //                   activeLeague]![
+                      //               currentGameweek]!) {
+                      //         if (_transaction.result ==
+                      //             "a") {
+                      //           _transaction.visible = true;
+                      //         } else {
+                      //           _transaction.visible = false;
+                      //         }
+                      //       }
+                      //     } else if (values.contains("r")) {
+                      //       for (Transaction _transaction
+                      //           in transactions[
+                      //                   activeLeague]![
+                      //               currentGameweek]!) {
+                      //         if (_transaction.result !=
+                      //             "a") {
+                      //           _transaction.visible = true;
+                      //         } else {
+                      //           _transaction.visible = false;
+                      //         }
+                      //       }
+                      //     }
+                      //     setState(() {
 
-                    //     });
-                    //   },
-                    // ),
-                    ),
-              ),
-            ],
-          ),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: visibleWaivers.length,
-            itemBuilder: (context, i) {
-              List<Transaction> _transactions = [];
-              Transaction _transaction = visibleWaivers[i];
-              DraftPlayer playerIn =
-                  players[int.parse(_transaction.playerInId)]!;
-              DraftPlayer playerOut =
-                  players[int.parse(_transaction.playerOutId)]!;
-              DraftTeam? _team;
-              for (DraftTeam team in teams.values) {
-                if (team.entryId.toString() == _transaction.teamId.toString()) {
-                  _team = team;
+                      //     });
+                      //   },
+                      // ),
+                      ),
+                ),
+              ],
+            ),
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: visibleWaivers.length,
+              itemBuilder: (context, i) {
+                List<Transaction> _transactions = [];
+                Transaction _transaction = visibleWaivers[i];
+                DraftPlayer playerIn =
+                    players[int.parse(_transaction.playerInId)]!;
+                DraftPlayer playerOut =
+                    players[int.parse(_transaction.playerOutId)]!;
+                DraftTeam? _team;
+                for (DraftTeam team in teams.values) {
+                  if (team.entryId.toString() ==
+                      _transaction.teamId.toString()) {
+                    _team = team;
+                  }
                 }
-              }
-              if (_transaction.visible && _transaction.type == "w") {
-                _transactions.add(_transaction);
-              }
+                if (_transaction.visible && _transaction.type == "w") {
+                  _transactions.add(_transaction);
+                }
 
-              return Column(
-                children: [
-                  Divider(
-                    thickness: 2,
-                  ),
-                  Waiver(
-                    transaction: _transaction,
-                    playerIn: playerIn,
-                    playerOut: playerOut,
-                    team: _team,
-                  ),
-                ],
-              );
-            },
-          ),
+                return Column(
+                  children: [
+                    const Divider(
+                      thickness: 2,
+                    ),
+                    Waiver(
+                      transaction: _transaction,
+                      playerIn: playerIn,
+                      playerOut: playerOut,
+                      team: _team,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ] else ...[
+            const SizedBox(
+              height: 10,
+            ),
+            const Center(
+              child: Text("No Waivers this GW"),
+            )
+          ]
         ],
       ),
     );

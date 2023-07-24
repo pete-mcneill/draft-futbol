@@ -33,7 +33,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
     if (_formKey.currentState!.validate() && leagueSet) {
       final SharedPreferences _prefs = await SharedPreferences.getInstance();
       Map<String, dynamic>? leagueMap;
-      // _prefs.clear();
+      _prefs.clear();
       String? leagueIds;
       try {
         leagueIds = _prefs.getString('league_ids');
@@ -45,6 +45,9 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
         };
       }
       await _prefs.setString('league_ids', json.encode(leagueMap));
+      String activeLeague = leagueMap.keys.first;
+      ref.read(utilsProvider.notifier).updateActiveLeague(activeLeague);
+      ref.refresh(futureLiveDataProvider);
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const InitialiseHomeScreen()),
           (Route<dynamic> route) => false);

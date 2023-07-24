@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:draft_futbol/models/draft_subs.dart';
 import 'package:draft_futbol/ui/screens/initialise_home_screen.dart';
-import 'package:draft_futbol/ui/web/web_landing.dart';
 import 'package:draft_futbol/ui/widgets/loading.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -61,12 +60,12 @@ void main() async {
   }
 
   if (kIsWeb) {
-    runApp(ProviderScope(
-        child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: WebHome(),
-      // ProviderTest(),
-    )));
+    // runApp(ProviderScope(
+    //     child: MaterialApp(
+    //   debugShowCheckedModeBanner: false,
+    //   home: WebHome(),
+    //   // ProviderTest(),
+    // )));
   } else {
     runApp(const ProviderScope(
         child: MaterialApp(
