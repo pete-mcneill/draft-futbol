@@ -1,40 +1,40 @@
 {
   "project_info": {
-    "project_number": "379766591589",
-    "project_id": "baguley-draft-e9ad3",
-    "storage_bucket": "baguley-draft-e9ad3.appspot.com"
+    "project_number": "",
+    "project_id": "",
+    "storage_bucket": ""
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:379766591589:android:bb754f5fe4f3e727e7b68c",
+        "mobilesdk_app_id": "",
         "android_client_info": {
-          "package_name": "com.psjmcneill.draftfutbol"
+          "package_name": ""
         }
       },
       "oauth_client": [
         {
-          "client_id": "379766591589-crf9obi371v713g1tpbanc8gal13lfb2.apps.googleusercontent.com",
+          "client_id": "",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA4CVVqFXXJW5SCzqzxJoQ926paXtr38Ns"
+          "current_key": ""
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "379766591589-crf9obi371v713g1tpbanc8gal13lfb2.apps.googleusercontent.com",
+              "client_id": "",
               "client_type": 3
             },
             {
-              "client_id": "379766591589-k6n1s6osira86g0bnb21u7r3v2g2dma6.apps.googleusercontent.com",
+              "client_id": "",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.psjmcneill.draftfutbol"
+                "bundle_id": ""
               }
             }
           ]
