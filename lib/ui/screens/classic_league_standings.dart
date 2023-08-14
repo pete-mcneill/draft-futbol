@@ -2,20 +2,19 @@ import 'package:badges/badges.dart';
 import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/draft_player.dart';
 import 'package:draft_futbol/models/fixture.dart';
+import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/models/league_standing.dart';
 import 'package:draft_futbol/models/players/match.dart';
 import 'package:draft_futbol/models/players/stat.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/screens/pitch/classic_view/classic_pitch.dart';
-import 'package:draft_futbol/ui/widgets/adverts/adverts.dart';
+import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:badges/badges.dart' as badges;
-import '../../models/Gameweek.dart';
+import '../../models/draft_team.dart';
 import '../widgets/filter_ui.dart';
 
 class ClassicLeagueStandings extends ConsumerStatefulWidget {
@@ -33,11 +32,11 @@ class _ClassicLeagueStandingsState
   var leagueData;
   bool liveBps = false;
   int view = 1;
-  late String currentGameweek;
+  int? currentGameweek;
   List<LeagueStanding> staticStandings = [];
   List<LeagueStanding> liveStandings = [];
   List<LeagueStanding> liveBpsStandings = [];
-  String activeLeague = "";
+  int? activeLeague;
 
   @override
   void initState() {
@@ -55,11 +54,11 @@ class _ClassicLeagueStandingsState
     if (standing.rank == 1) {
       rowColor = Colors.green;
     }
-    return Container(
+    return SizedBox(
       height: 50,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: EdgeInsets.all(0),
+        margin: const EdgeInsets.all(0),
         color: rowColor,
         elevation: 10,
         child: GestureDetector(
@@ -67,7 +66,7 @@ class _ClassicLeagueStandingsState
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ClassicPitch(team: team!)));
+                    builder: (context) => ClassicPitch(team: team)));
           },
           child: Row(
             children: [
@@ -119,7 +118,8 @@ class _ClassicLeagueStandingsState
     if (standing.rank == 1) {
       rowColor = Colors.green;
     }
-    Map<int, DraftPlayer> players = ref.watch(draftPlayersProvider).players;
+    Map<int, DraftPlayer> players =
+        ref.watch(fplGwDataProvider.select((value) => value.players!));
     DraftTeam? team = teams[standing.teamId]!;
     int goals = 0;
     int assists = 0;
@@ -127,7 +127,7 @@ class _ClassicLeagueStandingsState
     for (int _id in team.squad!.keys) {
       if (team.squad![_id]! < 12) {
         DraftPlayer player = players[_id]!;
-        for (Match match in player.matches!) {
+        for (PlMatchStats match in player.matches!) {
           for (Stat stat in match.stats!) {
             if (stat.statName == "Goals scored") {
               goals += stat.value!;
@@ -198,14 +198,13 @@ class _ClassicLeagueStandingsState
     return Container(
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: EdgeInsets.all(0),
+        margin: const EdgeInsets.all(0),
         color: rowColor,
         elevation: 10,
         child: Column(
           children: [
-            Text("Remaining Players",
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const Text("Remaining Players",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -213,50 +212,59 @@ class _ClassicLeagueStandingsState
                     toAnimate: false,
                     shape: BadgeShape.square,
                     badgeColor:
-                        Theme.of(context).colorScheme.secondaryContainer!,
+                        Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
-                        Text("Live: ",
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.bold)),
+                        const Text("Live: ",
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black)),
                         Text(team.livePlayers.toString(),
-                            style: const TextStyle(fontSize: 12))
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black))
                       ],
                     )),
                 badges.Badge(
                     toAnimate: false,
                     shape: BadgeShape.square,
                     badgeColor:
-                        Theme.of(context).colorScheme.secondaryContainer!,
+                        Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
-                        Text("Starting XI: ",
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.bold)),
+                        const Text("Starting XI: ",
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black)),
                         Text(remainingSubsMatches,
-                            style: const TextStyle(fontSize: 12))
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black))
                       ],
                     )),
                 badges.Badge(
                     toAnimate: false,
                     shape: BadgeShape.square,
                     badgeColor:
-                        Theme.of(context).colorScheme.secondaryContainer!,
+                        Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
-                        Text("Subs: ",
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.bold)),
+                        const Text("Subs: ",
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black)),
                         Text(remainingSubsMatches,
-                            style: const TextStyle(fontSize: 12))
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.black))
                       ],
                     ))
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             )
           ],
@@ -281,73 +289,33 @@ class _ClassicLeagueStandingsState
   @override
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
-    Gameweek? gameweek = ref.watch(gameweekProvider);
-    activeLeague = ref.watch(utilsProvider).activeLeagueId!;
+    Gameweek? gameweek =
+        ref.watch(fplGwDataProvider.select((value) => value.gameweek));
+    activeLeague = ref.watch(utilsProvider).activeLeagueId;
     staticStandings =
-        ref.watch(classicStandingsProvider).staticStandings[activeLeague]!;
+        ref.watch(fplGwDataProvider).staticStandings![activeLeague]!;
     if (gameweek!.gameweekFinished) {
       liveStandings = staticStandings;
       liveBpsStandings = staticStandings;
     } else {
-      liveStandings =
-          ref.watch(classicStandingsProvider).liveStandings[activeLeague]!;
-      liveBpsStandings =
-          ref.watch(classicStandingsProvider).liveBpsStandings[activeLeague]!;
+      liveStandings = ref.watch(fplGwDataProvider
+          .select((value) => value.liveStandings))![activeLeague]!;
+      liveBpsStandings = ref.watch(fplGwDataProvider
+          .select((value) => value.bonusStanding))![activeLeague]!;
     }
 
-    teams = ref.watch(draftTeamsProvider).teams![activeLeague]!;
+    teams = ref.watch(
+        fplGwDataProvider.select((value) => value.teams))![activeLeague]!;
 
     currentGameweek = gameweek.currentGameweek;
-    String lastGw = (int.parse(currentGameweek) - 1).toString();
+    String lastGw = (currentGameweek! - 1).toString();
     liveBps = ref.watch(utilsProvider).liveBps!;
-
-    bool remainingPlayersView = ref.watch(
-        utilsProvider.select((connection) => connection.remainingPlayersView!));
-    bool iconsSummaryView = ref.watch(
-        utilsProvider.select((connection) => connection.iconSummaryView!));
 
     return SingleChildScrollView(
       child: Column(
         // mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          if (!ref.watch(purchasesProvider).noAdverts!)
-            SizedBox(
-              height: 120,
-              // color: Colors.deepOrange,
-              child: FutureBuilder<Widget>(
-                future: getBannerWidget(
-                    context: context,
-                    adSize: AdSize.banner,
-                    noAdverts: ref.watch(purchasesProvider).noAdverts!),
-                builder: (_, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(child: const CircularProgressIndicator());
-                  } else {
-                    return Column(
-                      children: [
-                        Center(
-                            child: ValueListenableBuilder<Box>(
-                          valueListenable: Hive.box('adverts')
-                              .listenable(keys: ['adCounter']),
-                          builder: (context, box, _) {
-                            int adRefresh = box.get('adCounter');
-                            adRefresh = 10 - adRefresh;
-                            return Text(
-                                "Video Advert will appear in $adRefresh refreshes",
-                                style: const TextStyle(fontSize: 12));
-                          },
-                        )),
-                        SizedBox(
-                          height: 100,
-                          width: MediaQuery.of(context).size.width,
-                          child: snapshot.data,
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-            ),
+          buyaCoffeebutton(context),
           if (!gameweek.gameweekFinished)
             ToggleSwitch(
               customWidths: const [120.0, 90.0, 120.0],
@@ -357,8 +325,7 @@ class _ClassicLeagueStandingsState
                 [Theme.of(context).buttonTheme.colorScheme!.secondary],
                 [Theme.of(context).buttonTheme.colorScheme!.secondary]
               ],
-              // activeFgColor:
-              // Theme.of(context).buttonTheme.colorScheme!.secondary,
+              activeFgColor: Colors.black,
               inactiveBgColor: Theme.of(context).cardColor,
               inactiveFgColor: Colors.white,
               borderColor: [Theme.of(context).dividerColor],
@@ -372,8 +339,8 @@ class _ClassicLeagueStandingsState
             FilterH2HMatches(options: getFilterOptions()),
           Container(
             color: Theme.of(context).cardColor,
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Expanded(
                   flex: 1,
                   child: Text(
@@ -413,7 +380,7 @@ class _ClassicLeagueStandingsState
             for (LeagueStanding standing in staticStandings) ...[
               getLeagueStanding(standing),
               if (!gameweek.gameweekFinished) remainingPlayers(standing),
-              SizedBox(
+              const SizedBox(
                 height: 5,
               ),
             ]
@@ -421,7 +388,7 @@ class _ClassicLeagueStandingsState
             for (LeagueStanding standing in liveStandings) ...[
               getLeagueStanding(standing),
               if (!gameweek.gameweekFinished) remainingPlayers(standing),
-              SizedBox(
+              const SizedBox(
                 height: 5,
               ),
             ]
@@ -429,7 +396,7 @@ class _ClassicLeagueStandingsState
             for (LeagueStanding standing in liveBpsStandings) ...[
               getLeagueStanding(standing),
               if (!gameweek.gameweekFinished) remainingPlayers(standing),
-              SizedBox(
+              const SizedBox(
                 height: 5,
               ),
             ]

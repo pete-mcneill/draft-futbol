@@ -5,6 +5,8 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../models/draft_team.dart';
+
 class PitchHeader extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
   Fixture fixture;
@@ -30,7 +32,12 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
   @override
   Widget build(BuildContext context) {
     bool liveBonus = ref.watch(utilsProvider).liveBps!;
-
+    DraftTeam homeTeam = ref
+        .watch(fplGwDataProvider)
+        .teams![widget.homeTeam.leagueId]![widget.homeTeam.id]!;
+    DraftTeam awayTeam = ref
+        .watch(fplGwDataProvider)
+        .teams![widget.awayTeam.leagueId]![widget.awayTeam.id]!;
     return AppBar(
       automaticallyImplyLeading: false,
       bottom: widget.subModeEnabled
@@ -46,7 +53,7 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
                       child: Column(
                     children: [
                       AutoSizeText(
-                        widget.homeTeam.teamName!,
+                        homeTeam.teamName!,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -55,11 +62,11 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
                         maxLines: 1,
                       ),
                       liveBonus
-                          ? Text(widget.homeTeam.bonusPoints.toString(),
+                          ? Text(homeTeam.bonusPoints.toString(),
                               style: const TextStyle(
                                 fontSize: 14,
                               ))
-                          : Text(widget.homeTeam.points.toString(),
+                          : Text(homeTeam.points.toString(),
                               style: const TextStyle(
                                 fontSize: 14,
                               ))
@@ -69,7 +76,7 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
                       child: Column(
                     children: [
                       AutoSizeText(
-                        widget.awayTeam.teamName!,
+                        awayTeam.teamName!,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -78,11 +85,11 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
                         maxLines: 1,
                       ),
                       liveBonus
-                          ? Text(widget.awayTeam.bonusPoints.toString(),
+                          ? Text(awayTeam.bonusPoints.toString(),
                               style: const TextStyle(
                                 fontSize: 14,
                               ))
-                          : Text(widget.awayTeam.points.toString(),
+                          : Text(awayTeam.points.toString(),
                               style: const TextStyle(
                                 fontSize: 14,
                               ))

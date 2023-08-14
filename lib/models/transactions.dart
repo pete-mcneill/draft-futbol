@@ -2,19 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TransactionsNotifier extends StateNotifier<Transactions> {
   TransactionsNotifier() : super(Transactions());
-  void addAllTransactions(var transactions, String leagueId) {
+  void addAllTransactions(var transactions, int leagueId) {
     state.transactions[leagueId] = {};
     for (var transaction in transactions) {
       Transaction _transaction = Transaction.fromJson(transaction);
       try {
-        if (state.transactions[leagueId]![transaction['event'].toString()] !=
-            null) {
-          state.transactions[leagueId]![transaction['event'].toString()]!
+        if (state.transactions[leagueId]![transaction['event']] != null) {
+          state.transactions[leagueId]![transaction['event']]!
               .add(_transaction);
         } else {
-          state.transactions[leagueId]![transaction['event'].toString()] = [
-            _transaction
-          ];
+          state.transactions[leagueId]![transaction['event']] = [_transaction];
         }
       } catch (e) {
         print(e);
@@ -22,18 +19,15 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
     }
   }
 
-  void addAllTrades(var trades, String leagueId) {
+  void addAllTrades(var trades, int leagueId) {
     state.trades[leagueId] = {};
     for (var transaction in trades) {
       Transaction _transaction = Transaction.fromJson(transaction);
       try {
-        if (state.trades[leagueId]![transaction['event'].toString()] != null) {
-          state.trades[leagueId]![transaction['event'].toString()]!
-              .add(_transaction);
+        if (state.trades[leagueId]![transaction['event']] != null) {
+          state.trades[leagueId]![transaction['event']]!.add(_transaction);
         } else {
-          state.trades[leagueId]![transaction['event'].toString()] = [
-            _transaction
-          ];
+          state.trades[leagueId]![transaction['event']] = [_transaction];
         }
       } catch (e) {
         print(e);
@@ -44,8 +38,8 @@ class TransactionsNotifier extends StateNotifier<Transactions> {
 
 class Transactions {
   Transactions() : super();
-  Map<String, Map<String, List<Transaction>>> transactions = {};
-  Map<String, Map<String, List<Transaction>>> trades = {};
+  Map<int, Map<int, List<Transaction>>> transactions = {};
+  Map<int, Map<int, List<Transaction>>> trades = {};
 }
 
 class Transaction {
@@ -62,7 +56,7 @@ class Transaction {
   final String playerInId;
   final String playerOutId;
   final String teamId;
-  final String gameweek;
+  final int gameweek;
   final String priority;
   final String result;
   final String type;
@@ -73,7 +67,7 @@ class Transaction {
         playerInId: transactionData['element_in'].toString(),
         playerOutId: transactionData['element_out'].toString(),
         teamId: transactionData['entry'].toString(),
-        gameweek: transactionData['event'].toString(),
+        gameweek: transactionData['event'],
         priority: transactionData['index'].toString(),
         result: transactionData['result'],
         type: transactionData['kind']);

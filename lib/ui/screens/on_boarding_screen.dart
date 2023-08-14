@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/services/api_service.dart';
 import 'package:draft_futbol/ui/screens/initialise_home_screen.dart';
+import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +24,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
   final introKey = GlobalKey<IntroductionScreenState>();
 
   late String leagueName;
-  late String leagueId;
+  late int leagueId;
   late String leagueType;
   bool leagueSet = false;
   bool leagueError = false;
@@ -38,13 +39,16 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
       try {
         leagueIds = _prefs.getString('league_ids');
         leagueMap = json.decode(leagueIds!);
-        leagueMap![leagueId] = {"name": leagueName, "season": "23/24"};
+        leagueMap![leagueId.toString()] = {
+          "name": leagueName,
+          "season": "23/24"
+        };
       } catch (e) {
         leagueMap = {
-          leagueId: {"name": leagueName, "season": "23/24"}
+          leagueId.toString(): {"name": leagueName, "season": "23/24"}
         };
       }
-      await _prefs.setString('league_ids', json.encode(leagueMap));
+      await _prefs.setString('league_ids', jsonEncode(leagueMap));
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const InitialiseHomeScreen()),
           (Route<dynamic> route) => false);
@@ -53,21 +57,17 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.read(purchasesProvider);
-    String price = "2.99";
-    // String price = ref.watch(purchasesProvider).subscriptionPrice!;
-    bool noAdverts = ref.watch(purchasesProvider).noAdverts!;
     Api _api = Api();
     return Container(
       child: SafeArea(
         child: IntroductionScreen(
           key: introKey,
           showSkipButton: true,
-          skip: Text("Know your league ID?"),
+          skip: const Text("Know your league ID?"),
           pages: [
             PageViewModel(
               title: "Welcome to Draft Futbol",
-              image: Center(
+              image: const Center(
                   child: Image(
                       image: AssetImage('assets/images/app_icon.png'),
                       height: 200,
@@ -103,8 +103,8 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
             ),
             PageViewModel(
               title: "Note from the developer!",
-              decoration: PageDecoration(
-                  titleTextStyle: const TextStyle(fontWeight: FontWeight.bold)),
+              decoration: const PageDecoration(
+                  titleTextStyle: TextStyle(fontWeight: FontWeight.bold)),
               bodyWidget: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -117,18 +117,11 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                       children: <TextSpan>[
                         const TextSpan(
                           text:
-                              "\n To help keep this app available on the app stores and maintain it, there are a number of adverts throughout the app",
+                              "\n I develop this app in my spare time, primarily for my own draft league but wanted to share it with the community",
                         ),
                         const TextSpan(
                           text:
-                              "\n \n Every 10 times the app is started or data refreshed from FPL, there will be a video advert",
-                        ),
-                        const TextSpan(
-                          text:
-                              "\n \n All adverts can be removed by purchasing the annual renewing subscription to the app.",
-                        ),
-                        TextSpan(
-                          text: "\n Price:" + price,
+                              "\n \n If you like or get good use of the app, any donations to keep it on the app store would be appreciated!",
                         ),
                         const TextSpan(
                           text: '\n \n Thanks for downloading!',
@@ -136,13 +129,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                       ],
                     ),
                   ),
-                  ElevatedButton(
-                      onPressed: () {
-                        ref.read(purchasesProvider.notifier).makePurchases();
-                      },
-                      child: !noAdverts
-                          ? const Text("Remove Ads")
-                          : const Text("Thanks for supporting the app")),
+                  buyaCoffeebutton(context),
                   const SizedBox(
                     height: 20,
                   ),
@@ -157,7 +144,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
             PageViewModel(
               title: "League Setup",
               decoration: PageDecoration(
-                  pageColor: Theme.of(context).backgroundColor,
+                  pageColor: Theme.of(context).colorScheme.background,
                   titleTextStyle: TextStyle(
                       color: Theme.of(context).textTheme.bodyMedium!.color,
                       fontWeight: FontWeight.bold)),
@@ -198,7 +185,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
             PageViewModel(
               title: "League Setup",
               decoration: PageDecoration(
-                  pageColor: Theme.of(context).backgroundColor,
+                  pageColor: Theme.of(context).colorScheme.background,
                   titleTextStyle: TextStyle(
                       color: Theme.of(context).textTheme.bodyMedium!.color,
                       fontWeight: FontWeight.bold)),
@@ -248,7 +235,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
             PageViewModel(
               title: "League Setup",
               decoration: PageDecoration(
-                  pageColor: Theme.of(context).backgroundColor,
+                  pageColor: Theme.of(context).colorScheme.background,
                   titleTextStyle: TextStyle(
                       color: Theme.of(context).textTheme.bodyMedium!.color,
                       fontWeight: FontWeight.bold)),
@@ -303,8 +290,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _api
-                            .checkLeagueExists(
-                                textFieldController.text.toString())
+                            .checkLeagueExists(textFieldController.text)
                             .then((value) => {
                                   if (value['valid'])
                                     {
@@ -316,7 +302,7 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                                         leagueName = leagueName;
                                         leagueError = false;
                                         leagueId =
-                                            textFieldController.text.toString();
+                                            int.parse(textFieldController.text);
                                         leagueType = leagueType;
                                       }),
                                     }

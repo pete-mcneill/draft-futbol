@@ -1,9 +1,8 @@
-import 'package:draft_futbol/baguley-features/widgets/draft_drawer.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/screens/draft_fixtures_results.dart';
-import 'package:draft_futbol/ui/screens/settings_screen.dart';
 import 'package:draft_futbol/ui/screens/squads_screen.dart';
 import 'package:draft_futbol/ui/screens/transactions.dart';
+import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:draft_futbol/ui/widgets/waivers/player_trade.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +22,7 @@ class More extends ConsumerStatefulWidget {
 class _MoreState extends ConsumerState<More> {
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic>? leagueIds = ref.read(utilsProvider).leagueIds;
+    Map<int, dynamic>? leagueIds = ref.read(utilsProvider).leagueIds;
     bool baguleyLeague = false;
     List<String> baguleyIds = ["145", "687"];
     for (var leagueInfo in leagueIds!.entries) {
@@ -35,18 +34,20 @@ class _MoreState extends ConsumerState<More> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: const Text("Draft League",
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text("Draft League",
                 textAlign: TextAlign.left,
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SquadsScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SquadsScreen()));
               },
               child: Card(
                   shape: RoundedRectangleBorder(
@@ -65,10 +66,10 @@ class _MoreState extends ConsumerState<More> {
                   )),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: GestureDetector(
               onTap: () {
@@ -94,17 +95,17 @@ class _MoreState extends ConsumerState<More> {
                   )),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: GestureDetector(
               onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => new Transactions()));
+                        builder: (context) => const Transactions()));
               },
               child: Card(
                   shape: RoundedRectangleBorder(
@@ -124,15 +125,15 @@ class _MoreState extends ConsumerState<More> {
                   )),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => new Trade()));
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Trade()));
               },
               child: Card(
                   shape: RoundedRectangleBorder(
@@ -151,24 +152,24 @@ class _MoreState extends ConsumerState<More> {
                   )),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           if (baguleyLeague) ...[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const Text("Baguley",
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text("Baguley",
                   textAlign: TextAlign.left,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
             ),
-            Container(
+            SizedBox(
               height: 50,
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => new BaguleyHome()));
+                          builder: (context) => const BaguleyHome()));
                 },
                 child: Card(
                     shape: RoundedRectangleBorder(
@@ -187,13 +188,13 @@ class _MoreState extends ConsumerState<More> {
                     )),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 5,
             ),
           ],
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: const Text("Issues or Queries",
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text("Issues or Queries",
                 textAlign: TextAlign.left,
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ),
@@ -213,7 +214,7 @@ class _MoreState extends ConsumerState<More> {
                         launchUrl(Uri.parse(
                             "https://github.com/PSJMcNeill/draft-futbol/issues"));
                       }),
-                  Text("Github",
+                  const Text("Github",
                       textAlign: TextAlign.center,
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
@@ -242,7 +243,7 @@ class _MoreState extends ConsumerState<More> {
                         }
                         // launchUrl(params);
                       }),
-                  Text("Email",
+                  const Text("Email",
                       textAlign: TextAlign.center,
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
@@ -250,6 +251,7 @@ class _MoreState extends ConsumerState<More> {
               ),
             ],
           ),
+          buyaCoffeebutton(context)
         ],
       ),
     );

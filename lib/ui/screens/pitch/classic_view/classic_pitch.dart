@@ -2,11 +2,11 @@ import 'package:draft_futbol/ui/screens/pitch/classic_view/classic_pitch_header.
 import 'package:draft_futbol/ui/screens/pitch/line_painter.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_background.dart';
 import 'package:draft_futbol/ui/screens/pitch/squad.dart';
-import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/pitch_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../models/DraftTeam.dart';
+import '../../../../models/draft_team.dart';
 
 class ClassicPitch extends StatefulWidget {
   DraftTeam team;
@@ -24,7 +24,7 @@ class _ClassicPitchState extends State<ClassicPitch> {
     double subsLength = (pitchHeight - (pitchHeight / 10) * 7);
     double lineLength = pitchHeight - subsLength;
     return Scaffold(
-      appBar: PitchAppBar(),
+      appBar: const PitchAppBar(),
       body: Container(
         child: DefaultTabController(
           animationDuration: Duration.zero,

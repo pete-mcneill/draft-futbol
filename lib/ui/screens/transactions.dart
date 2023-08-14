@@ -1,17 +1,13 @@
+import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/custom_error.dart';
-import 'package:draft_futbol/ui/widgets/player_pool/player_pool.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import '../../models/DraftTeam.dart';
-import '../../models/Gameweek.dart';
 import '../../models/draft_player.dart';
-import '../../models/fixture.dart';
+import '../../models/draft_team.dart';
 import '../../models/transactions.dart';
 import '../widgets/loading.dart';
 import '../widgets/waivers/player_waiver.dart';
@@ -30,11 +26,11 @@ class _TransactionsState extends ConsumerState<Transactions> {
   List<DropdownMenuItem<String>> menuOptions = [];
   List<DropdownMenuItem<String>> gwOptions = [];
   List<Object?> _draftTeams = [];
-  List<Object?> _waiverResults = [];
-  Map<String, dynamic>? leagueIds;
+  final List<Object?> _waiverResults = [];
+  Map<int, dynamic>? leagueIds;
   bool waiversFiltered = false;
-  String? currentGW;
-  String? dropdownValue;
+  int? currentGW;
+  int? dropdownValue;
 
   @override
   void initState() {
@@ -47,7 +43,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
   }
 
   void setPossibleGameweeks() {
-    for (var i = 1; i <= int.parse(currentGW!); i++) {
+    for (var i = 1; i <= currentGW!; i++) {
       gwOptions.add(DropdownMenuItem(
           value: i.toString(),
           child: Center(
@@ -71,11 +67,12 @@ class _TransactionsState extends ConsumerState<Transactions> {
   @override
   Widget build(BuildContext context) {
     leagueIds = ref.watch(utilsProvider).leagueIds!;
-    currentGW = ref.watch(gameweekProvider)!.currentGameweek;
+    currentGW = ref.watch(
+        fplGwDataProvider.select((value) => value.gameweek!.currentGameweek));
     setPossibleGameweeks();
     leagueIds!.forEach((key, value) {
       menuOptions.add(DropdownMenuItem(
-          value: key,
+          value: key.toString(),
           child: Center(
             child: Text(
               value['name'],
@@ -90,31 +87,32 @@ class _TransactionsState extends ConsumerState<Transactions> {
     dropdownValue = ref.watch(
         utilsProvider.select((connection) => connection.activeLeagueId!));
     Map<int, DraftTeam> teams =
-        ref.read(draftTeamsProvider).teams![dropdownValue]!;
+        ref.read(fplGwDataProvider).teams![dropdownValue]!;
 
     final _draftTeamFilters = teams.entries
         .map((key) => MultiSelectItem(key.key, key.value.teamName!))
         .toList();
 
-    AsyncValue config = ref.watch(allTransactions);
+    AsyncValue config = ref.refresh(allTransactions);
 
     try {
       return config.when(
           loading: () => const Loading(),
           error: (err, stack) => Text('Error: $err'),
           data: (config) {
-            Map<String, Map<String, List<Transaction>>> transactions =
+            Map<int, Map<int, List<Transaction>>> transactions =
                 ref.read(transactionsProvider).transactions;
             var activeLeague = ref.watch(utilsProvider
                 .select((connection) => connection.activeLeagueId!));
 
             Map<int, DraftPlayer> players =
-                ref.read(draftPlayersProvider).players;
-            Gameweek gameweek = ref.watch(gameweekProvider)!;
-            String currentGameweek = gameweek.waiversProcessed
-                ? (int.parse(gameweek.currentGameweek) + 1).toString()
-                : gameweek.currentGameweek;
-
+                ref.read(fplGwDataProvider).players!;
+            Gameweek gameweek =
+                ref.watch(fplGwDataProvider.select((value) => value.gameweek!));
+            // int currentGameweek = (gameweek.waiversProcessed
+            //     ? (int.parse(gameweek.currentGameweek) + 1).toString()
+            //     : gameweek.currentGameweek) as int;
+            int currentGameweek = 38;
             if (!waiversFiltered) {
               _draftTeams = teams.keys.toList();
               visibleWaivers = [];
@@ -203,9 +201,9 @@ class _TransactionsState extends ConsumerState<Transactions> {
     List<MultiSelectItem<int>> _draftTeamFilters,
     Map<int, DraftPlayer> players,
     Map<int, DraftTeam> teams,
-    Map<String, Map<String, List<Transaction>>> transactions,
-    String activeLeague,
-    String currentGameweek,
+    Map<int, Map<int, List<Transaction>>> transactions,
+    int activeLeague,
+    int currentGameweek,
   ) {
     return SingleChildScrollView(
       child: Column(
@@ -213,9 +211,9 @@ class _TransactionsState extends ConsumerState<Transactions> {
           const SizedBox(
             height: 15,
           ),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Expanded(
                 child: Center(
                     child: Text("Player In",
@@ -269,7 +267,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
               if (_transaction.type == "f") {
                 return Column(
                   children: [
-                    Divider(
+                    const Divider(
                       thickness: 2,
                     ),
                     Waiver(
@@ -281,7 +279,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
                   ],
                 );
               }
-              return SizedBox.shrink();
+              return const SizedBox.shrink();
             },
           ),
         ],
@@ -291,9 +289,9 @@ class _TransactionsState extends ConsumerState<Transactions> {
 
   SingleChildScrollView waiversTab(
       List<MultiSelectItem<int>> _draftTeamFilters,
-      Map<String, Map<String, List<Transaction>>> transactions,
-      String activeLeague,
-      String currentGameweek,
+      Map<int, Map<int, List<Transaction>>> transactions,
+      int activeLeague,
+      int currentGameweek,
       Map<int, DraftTeam> teams,
       Map<int, DraftPlayer> players) {
     return SingleChildScrollView(
@@ -302,9 +300,9 @@ class _TransactionsState extends ConsumerState<Transactions> {
           const SizedBox(
             height: 15,
           ),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Expanded(
                 flex: 2,
                 child: Center(
@@ -427,7 +425,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
 
               return Column(
                 children: [
-                  Divider(
+                  const Divider(
                     thickness: 2,
                   ),
                   Waiver(

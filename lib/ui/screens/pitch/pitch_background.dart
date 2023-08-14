@@ -1,4 +1,3 @@
-import 'package:draft_futbol/ui/screens/pitch/line_painter.dart';
 import 'package:flutter/material.dart';
 
 class PitchBackground extends StatelessWidget {
@@ -15,37 +14,37 @@ class PitchBackground extends StatelessWidget {
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF05AE56),
+          color: const Color(0xFF05AE56),
         ),
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF00BA5C),
+          color: const Color(0xFF00BA5C),
         ),
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF05AE56),
+          color: const Color(0xFF05AE56),
         ),
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF00BA5C),
+          color: const Color(0xFF00BA5C),
         ),
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF05AE56),
+          color: const Color(0xFF05AE56),
         ),
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF00BA5C),
+          color: const Color(0xFF00BA5C),
         ),
         Container(
           width: MediaQuery.of(context).size.width,
           height: pitchHeight / 10,
-          color: Color(0xFF05AE56),
+          color: const Color(0xFF05AE56),
         ),
         Container(
           width: MediaQuery.of(context).size.width,

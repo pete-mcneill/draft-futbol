@@ -45,15 +45,15 @@ class _DraftBottomBarState extends State<DraftBottomBar> {
   ];
 
   List<NavigationDestination> classicOptions = [
-    NavigationDestination(
+    const NavigationDestination(
       icon: Icon(Icons.table_rows),
       label: 'Standings',
     ),
-    NavigationDestination(
+    const NavigationDestination(
       icon: Icon(Icons.sports),
       label: 'PL Matches',
     ),
-    NavigationDestination(
+    const NavigationDestination(
       icon: Icon(Icons.more_horiz),
       label: 'More',
     ),

@@ -11,7 +11,7 @@ class Loading extends StatelessWidget {
         key: _scaffoldKey,
         body: SafeArea(
             child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.headline2!,
+          style: Theme.of(context).textTheme.displayMedium!,
           textAlign: TextAlign.center,
           child: Container(
               margin: const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),

@@ -1,16 +1,15 @@
-
 import 'package:hive/hive.dart';
 
-part 'draft_subs.g.dart';
+part 'sub.g.dart';
 
-@HiveType(typeId: 1)
-class DraftSub {
+@HiveType(typeId: 2)
+class Sub {
   @HiveField(0)
-  String gameweek;
-  
+  int gameweek;
+
   @HiveField(1)
   int subOutId;
-  
+
   @HiveField(2)
   int subInId;
 
@@ -23,6 +22,6 @@ class DraftSub {
   @HiveField(5)
   int teamId;
 
-
-  DraftSub(this.gameweek, this.subOutId, this.subInId, this.subOutPosition, this.subInPosition, this.teamId);
+  Sub(this.gameweek, this.subOutId, this.subInId, this.subOutPosition,
+      this.subInPosition, this.teamId);
 }

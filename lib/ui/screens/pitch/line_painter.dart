@@ -41,17 +41,17 @@ class LinePainter extends CustomPainter {
     // Top Left Corner
     path.moveTo(size.width * 0.05, 0.0);
     path.arcToPoint(Offset(0.0, pitchLength! * 0.05),
-        radius: Radius.circular(30));
+        radius: const Radius.circular(30));
 
     // Top Right Corner
     path.moveTo(size.width * 0.95, 0.0);
     path.arcToPoint(Offset(size.width, pitchLength! * 0.05),
-        radius: Radius.circular(30), clockwise: false);
+        radius: const Radius.circular(30), clockwise: false);
 
     // Centre Circle
     path.moveTo(size.width * 0.3, pitchLength!);
     path.arcToPoint(Offset(size.width * 0.7, pitchLength!),
-        radius: Radius.circular(20));
+        radius: const Radius.circular(20));
 
     canvas.drawPath(path, paint);
   }

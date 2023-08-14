@@ -5,12 +5,9 @@ import 'package:draft_futbol/baguley-features/models/baguley_draft_player.dart';
 import 'package:draft_futbol/baguley-features/models/baguley_draft_team.dart';
 import 'package:draft_futbol/baguley-features/models/fixture.dart';
 import 'package:draft_futbol/baguley-features/screen/pitch/baguley_pitch.dart';
-import 'package:draft_futbol/models/DraftTeam.dart';
-import 'package:draft_futbol/models/draft_player.dart';
 import 'package:flutter/material.dart';
 import 'package:draft_futbol/models/players/match.dart';
 import '../../ui/widgets/app_bar/draft_app_bar.dart';
-import '../widgets/season_overview.dart';
 
 class BaguleyResults extends StatefulWidget {
   String seasonId;
@@ -29,17 +26,17 @@ class _BaguleyResultsState extends State<BaguleyResults> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
   }
 
-  Future<Map<String, dynamic>?> getTeamUuid(String fpl_id) async {
+  Future<Map<String, dynamic>?> getTeamUuid(String fplId) async {
     try {
       final teamIds = await FirebaseFirestore.instance
           .collection("draft_teams")
-          .where("uuid", isEqualTo: fpl_id)
+          .where("uuid", isEqualTo: fplId)
           .get();
       return teamIds.docs[0].data();
     } catch (error) {
       final teamIds = await FirebaseFirestore.instance
           .collectionGroup("team_ids")
-          .where("fpl_id", isEqualTo: fpl_id)
+          .where("fpl_id", isEqualTo: fplId)
           .get();
       String? homeTeamDoc;
       for (var doc in teamIds.docs) {
@@ -79,7 +76,7 @@ class _BaguleyResultsState extends State<BaguleyResults> {
           builder:
               (BuildContext context, AsyncSnapshot<List<Object?>> snapshot) {
             if (snapshot.hasError) {
-              return Text("Error");
+              return const Text("Error");
             }
 
             if (snapshot.hasData) {
@@ -88,7 +85,7 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                       (e) => BaguleyFixture.fromJson(e as Map<String, dynamic>))
                   .toList();
               var newMap =
-                  groupBy(results, (BaguleyFixture obj) => obj!.gameweek!);
+                  groupBy(results, (BaguleyFixture obj) => obj.gameweek!);
               try {
                 return Scaffold(
                     body: Column(
@@ -101,15 +98,15 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                             print(newMap.length);
                             String key = (newMap.length - index).toString();
                             List<BaguleyFixture> _fixtures = newMap[key]!;
-                            String gameweek = _fixtures[0].gameweek!;
+                            int gameweek = _fixtures[0].gameweek!;
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
-                                Text("Gameweek " + gameweek),
-                                Divider(
+                                Text("Gameweek " + gameweek.toString()),
+                                const Divider(
                                   thickness: 2,
                                 ),
                                 ListView.separated(
@@ -137,8 +134,8 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                                             List<BaguleyDraftPlayer> awaySquad =
                                                 await getSquad(
                                                     awayUuid!, gameweek);
-                                            if (homeSquad.length == 0 &&
-                                                awaySquad.length == 0) {
+                                            if (homeSquad.isEmpty &&
+                                                awaySquad.isEmpty) {
                                               throw Error();
                                             }
                                             BaguleyDraftTeam homeTeam =
@@ -157,7 +154,7 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                                             BaguleyDraftTeam awayTeam =
                                                 BaguleyDraftTeam.fromJson({
                                               "entry_id":
-                                                  int.parse(awayUuid!['uuid']),
+                                                  int.parse(awayUuid['uuid']),
                                               "player_first_name":
                                                   awayUuid['first_name'],
                                               "player_last_name":
@@ -171,13 +168,13 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (context) =>
-                                                        new Baguleypitch(
+                                                        Baguleypitch(
                                                           homeTeam: homeTeam,
                                                           awayTeam: awayTeam,
                                                         )));
                                           } catch (error) {
                                             ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
+                                                .showSnackBar(const SnackBar(
                                                     content: Text(
                                                         "Squad data not availble for this fixture")));
                                           }
@@ -222,12 +219,12 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                                                       ),
                                                     ],
                                                   )),
-                                              Expanded(
+                                              const Expanded(
                                                 child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
                                                             .center,
-                                                    children: const <Widget>[
+                                                    children: <Widget>[
                                                       Expanded(
                                                           child:
                                                               VerticalDivider(
@@ -281,14 +278,14 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                                       );
                                     } catch (error) {
                                       print(error);
-                                      return ListTile(
+                                      return const ListTile(
                                         title: Text("Error"),
                                       );
                                     }
                                   },
                                   separatorBuilder:
                                       (BuildContext context, int index) {
-                                    return Divider(
+                                    return const Divider(
                                       thickness: 2,
                                     );
                                   },
@@ -300,29 +297,29 @@ class _BaguleyResultsState extends State<BaguleyResults> {
                   ],
                 ));
               } catch (error) {
-                return Text("Error");
+                return const Text("Error");
               }
             }
 
             if (snapshot.connectionState == ConnectionState.done) {
               print("Hello");
-              return Text("Hello");
+              return const Text("Hello");
             }
 
-            return Text("loading");
+            return const Text("loading");
           },
         ));
   }
 
   Future<List<BaguleyDraftPlayer>> getSquad(
-      Map<String, dynamic> uuid, String gameweek) async {
+      Map<String, dynamic> uuid, int gameweek) async {
     var squadTest = await FirebaseFirestore.instance
         .collection('squads')
         .doc(uuid['uuid'])
         .collection("seasons")
         .doc(widget.seasonId)
         .collection("gameweeks")
-        .doc(gameweek)
+        .doc(gameweek.toString())
         .collection("players")
         .get();
     final allData = squadTest.docs.map((doc) => doc.data()).toList();
@@ -343,12 +340,12 @@ class _BaguleyResultsState extends State<BaguleyResults> {
         "positionId": player["position"]
       };
       BaguleyDraftPlayer _player = BaguleyDraftPlayer.fromJson(json);
-      List<Match> _matches = [];
+      List<PlMatchStats> _matches = [];
       for (var match in matches.docs) {
         var requiredPath =
             'squads/${uuid['uuid']}/seasons/${widget.seasonId}/gameweeks/$gameweek/players/${_player.playerId}/matches';
         if (match.reference.path.contains(requiredPath)) {
-          Match _match = Match.fromFirestoreData(match.data());
+          PlMatchStats _match = PlMatchStats.fromFirestoreData(match.data());
           _matches.add(_match);
         }
       }

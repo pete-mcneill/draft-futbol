@@ -2,11 +2,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/models/draft_player.dart';
 import 'package:draft_futbol/models/pl_match.dart';
 import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/ui/widgets/adverts/adverts.dart';
+import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive_flutter/adapters.dart';
 
 import '../../models/players/bps.dart';
 
@@ -125,7 +123,7 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
               children: [
                 Text(
                   stats['name'],
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 )
               ],
             ),
@@ -136,14 +134,14 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
                   for (var stats in homeStats)
                     if (stats['value'] > 1)
                       Text("${stats['playerName']}(${stats['value']})",
-                          style: TextStyle(fontWeight: FontWeight.w300))
+                          style: const TextStyle(fontWeight: FontWeight.w300))
                     else
                       Text(stats['playerName'],
-                          style: TextStyle(fontWeight: FontWeight.w300))
+                          style: const TextStyle(fontWeight: FontWeight.w300))
                 ]),
-                Column(
+                const Column(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: const <Widget>[
+                    children: <Widget>[
                       VerticalDivider(
                         thickness: 1,
                       ),
@@ -156,13 +154,13 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
                     if (stats['value'] > 1)
                       Text(
                         "${stats['playerName']}(${stats['value']})",
-                        style: TextStyle(fontWeight: FontWeight.w300),
+                        style: const TextStyle(fontWeight: FontWeight.w300),
                         textAlign: TextAlign.center,
                       )
                     else
                       Text(
                         stats['playerName'],
-                        style: TextStyle(fontWeight: FontWeight.w300),
+                        style: const TextStyle(fontWeight: FontWeight.w300),
                         textAlign: TextAlign.center,
                       )
                 ]),
@@ -178,7 +176,7 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
   createMatchWidget(PlMatch match) {
     return Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 8),
         elevation: 10,
         child: Column(children: [
           Row(
@@ -187,7 +185,8 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
           ),
           ...getBonusPoints(match.bpsPlayers, match),
           ExpansionTile(
-              title: Container(child: Center(child: Text("Detailed Stats"))),
+              title:
+                  Container(child: const Center(child: Text("Detailed Stats"))),
               children: [...getStats(match)]),
         ]));
   }
@@ -206,14 +205,14 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
         }
       }
       return [
-        Text("Offical Bonus Points",
+        const Text("Offical Bonus Points",
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold)),
         Wrap(children: [
           Text(
             bonusPoints.join(" "),
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.w300),
+            style: const TextStyle(fontWeight: FontWeight.w300),
           ),
         ]),
       ];
@@ -232,13 +231,13 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
         _bpsPlayers.add(_player.playerName! + ("(1)"));
       }
       return [
-        Text("Live Bonus Points",
+        const Text("Live Bonus Points",
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold)),
         Wrap(children: [
           Text(_bpsPlayers.join(" "),
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w300)),
+              style: const TextStyle(fontWeight: FontWeight.w300)),
         ]),
       ];
     }
@@ -261,8 +260,8 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
         flex: 1,
         child: Column(
           children: [
-            Image.network(
-                "https://resources.premierleague.com/premierleague/badges/70/t${match.homeCode}.png",
+            Image.asset(
+                'assets/images/logos/' + match.homeCode.toString() + '.png',
                 height: 40,
                 width: 40),
             Text(match.homeShortName!)
@@ -310,7 +309,7 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
                         //borderRadius: new BorderRadius.circular(30.0),
                         color: Colors.red,
                       )),
-                  Text(
+                  const Text(
                     "Live",
                     style: TextStyle(color: Colors.red),
                   )
@@ -350,8 +349,8 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.network(
-                  "https://resources.premierleague.com/premierleague/badges/70/t${match.awayCode}.png",
+              Image.asset(
+                  'assets/images/logos/' + match.awayCode.toString() + '.png',
                   height: 40,
                   width: 40),
               Text(match.awayShortName!)
@@ -363,7 +362,7 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
   getTeamSummaryStat(var stats, String statName, String homeOrAway) {
     return [
       Text(statName,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           )),
       for (var stat in stats[homeOrAway]!)
@@ -374,11 +373,11 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
   getCardStats(int elementId, int value) {
     DraftPlayer player = players[elementId]!;
     if (value > 1) {
-      return Text("${player.playerName}(${value})",
-          style: TextStyle(fontWeight: FontWeight.w300));
+      return Text("${player.playerName}($value)",
+          style: const TextStyle(fontWeight: FontWeight.w300));
     } else {
       return Text("${player.playerName}",
-          style: TextStyle(fontWeight: FontWeight.w300));
+          style: const TextStyle(fontWeight: FontWeight.w300));
     }
   }
 
@@ -386,51 +385,14 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
   Widget build(BuildContext context) {
     // elementNames = Provider.of<StaticDataProvider>(context, listen: true)
     //     .staticData!['element_stats'];
-    players = ref.watch(draftPlayersProvider).players;
-    Map<String, PlMatch> matches = ref.watch(plMatchesProvider).plMatches!;
+    players = ref.watch(fplGwDataProvider.select((value) => value.players!));
+    Map<int, PlMatch> matches =
+        ref.watch(fplGwDataProvider.select((value) => value.plMatches!));
     return SingleChildScrollView(
       child: Column(
         children: [
-          if (!ref.watch(purchasesProvider).noAdverts!)
-            SizedBox(
-              height: 120,
-              // color: Colors.deepOrange,
-              child: FutureBuilder<Widget>(
-                future: getBannerWidget(
-                    context: context,
-                    adSize: AdSize.largeBanner,
-                    noAdverts: ref.watch(purchasesProvider).noAdverts!),
-                builder: (_, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const CircularProgressIndicator();
-                  } else {
-                    return Column(
-                      children: [
-                        Center(
-                            child: ValueListenableBuilder<Box>(
-                          valueListenable: Hive.box('adverts')
-                              .listenable(keys: ['adCounter']),
-                          builder: (context, box, _) {
-                            int adRefresh = box.get('adCounter');
-                            adRefresh = 10 - adRefresh;
-                            return Text(
-                                "Video Advert will appear in $adRefresh refreshes",
-                                style: const TextStyle(fontSize: 12));
-                          },
-                        )),
-                        SizedBox(
-                          height: 100,
-                          width: MediaQuery.of(context).size.width,
-                          child: snapshot.data,
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-            ),
-          for (String matchId in matches.keys)
-            createMatchWidget(matches[matchId]!)
+          buyaCoffeebutton(context),
+          for (int matchId in matches.keys) createMatchWidget(matches[matchId]!)
           // createPlMatchWidget(matches[matchId]!)
         ],
       ),

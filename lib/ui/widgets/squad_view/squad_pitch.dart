@@ -1,21 +1,10 @@
-import 'package:draft_futbol/baguley-features/widgets/reset_subs.dart';
-import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/draft_player.dart';
 import 'package:draft_futbol/models/pl_match.dart';
-import 'package:draft_futbol/models/players/match.dart';
-import 'package:draft_futbol/models/players/stat.dart';
 import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/services/subs_service.dart';
-import 'package:draft_futbol/ui/screens/pitch/player.dart';
 import 'package:draft_futbol/ui/screens/pitch/player_popup.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
-
-import '../../../models/Gameweek.dart';
-import '../../../models/draft_subs.dart';
-import '../../../models/fixture.dart';
 
 class SquadPitch extends ConsumerStatefulWidget {
   List<DraftPlayer> squad;
@@ -53,7 +42,8 @@ class _SquadPitchState extends ConsumerState<SquadPitch> {
 
   @override
   Widget build(BuildContext context) {
-    Map<int, DraftPlayer>? _players = ref.watch(draftPlayersProvider).players;
+    Map<int, DraftPlayer>? _players =
+        ref.read(fplGwDataProvider.select((value) => value.players));
     Map<String, List<DraftPlayer>> _squad = {
       "GK": [],
       "DEF": [],

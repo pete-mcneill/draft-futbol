@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class UtilitiesProvider extends StateNotifier<Utilities> {
   UtilitiesProvider() : super(Utilities());
 
-  void setLeagueIds(Map<String, dynamic> leagueIds) {
+  void setLeagueIds(Map<int, dynamic> leagueIds) {
     state = state.copyWith(leagueIds: leagueIds);
   }
 
@@ -20,19 +20,14 @@ class UtilitiesProvider extends StateNotifier<Utilities> {
     state = state.copyWith(showBpsButton: value);
   }
 
-  void updateActiveLeague(String value) {
+  void updateActiveLeague(int value) {
     state = state.copyWith(activeLeagueId: value);
   }
 
   void setDefaultActiveLeague() {
-    for (String key in state.leagueIds!.keys) {
-      if (state.activeLeagueId!.isEmpty) {
-        state = state.copyWith(activeLeagueId: key);
-        break;
-      }
-    }
-    if (state.leagueIds!.isEmpty) {
-      state = state.copyWith(activeLeagueId: "");
+    for (int key in state.leagueIds!.keys) {
+      state = state.copyWith(activeLeagueId: key);
+      break;
     }
   }
 
@@ -52,11 +47,11 @@ class UtilitiesProvider extends StateNotifier<Utilities> {
     state = state.copyWith(iconSummaryView: value);
   }
 
-  void setSubModeEnabled(bool value){
+  void setSubModeEnabled(bool value) {
     state = state.copyWith(subModeEnabled: value);
   }
 
-    void setSubsReset(bool value){
+  void setSubsReset(bool value) {
     state = state.copyWith(subsReset: value);
   }
 }
@@ -64,8 +59,8 @@ class UtilitiesProvider extends StateNotifier<Utilities> {
 class Utilities {
   bool? iconSummaryView = false;
   bool? remainingPlayersView = false;
-  Map<String, dynamic>? leagueIds = {};
-  String? activeLeagueId;
+  Map<int, dynamic>? leagueIds = {};
+  int? activeLeagueId;
   bool? noAdverts = false;
   bool? liveBps = false;
   bool? showBpsButton = true;
@@ -74,7 +69,7 @@ class Utilities {
   bool? subModeEnabled = false;
   bool? subsReset = false;
   Utilities(
-      {this.activeLeagueId = "",
+      {this.activeLeagueId,
       this.noAdverts = false,
       this.liveBps = false,
       this.showBpsButton = true,
@@ -91,11 +86,11 @@ class Utilities {
   }
 
   Utilities copyWith(
-      {String? activeLeagueId,
+      {int? activeLeagueId,
       bool? noAdverts,
       bool? liveBps,
       bool? showBpsButton,
-      Map<String, dynamic>? leagueIds,
+      Map<int, dynamic>? leagueIds,
       bool? isLightTheme,
       String? subscriptionPrice,
       bool? remainingPlayersView,

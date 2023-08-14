@@ -3,7 +3,6 @@ import 'package:draft_futbol/models/draft_player.dart';
 import 'package:draft_futbol/models/pl_match.dart';
 import 'package:draft_futbol/models/pl_teams.dart';
 import 'package:draft_futbol/models/players/match.dart';
-import 'package:draft_futbol/models/players/stat.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,8 +20,8 @@ class _SquadPlayerState extends ConsumerState<SquadPlayer> {
 
   List<Widget> getPlayerFixtures() {
     List<Widget> fixtures = [];
-    for (Match _match in widget.player.matches!) {
-      PlMatch _plMatch = matches[_match.matchId.toString()]!;
+    for (PlMatchStats _match in widget.player.matches!) {
+      PlMatch _plMatch = matches[_match.matchId]!;
       if (!_plMatch.started!) {
         if (_plMatch.homeTeamId == widget.player.teamId) {
           fixtures.add(
@@ -63,8 +62,8 @@ class _SquadPlayerState extends ConsumerState<SquadPlayer> {
     // matches = ref.watch(plMatchesProvider).plMatches!;
     String playerImage;
     // Store team metadata
-    PlTeam team =
-        ref.watch(plTeamsProvider).plTeams[widget.player.teamId.toString()]!;
+    PlTeam team = ref.read(fplGwDataProvider.select((value) => value.plTeams))![
+        widget.player.teamId]!;
     if (widget.player.position == "GK") {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-keeper.png';
@@ -72,10 +71,13 @@ class _SquadPlayerState extends ConsumerState<SquadPlayer> {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-outfield.png';
     }
+    double pitchWidth = MediaQuery.of(context).size.width > 1000
+        ? 1000
+        : MediaQuery.of(context).size.width;
     return ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: 50,
-          maxWidth: MediaQuery.of(context).size.width / 5,
+          maxWidth: pitchWidth / 5,
           maxHeight: MediaQuery.of(context).size.height / 6,
         ),
         child: SizedBox(
@@ -98,7 +100,8 @@ class _SquadPlayerState extends ConsumerState<SquadPlayer> {
                           15,
                     ),
                     Container(
-                      constraints: BoxConstraints(minHeight: 50, minWidth: 100),
+                      constraints:
+                          const BoxConstraints(minHeight: 50, minWidth: 100),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.0),
                         // border: if(!bonus && !liveBonus) Border.all(),

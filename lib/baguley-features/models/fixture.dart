@@ -1,5 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 // class FixturesNotifier extends StateNotifier<Fixtures> {
 //   FixturesNotifier() : super(Fixtures());
 
@@ -22,8 +20,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // }
 // }
 
-
-
 // class Fixtures {
 //   Map<String, Map<String, List<Fixture>>> fixtures = {};
 
@@ -31,7 +27,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // }
 
 class BaguleyFixture {
-  String? gameweek;
+  int? gameweek;
   String? homeTeam;
   String? awayTeam;
   int? homePoints;
@@ -40,8 +36,7 @@ class BaguleyFixture {
   String? awayFplId;
 
   BaguleyFixture(
-      {
-      this.gameweek,
+      {this.gameweek,
       this.homeTeam,
       this.awayTeam,
       this.homePoints,
@@ -50,23 +45,22 @@ class BaguleyFixture {
       this.awayFplId});
 
   factory BaguleyFixture.fromJson(Map<String, dynamic> json) {
-    try{
-          return BaguleyFixture(
-        gameweek: json['gameweek'].toString(),
-        homeTeam: json['home_team'],
-        awayTeam: json['away_team'],
-        homePoints: json['home_points'],
-        awayPoints: json['away_points'],
-        homeFplId: json['home_fpl_id'].toString(),
-        awayFplId: json['away_fpl_id'].toString());
-    } catch(error){
+    try {
+      return BaguleyFixture(
+          gameweek: json['gameweek'],
+          homeTeam: json['home_team'],
+          awayTeam: json['away_team'],
+          homePoints: json['home_points'],
+          awayPoints: json['away_points'],
+          homeFplId: json['home_fpl_id'].toString(),
+          awayFplId: json['away_fpl_id'].toString());
+    } catch (error) {
       print(error);
       return BaguleyFixture(
-        homeTeam: json['home_team'],
-        awayTeam: json['away_team'],
-        homePoints: json['home_points'],
-        awayPoints: json['away_points']);
+          homeTeam: json['home_team'],
+          awayTeam: json['away_team'],
+          homePoints: json['home_points'],
+          awayPoints: json['away_points']);
     }
-
   }
 }

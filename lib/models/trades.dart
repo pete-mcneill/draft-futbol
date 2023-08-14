@@ -1,10 +1,9 @@
-import 'package:draft_futbol/models/transactions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TradesNotifier extends StateNotifier<Trades> {
   TradesNotifier() : super(Trades());
 
-  void addAllTrades(var leagueTrades, String leagueId) {
+  void addAllTrades(var leagueTrades, int leagueId) {
     state.trades[leagueId] = [];
     for (var trade in leagueTrades['trades']) {
       Trade _trade = Trade.fromJson(trade);
@@ -21,7 +20,7 @@ class TradesNotifier extends StateNotifier<Trades> {
 
 class Trades {
   Trades() : super();
-  Map<String, List<Trade>> trades = {};
+  Map<int, List<Trade>> trades = {};
 }
 
 class Trade {

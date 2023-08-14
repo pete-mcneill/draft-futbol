@@ -1,21 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:draft_futbol/baguley-features/models/fixture.dart';
 import 'package:draft_futbol/baguley-features/screen/season_history.dart';
-import 'package:draft_futbol/baguley-features/widgets/hall_of_fame_quick_view.dart';
 import 'package:draft_futbol/baguley-features/widgets/season_overview.dart';
-import 'package:draft_futbol/baguley-features/widgets/shame_corridor_quick_view.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class BaguleyHome extends StatefulWidget {
-  BaguleyHome({Key? key}) : super(key: key);
+  const BaguleyHome({Key? key}) : super(key: key);
 
   @override
   State<BaguleyHome> createState() => _BaguleyHomeState();
 }
 
 class _BaguleyHomeState extends State<BaguleyHome> {
-  CollectionReference _collectionRef =
+  final CollectionReference _collectionRef =
       FirebaseFirestore.instance.collection('seasons');
   @override
   void initState() {
@@ -46,7 +43,7 @@ class _BaguleyHomeState extends State<BaguleyHome> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => new SeasonHistoryScreen(
+                      builder: (context) => SeasonHistoryScreen(
                             seasonId: season['uuid'],
                             seasonData: season,
                           )));
@@ -56,7 +53,7 @@ class _BaguleyHomeState extends State<BaguleyHome> {
                 champion: season['baguley_winner'],
                 chairLeg: season['chair_leg'])),
       );
-      seasonWidgets.add(SizedBox(
+      seasonWidgets.add(const SizedBox(
         height: 10,
       ));
     }
@@ -73,7 +70,7 @@ class _BaguleyHomeState extends State<BaguleyHome> {
           builder:
               (BuildContext context, AsyncSnapshot<List<Object?>> snapshot) {
             if (snapshot.hasError) {
-              return Text("Error");
+              return const Text("Error");
             }
 
             if (snapshot.connectionState == ConnectionState.done) {
@@ -94,7 +91,7 @@ class _BaguleyHomeState extends State<BaguleyHome> {
               }
             }
 
-            return Text("loading");
+            return const Text("loading");
           },
         ));
   }

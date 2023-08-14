@@ -1,9 +1,7 @@
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/ui_settings_dialog.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../screens/settings_screen.dart';
@@ -67,7 +65,7 @@ class _DraftAppBarState extends ConsumerState<DraftAppBar> {
       actions: [
         if (widget.settings)
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.settings,
               color: Colors.white,
             ),
@@ -92,7 +90,7 @@ class _DraftAppBarState extends ConsumerState<DraftAppBar> {
           onChanged: (value) {
             ref
                 .read(utilsProvider.notifier)
-                .updateActiveLeague(value.toString());
+                .updateActiveLeague(int.parse(value.toString()));
           },
           value: dropdownValue,
           // dropdownDecoration:
@@ -123,10 +121,10 @@ class _DraftAppBarState extends ConsumerState<DraftAppBar> {
   }
 
   void setLeagueNamesForDropdown() {
-    Map<String, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
+    Map<int, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
     leagueIds.forEach((key, value) {
       menuOptions.add(DropdownMenuItem(
-          value: key,
+          value: key.toString(),
           child: Center(
             child: Text(
               value['name'],
@@ -138,8 +136,8 @@ class _DraftAppBarState extends ConsumerState<DraftAppBar> {
             ),
           )));
     });
-    dropdownValue = ref.watch(
-        utilsProvider.select((connection) => connection.activeLeagueId!));
+    dropdownValue = ref.watch(utilsProvider
+        .select((connection) => connection.activeLeagueId!.toString()));
   }
 
   void setupBpsButtonListener() {

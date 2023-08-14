@@ -1,20 +1,15 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/draft_player.dart';
-import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/ui/screens/pitch/player.dart';
-import 'package:draft_futbol/ui/screens/pitch/player_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import '../../../models/transactions.dart';
+import '../../../models/draft_team.dart';
 
 class PlayerPool extends ConsumerStatefulWidget {
   DraftPlayer? player;
   DraftTeam? team;
-  PlayerPool({Key? key, this.player, this.team})
-      : super(key: key);
+  PlayerPool({Key? key, this.player, this.team}) : super(key: key);
 
   @override
   _PlayerPoolState createState() => _PlayerPoolState();
@@ -33,7 +28,6 @@ class _PlayerPoolState extends ConsumerState<PlayerPool> {
       // constraints: BoxConstraints(minWidth: 11, maxWidth: 110, minHeight: 36),
       child: Column(
         children: [
-
           Row(
             children: [
               Expanded(
@@ -49,12 +43,12 @@ class _PlayerPoolState extends ConsumerState<PlayerPool> {
                       ),
                     ),
                     AutoSizeText(
-                    widget.player!.playerName!,
-                    style: const TextStyle(fontSize: 12),
-                    textAlign: TextAlign.center,
-                    minFontSize: 10,
-                    maxLines: 2,
-                  ),
+                      widget.player!.playerName!,
+                      style: const TextStyle(fontSize: 12),
+                      textAlign: TextAlign.center,
+                      minFontSize: 10,
+                      maxLines: 2,
+                    ),
                   ],
                 ),
               ),

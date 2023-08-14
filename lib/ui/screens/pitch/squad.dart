@@ -5,16 +5,17 @@ import 'package:draft_futbol/models/pl_match.dart';
 import 'package:draft_futbol/models/players/match.dart';
 import 'package:draft_futbol/models/players/stat.dart';
 import 'package:draft_futbol/providers/providers.dart';
+import 'package:draft_futbol/services/draft_team_service.dart';
 import 'package:draft_futbol/services/subs_service.dart';
 import 'package:draft_futbol/ui/screens/pitch/player.dart';
 import 'package:draft_futbol/ui/screens/pitch/player_popup.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
-import '../../../models/Gameweek.dart';
-import '../../../models/draft_subs.dart';
-import '../../../models/fixture.dart';
+import '../../../models/draft_team.dart';
+import '../../../models/sub.dart';
 import '../featureDiscovery/subs_info_discovery.dart';
 
 class Squad extends ConsumerStatefulWidget {
@@ -33,11 +34,12 @@ class _SquadState extends ConsumerState<Squad> {
     "FWD": {"valid": true, "ruleMin": 1},
   };
   bool _isLoading = false;
-  String? currentGameweek;
+  int? currentGameweek;
   bool subModeEnabled = false;
   bool saveSubs = false;
   bool subsToSave = false;
-  Map<String, PlMatch>? plMatches;
+  List<Sub> subs = [];
+  Map<int, PlMatch>? plMatches;
   Map<int, DraftPlayer>? players;
   @override
   void initState() {
@@ -48,18 +50,18 @@ class _SquadState extends ConsumerState<Squad> {
     if (subModeEnabled) {
       return (await showDialog(
             context: context,
-            builder: (context) => new AlertDialog(
-              title: new Text('Are you sure?'),
-              content: new Text('Discard any unsaved subs?'),
+            builder: (context) => AlertDialog(
+              title: const Text('Are you sure?'),
+              content: const Text('Discard any unsaved subs?'),
               actions: <Widget>[
-                new GestureDetector(
+                GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop(false);
                   },
                   child: const Text("NO"),
                 ),
                 const SizedBox(height: 16),
-                new GestureDetector(
+                GestureDetector(
                   onTap: () {
                     ref.read(utilsProvider.notifier).setSubModeEnabled(false);
                     Navigator.of(context).pop(true);
@@ -121,9 +123,14 @@ class _SquadState extends ConsumerState<Squad> {
       setState(() {
         _isLoading = true;
       });
-      ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players!);
-      ref.refresh(refreshFutureLiveDataProvider);
-      await ref.read(refreshFutureLiveDataProvider.future);
+      for (Sub _sub in subs) {
+        Hive.box('gwSubs').add(_sub);
+      }
+
+      await ref.read(fplGwDataProvider.notifier).refreshData(ref);
+      // ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players!);
+      // ref.refresh(refreshFutureLiveDataProvider);
+      // await ref.read(refreshFutureLiveDataProvider.future);
       // ref
       // .read(draftTeamsProvider.notifier)
       // .updateTeamSquad(widget.team.squad, widget.team.id!);
@@ -147,7 +154,7 @@ class _SquadState extends ConsumerState<Squad> {
     setState(() {
       _isLoading = true;
     });
-    Map<dynamic, dynamic> subs = Hive.box("subs").toMap();
+    Map<dynamic, dynamic> subs = Hive.box("gwSubs").toMap();
     List<int> subsToRemove = [];
     subs.forEach((key, value) {
       if (value.teamId == widget.team.id) {
@@ -155,35 +162,34 @@ class _SquadState extends ConsumerState<Squad> {
       }
     });
     for (int key in subsToRemove) {
-      Hive.box('subs').delete(key);
+      Hive.box('gwSubs').delete(key);
     }
-    Map<int, DraftPlayer> players = ref.read(draftPlayersProvider).players;
-    ref
-        .read(draftTeamsProvider.notifier)
-        .updateTeamSquad(widget.team.squad, widget.team.id!);
-    ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players);
-    ref.refresh(refreshFutureLiveDataProvider);
-    await ref.read(refreshFutureLiveDataProvider.future);
+    await ref.read(fplGwDataProvider.notifier).refreshData(ref);
+    // ref
+    //     .read(draftTeamsProvider.notifier)
+    //     .updateTeamSquad(widget.team.squad, widget.team.id!);
+    // ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players);
+    // ref.refresh(refreshFutureLiveDataProvider);
+    // await ref.read(refreshFutureLiveDataProvider.future);
     Navigator.of(context).pop(true);
   }
 
   GestureDetector generatePlayer(DraftPlayer player) {
     bool subAllowed = true;
-    bool validSubForPosition = true;
+    // bool validSubForPosition = true;
     bool subHighlighted = false;
     // Check if Squad has min positions for subs
-    String position = player.position!;
+    // String position = player.position!;
     if (validSubPositions[player.position!]!['valid']) {
       subAllowed = true;
     } else {
       subAllowed = false;
     }
     // Check if player played a match already
-    for (Match match in player.matches!) {
-      PlMatch _match = plMatches![match.matchId.toString()]!;
+    for (PlMatchStats match in player.matches!) {
       for (Stat stat in match.stats!) {
-        if (stat.statName == "Minutes played" && stat.fantasyPoints != 0) {
-          subAllowed = false;
+        if (stat.statName == "Minutes played" && stat.value == 0) {
+          subAllowed = true;
           break;
         }
       }
@@ -197,24 +203,23 @@ class _SquadState extends ConsumerState<Squad> {
           onAcceptWithDetails: (details) {
             if (subAllowed) {
               DraftPlayer incomingSub = details.data;
-              int playerPosition =
-                  widget.team.squad![int.parse(player.playerId!)]!;
-              int subPosition =
-                  widget.team.squad![int.parse(incomingSub.playerId!)]!;
+              int playerPosition = widget.team.squad![player.playerId!]!;
+              int subPosition = widget.team.squad![incomingSub.playerId!]!;
               setState(() {
-                widget.team.squad![int.parse(player.playerId!)] = subPosition;
-                widget.team.squad![int.parse(incomingSub.playerId!)] =
-                    playerPosition;
+                widget.team.squad![player.playerId!] = subPosition;
+                widget.team.squad![incomingSub.playerId!] = playerPosition;
                 subsToSave = true;
               });
-              DraftSub _sub = DraftSub(
+              Sub _sub = Sub(
                   currentGameweek!,
-                  int.parse(player.playerId!),
-                  int.parse(incomingSub.playerId!),
+                  player.playerId!,
+                  incomingSub.playerId!,
                   playerPosition,
                   subPosition,
                   widget.team.id!);
-              Hive.box('subs').add(_sub);
+              subs.add(_sub);
+              ref.read(fplGwDataProvider.notifier).subScorePreview(
+                  widget.team.squad, widget.team.leagueId, widget.team.id!);
             } else {
               ScaffoldMessenger.of(context)
                   .showSnackBar(const SnackBar(content: Text("Invalid Sub")));
@@ -231,6 +236,7 @@ class _SquadState extends ConsumerState<Squad> {
             );
           },
           onAccept: (item) {
+            print(item);
             if (!subAllowed) {
               ScaffoldMessenger.of(context)
                   .showSnackBar(const SnackBar(content: Text("Invalid Sub")));
@@ -241,11 +247,12 @@ class _SquadState extends ConsumerState<Squad> {
 
   @override
   Widget build(BuildContext context) {
-    bool gameweek = ref.watch(gameweekProvider)!.gameweekFinished;
-    players = ref.read(draftPlayersProvider).players;
-    currentGameweek = ref.read(gameweekProvider)!.currentGameweek;
-    plMatches = ref.watch(plMatchesProvider).plMatches!;
-    Map<int, DraftPlayer>? _players = ref.watch(draftPlayersProvider).players;
+    bool gameweek = ref.watch(
+        fplGwDataProvider.select((value) => value.gameweek!.gameweekFinished));
+    players = ref.read(fplGwDataProvider.select((value) => value.players));
+    currentGameweek = ref.watch(
+        fplGwDataProvider.select((value) => value.gameweek!.currentGameweek));
+    plMatches = ref.watch(fplGwDataProvider.select((value) => value.plMatches));
     Map<String, List<DraftPlayer>> _squad = {
       "GK": [],
       "DEF": [],
@@ -254,9 +261,8 @@ class _SquadState extends ConsumerState<Squad> {
       "SUBS": []
     };
     try {
-      Map<int, int>? test = widget.team.squad;
       widget.team.squad?.forEach((key, value) {
-        DraftPlayer? _player = _players[key];
+        DraftPlayer? _player = players![key];
         if (value < 12) {
           _squad[_player!.position]!.add(_player);
         } else {
@@ -278,12 +284,12 @@ class _SquadState extends ConsumerState<Squad> {
     } catch (e) {
       print(e);
     }
-
+    double pitchWidth = kIsWeb ? 1000 : MediaQuery.of(context).size.width;
     return Stack(children: [
       WillPopScope(
         onWillPop: _onWillPop,
         child: Container(
-          // width: MediaQuery.of(context).size.width
+          width: pitchWidth,
           // constraints: BoxConstraints(minWidth: 11, maxWidth: 110, minHeight: 36),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -293,6 +299,7 @@ class _SquadState extends ConsumerState<Squad> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // Text("Row weird")
                   for (DraftPlayer player in _squad['GK']!)
                     generatePlayer(player)
                 ],
@@ -386,7 +393,7 @@ class _SquadState extends ConsumerState<Squad> {
                                     backgroundColor:
                                         Theme.of(context).canvasColor),
                                 onPressed: () async {
-                                  Map<int, DraftSub> _subs = SubsService()
+                                  Map<int, Sub> _subs = SubsService()
                                       .getSubsForTeam(widget.team.id!);
                                   await ResetSubsPopUp.showAlertDialog(
                                       context, _subs, players!, widget.team);
@@ -398,7 +405,7 @@ class _SquadState extends ConsumerState<Squad> {
                                     });
                                   }
                                 },
-                                child: Text(
+                                child: const Text(
                                   "Reset Subs",
                                   textAlign: TextAlign.center,
                                 )),
@@ -444,7 +451,7 @@ class _SquadState extends ConsumerState<Squad> {
         ),
       ),
       if (_isLoading)
-        Container(
+        SizedBox(
           height: MediaQuery.of(context).size.height,
           child: const Opacity(
             opacity: 0.8,
@@ -453,9 +460,9 @@ class _SquadState extends ConsumerState<Squad> {
         ),
       if (_isLoading)
         Center(
-          child: Container(
+          child: SizedBox(
               height: MediaQuery.of(context).size.height,
-              child: Column(
+              child: const Column(
                 children: [
                   Text("Saving Changes"),
                   CircularProgressIndicator(),

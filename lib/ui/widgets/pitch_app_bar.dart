@@ -1,16 +1,10 @@
 import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/ui/widgets/ui_settings_dialog.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'filter_ui.dart';
 
 class PitchAppBar extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
-  PitchAppBar({Key? key}) : super(key: key);
+  const PitchAppBar({Key? key}) : super(key: key);
 
   @override
   _PitchAppBarState createState() => _PitchAppBarState();
@@ -28,7 +22,8 @@ class _PitchAppBarState extends ConsumerState<PitchAppBar> {
   @override
   Widget build(BuildContext context) {
     bool liveBonus = ref.watch(utilsProvider).liveBps!;
-    bool gameweekFinished = ref.watch(gameweekProvider)!.gameweekFinished;
+    bool gameweekFinished = ref.watch(
+        fplGwDataProvider.select((value) => value.gameweek!.gameweekFinished));
     return AppBar(
       centerTitle: true,
       // leadingWidth: 0,
@@ -38,7 +33,7 @@ class _PitchAppBarState extends ConsumerState<PitchAppBar> {
       actions: [
         if (!gameweekFinished)
           ChoiceChip(
-            label: Text("Live Bonus Points"),
+            label: const Text("Live Bonus Points"),
             selected: liveBonus,
             onSelected: (selected) {
               ref.read(utilsProvider.notifier).updateLiveBps(selected);

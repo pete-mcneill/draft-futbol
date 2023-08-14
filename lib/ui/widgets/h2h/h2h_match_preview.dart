@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:badges/badges.dart' as badges;
 
-import '../../models/Gameweek.dart';
+import '../../../models/draft_team.dart';
 
 class H2hMatchPreview extends ConsumerStatefulWidget {
   final DraftTeam homeTeam;
@@ -172,7 +172,7 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
       if (team.squad![_id]! < 12) {
         DraftPlayer player = players[_id]!;
         int score = 0;
-        for (Match match in player.matches!) {
+        for (PlMatchStats match in player.matches!) {
           for (Stat stat in match.stats!) {
             score += stat.fantasyPoints!;
             if (stat.statName == "Goals scored") {
@@ -206,17 +206,121 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
     };
   }
 
+  getMatchSummary(
+      DraftTeam homeTeam, DraftTeam awayTeam, Map<int, DraftPlayer> players) {
+    String topPlayerName = '';
+    String topPlayerTeam = '';
+    String topPoints = '';
+    DraftPlayer topPlayer;
+    var homeStats = getTeamSummaryStats(homeTeam, players);
+    var awayStats = getTeamSummaryStats(awayTeam, players);
+    if (homeStats['topPlayerPoints'] == awayStats['topPlayerPoints']) {
+      topPlayerName = "Multiple Players";
+      topPlayerTeam = '';
+      topPoints = homeStats['topPlayerPoints'].toString();
+    } else if (homeStats['topPlayerPoints'] < awayStats['topPlayerPoints']) {
+      topPlayerName = awayStats['topPlayer'].playerName!;
+      topPlayerTeam = awayTeam.teamName!;
+      topPoints = awayStats['topPlayerPoints'].toString();
+    } else {
+      topPlayerName = homeStats['topPlayer'].playerName!;
+      topPlayerTeam = homeTeam.teamName!;
+      topPoints = homeStats['topPlayerPoints'].toString();
+    }
+    return Expanded(
+      flex: 2,
+      child: Column(
+        children: [
+          const Text("Top Player",
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+          Text(
+            topPlayerName + "($topPoints)",
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          Text(topPlayerTeam,
+              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold)),
+          const Text("Goals",
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(homeStats['goals'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold)),
+              const Text(" - "),
+              Text(awayStats['goals'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold))
+            ],
+          ),
+          const Text("Assists",
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(homeStats['assists'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold)),
+              const Text(" - "),
+              Text(awayStats['assists'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold))
+            ],
+          ),
+          const Text("Clean Sheets",
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(homeStats['cleanSheets'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold)),
+              const Text(" - "),
+              Text(awayStats['cleanSheets'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold))
+            ],
+          ),
+          const Text("Bonus Points",
+              style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(homeStats['bonus'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold)),
+              const Text(" - "),
+              Text(awayStats['bonus'].toString(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.bold))
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    Map<int, DraftPlayer> players = ref.watch(draftPlayersProvider).players;
+    Map<int, DraftPlayer> players =
+        ref.watch(fplGwDataProvider.select((data) => data.players!));
     liveBonus = ref.watch(utilsProvider).liveBps!;
-    bool gameweekFinished = ref.watch(gameweekProvider)!.gameweekFinished;
+    bool gameweekFinished = ref.watch(
+        fplGwDataProvider.select((data) => data.gameweek!.gameweekFinished));
+
     final String score1 = widget.homeTeam.points.toString();
     final String score2 = widget.awayTeam.points.toString();
     final String bonusScore1 = widget.homeTeam.bonusPoints.toString();
     final String bonusScore2 = widget.awayTeam.bonusPoints.toString();
     final String homeTeam = widget.homeTeam.teamName.toString();
     final String awayTeam = widget.awayTeam.teamName.toString();
+
+    // ref
+    //     .read(fixturesProvider)
+    //     .fixtures[activeLeague]![gameweek!.currentGameweek];
+    // teams = {};
+    // ref.watch(fplGwDataProvider.select((data) => data.teams))[activeLeague];
 
     Row remainingPlayers(String remainingXi, String completedXi,
         String remainingSubs, String completedSubs) {
@@ -263,105 +367,10 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
       );
     }
 
-    getMatchSummary(DraftTeam homeTeam, DraftTeam awayTeam) {
-      String topPlayerName = '';
-      String topPlayerTeam = '';
-      String topPoints = '';
-      DraftPlayer topPlayer;
-      var homeStats = getTeamSummaryStats(homeTeam, players);
-      var awayStats = getTeamSummaryStats(awayTeam, players);
-      if (homeStats['topPlayerPoints'] == awayStats['topPlayerPoints']) {
-        topPlayerName = "Multiple Players";
-        topPlayerTeam = '';
-        topPoints = homeStats['topPlayerPoints'].toString();
-      } else if (homeStats['topPlayerPoints'] < awayStats['topPlayerPoints']) {
-        topPlayerName = awayStats['topPlayer'].playerName!;
-        topPlayerTeam = awayTeam.teamName!;
-        topPoints = awayStats['topPlayerPoints'].toString();
-      } else {
-        topPlayerName = homeStats['topPlayer'].playerName!;
-        topPlayerTeam = homeTeam.teamName!;
-        topPoints = homeStats['topPlayerPoints'].toString();
-      }
-      return Expanded(
-        flex: 2,
-        child: Column(
-          children: [
-            const Text("Top Player",
-                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
-            Text(
-              topPlayerName + "(${topPoints})",
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            Text(topPlayerTeam,
-                style:
-                    const TextStyle(fontSize: 9, fontWeight: FontWeight.bold)),
-            const Text("Goals",
-                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(homeStats['goals'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold)),
-                const Text(" - "),
-                Text(awayStats['goals'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold))
-              ],
-            ),
-            const Text("Assists",
-                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(homeStats['assists'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold)),
-                const Text(" - "),
-                Text(awayStats['assists'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold))
-              ],
-            ),
-            const Text("Clean Sheets",
-                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(homeStats['cleanSheets'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold)),
-                const Text(" - "),
-                Text(awayStats['cleanSheets'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold))
-              ],
-            ),
-            const Text("Bonus Points",
-                style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(homeStats['bonus'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold)),
-                const Text(" - "),
-                Text(awayStats['bonus'].toString(),
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold))
-              ],
-            )
-          ],
-        ),
-      );
-    }
-
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
       shadowColor: Colors.transparent,
-      elevation: 10,
+      elevation: 4,
       child: IntrinsicHeight(
         child: Column(
           children: [
@@ -390,58 +399,10 @@ class _H2hMatchPreviewState extends ConsumerState<H2hMatchPreview> {
                 children: [
                   ...getTeamAndScores(bonusScore1, score1, homeTeam, "home"),
                   gameweekFinished
-                      ? getMatchSummary(widget.homeTeam, widget.awayTeam)
+                      ? getMatchSummary(
+                          widget.homeTeam, widget.awayTeam, players)
                       : getRemainingPlayers(widget.homeTeam, widget.awayTeam),
                   ...getTeamAndScores(bonusScore2, score2, awayTeam, "away")
-                  //   flex: 2,
-                  //   child: Column(
-                  //       mainAxisAlignment: MainAxisAlignment.center,
-                  //       crossAxisAlignment: CrossAxisAlignment.center,
-                  //       children: [
-                  //         SizedBox(
-                  //           height: 50,
-                  //           child: Center(
-                  //             child: AutoSizeText(
-                  //               liveBonus ? bonusScore2 : score2,
-                  //               style:
-                  //                   const TextStyle(fontFamily: 'Inter-Bold'),
-                  //               minFontSize: 14,
-                  //               maxLines: 1,
-                  //             ),
-                  //           ),
-                  //         )
-                  //       ]),
-                  // ),
-                  // Expanded(
-                  //   flex: 2,
-                  //   child: Column(
-                  //     mainAxisAlignment: MainAxisAlignment.center,
-                  //     crossAxisAlignment: CrossAxisAlignment.center,
-                  //     children: [
-                  //       SizedBox(
-                  //         height: 50,
-                  //         child: Center(
-                  //           child: AutoSizeText(
-                  //             awayTeam,
-                  //             style: const TextStyle(
-                  //                 fontSize: 12, fontWeight: FontWeight.w600),
-                  //             textAlign: TextAlign.center,
-                  //             minFontSize: 10,
-                  //             maxLines: 2,
-                  //           ),
-                  //         ),
-                  //       ),
-                  //       if (remainingPlayersView)
-                  //         remainingPlayers(
-                  //             remainingMatchesAway,
-                  //             completedMatchesAway,
-                  //             remainingSubsMatchesAway,
-                  //             completedSubsMatchesAway),
-                  //       if (iconsSummaryView)
-                  //         iconsSummary(awayGoals, awayAssists, awayCleanSheets)
-                  //     ],
-                  //   ),
-                  // ),
                 ],
               ),
             ),

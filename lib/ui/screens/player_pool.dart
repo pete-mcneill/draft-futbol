@@ -1,19 +1,15 @@
+import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/player_pool/player_pool.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import '../../models/DraftTeam.dart';
-import '../../models/Gameweek.dart';
 import '../../models/draft_player.dart';
-import '../../models/fixture.dart';
+import '../../models/draft_team.dart';
 import '../../models/transactions.dart';
 import '../widgets/loading.dart';
-import '../widgets/waivers/player_waiver.dart';
 
 class PlayerPoolScreen extends ConsumerStatefulWidget {
   const PlayerPoolScreen({Key? key}) : super(key: key);
@@ -24,9 +20,9 @@ class PlayerPoolScreen extends ConsumerStatefulWidget {
 
 class _PlayerPoolScreenState extends ConsumerState<PlayerPoolScreen> {
   List<DropdownMenuItem<String>> menuOptions = [];
-  Map<String, dynamic>? leagueIds;
+  Map<int, dynamic>? leagueIds;
   String? currentGW;
-  String? dropdownValue;
+  int? dropdownValue;
 
   @override
   void initState() {
@@ -43,7 +39,7 @@ class _PlayerPoolScreenState extends ConsumerState<PlayerPoolScreen> {
     leagueIds = ref.watch(utilsProvider).leagueIds!;
     leagueIds!.forEach((key, value) {
       menuOptions.add(DropdownMenuItem(
-          value: key,
+          value: key.toString(),
           child: Center(
             child: Text(
               value['name'],
@@ -57,8 +53,8 @@ class _PlayerPoolScreenState extends ConsumerState<PlayerPoolScreen> {
     });
     dropdownValue = ref.watch(
         utilsProvider.select((connection) => connection.activeLeagueId!));
-    Map<int, DraftTeam> teams =
-        ref.read(draftTeamsProvider).teams![dropdownValue]!;
+    Map<int, DraftTeam> teams = {};
+    // ref.read(draftTeamsProvider).teams![dropdownValue]!;
 
     final _draftTeamFilters = teams.entries
         .map((key) => MultiSelectItem(key.key, key.value.teamName!))
@@ -69,82 +65,78 @@ class _PlayerPoolScreenState extends ConsumerState<PlayerPoolScreen> {
         loading: () => const Loading(),
         error: (err, stack) => Text('Error: $err'),
         data: (config) {
-          Map<String, Map<String, List<Transaction>>> transactions =
+          Map<int, Map<int, List<Transaction>>> transactions =
               ref.read(transactionsProvider).transactions;
           var activeLeague = ref.watch(
               utilsProvider.select((connection) => connection.activeLeagueId!));
 
-          Map<int, DraftPlayer> players =
-              ref.read(draftPlayersProvider).players;
-          Gameweek gameweek = ref.watch(gameweekProvider)!;
+          Map<int, DraftPlayer> players = {};
+          Gameweek gameweek =
+              ref.watch(fplGwDataProvider.select((value) => value.gameweek))!;
           String currentGameweek = gameweek.waiversProcessed
-              ? (int.parse(gameweek.currentGameweek) + 1).toString()
-              : gameweek.currentGameweek;
+              ? (gameweek.currentGameweek + 1).toString()
+              : gameweek.currentGameweek.toString();
           return Scaffold(
-            appBar: DraftAppBar(),
-            body: playerPoolTab(players, activeLeague, teams)
+              appBar: DraftAppBar(),
+              body: playerPoolTab(players, activeLeague, teams)
 
-            // Show next GW Fixtures
-            // Option to navigate between each GW
-          );
+              // Show next GW Fixtures
+              // Option to navigate between each GW
+              );
         });
   }
 
-  SingleChildScrollView playerPoolTab(Map<int, DraftPlayer> players, String activeLeague, Map<int, DraftTeam> teams) {
+  SingleChildScrollView playerPoolTab(Map<int, DraftPlayer> players,
+      int activeLeague, Map<int, DraftTeam> teams) {
     return SingleChildScrollView(
-                            child: Column(children: [
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Expanded(
-                                child: Center(
-                                    child: Text("Player",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
-                              ),
-                              const Expanded(
-                                child: Center(
-                                    child: Text("PL Team",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold))),
-                              ),
-                              const Expanded(
-                                  child: Center(
-                                      child: Text("Draft Team",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold))))
-                            ],
-                          ),
-                          const Divider(
-                            thickness: 2,
-                          ),
-                          ListView.separated(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: players.length,
-                            separatorBuilder: (context, index) {
-                              return const Divider(
-                                thickness: 2,
-                              );
-                            },
-                            itemBuilder: (context, i) {
-                              int key = players.keys.elementAt(i);
-                              DraftTeam? _team;
-                              DraftPlayer player = players[key]!;
-                              if (player.playerStatus![activeLeague] == "o") {
-                                _team = teams[int.parse(
-                                    player.draftTeamId![activeLeague]!)];
-                              }
-                              return PlayerPool(
-                                player: player,
-                                team: _team,
-                              );
-                            },
-                          ),
-                        ]));
+        child: Column(children: [
+      const SizedBox(
+        height: 15,
+      ),
+      const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Center(
+                child: Text("Player",
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+          ),
+          Expanded(
+            child: Center(
+                child: Text("PL Team",
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+          ),
+          Expanded(
+              child: Center(
+                  child: Text("Draft Team",
+                      style: TextStyle(fontWeight: FontWeight.bold))))
+        ],
+      ),
+      const Divider(
+        thickness: 2,
+      ),
+      ListView.separated(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: players.length,
+        separatorBuilder: (context, index) {
+          return const Divider(
+            thickness: 2,
+          );
+        },
+        itemBuilder: (context, i) {
+          int key = players.keys.elementAt(i);
+          DraftTeam? _team;
+          DraftPlayer player = players[key]!;
+          if (player.playerStatus![activeLeague] == "o") {
+            _team = teams[player.draftTeamId![activeLeague]!];
+          }
+          return PlayerPool(
+            player: player,
+            team: _team,
+          );
+        },
+      ),
+    ]));
   }
-
 }

@@ -1,7 +1,8 @@
 import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/fixture.dart';
-import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'draft_team.dart';
 
 class H2HLeagueStandingsNotifier extends StateNotifier<H2HLeagueStandings> {
   H2HLeagueStandingsNotifier() : super(H2HLeagueStandings());
@@ -35,7 +36,7 @@ class H2HLeagueStandingsNotifier extends StateNotifier<H2HLeagueStandings> {
       String leagueId,
       Map<String, List<Fixture>> fixtures,
       Map<String, Map<int, DraftTeam>> draftTeams,
-      String gameweek) async {
+      int gameweek) async {
     state.liveStandings[leagueId] = [];
     try {
       for (Fixture _fixture in fixtures[gameweek]!) {
@@ -111,7 +112,7 @@ class H2HLeagueStandingsNotifier extends StateNotifier<H2HLeagueStandings> {
       String leagueId,
       Map<String, List<Fixture>> fixtures,
       Map<String, Map<int, DraftTeam>> draftTeams,
-      String gameweek) async {
+      int gameweek) async {
     state.liveBpsStandings[leagueId] = [];
     try {
       for (Fixture _fixture in fixtures[gameweek]!) {

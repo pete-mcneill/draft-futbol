@@ -1,16 +1,14 @@
 import 'package:draft_futbol/models/DraftTeam.dart';
-import 'package:draft_futbol/models/Gameweek.dart';
 import 'package:draft_futbol/models/fixture.dart';
+import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/models/league_standing.dart';
 import 'package:draft_futbol/providers/providers.dart';
+import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
-import '../widgets/adverts/adverts.dart';
+import '../../models/draft_team.dart';
 import '../widgets/filter_ui.dart';
 
 class LeagueStandings extends ConsumerStatefulWidget {
@@ -27,11 +25,11 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
   var leagueData;
   bool liveBps = false;
   int view = 1;
-  late String currentGameweek;
+  int? currentGameweek;
   List<LeagueStanding> staticStandings = [];
   List<LeagueStanding> liveStandings = [];
   List<LeagueStanding> liveBpsStandings = [];
-  String activeLeague = "";
+  int? activeLeague;
 
   @override
   void initState() {
@@ -52,11 +50,11 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
     // if (standing.rank!.isEven) {
     //   rowColor = Theme.of(context).;
     // }
-    return Container(
+    return SizedBox(
       height: 50,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: EdgeInsets.all(0),
+        margin: const EdgeInsets.all(0),
         color: rowColor,
         elevation: 10,
         child: Row(
@@ -153,71 +151,37 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
   Widget build(BuildContext context) {
     liveBps =
         ref.watch(utilsProvider.select((connection) => connection.liveBps!));
-    Gameweek? gameweek = ref.watch(gameweekProvider);
-    activeLeague = ref.watch(utilsProvider).activeLeagueId!;
-    staticStandings =
-        ref.watch(h2hStandingsProvider).staticStandings[activeLeague]!;
+    Gameweek? gameweek =
+        ref.watch(fplGwDataProvider.select((value) => value.gameweek));
+    activeLeague = ref.watch(utilsProvider).activeLeagueId;
+    staticStandings = ref.watch(fplGwDataProvider
+        .select((value) => value.staticStandings))![activeLeague]!;
 
     if (gameweek!.gameweekFinished) {
       liveStandings = staticStandings;
       liveBpsStandings = staticStandings;
     } else {
-      liveStandings =
-          ref.watch(h2hStandingsProvider).liveStandings[activeLeague]!;
-      liveBpsStandings =
-          ref.watch(h2hStandingsProvider).liveBpsStandings[activeLeague]!;
+      liveStandings = ref.watch(fplGwDataProvider
+          .select((value) => value.liveStandings))![activeLeague]!;
+      liveBpsStandings = ref.watch(fplGwDataProvider
+          .select((value) => value.bonusStanding))![activeLeague]!;
     }
 
-    teams = ref.watch(draftTeamsProvider).teams![activeLeague]!;
+    teams = ref.watch(
+        fplGwDataProvider.select((value) => value.teams))![activeLeague]!;
     currentGameweek = gameweek.currentGameweek;
-    String lastGw = (int.parse(currentGameweek) - 1).toString();
+    String lastGw = (currentGameweek! - 1).toString();
     liveBps = ref.watch(utilsProvider).liveBps!;
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (!ref.watch(purchasesProvider).noAdverts!)
-            SizedBox(
-              height: 120,
-              // color: Colors.deepOrange,
-              child: FutureBuilder<Widget>(
-                future: getBannerWidget(
-                    context: context,
-                    adSize: AdSize.banner,
-                    noAdverts: ref.watch(purchasesProvider).noAdverts!),
-                builder: (_, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(child: const CircularProgressIndicator());
-                  } else {
-                    return Column(
-                      children: [
-                        Center(
-                            child: ValueListenableBuilder<Box>(
-                          valueListenable: Hive.box('adverts')
-                              .listenable(keys: ['adCounter']),
-                          builder: (context, box, _) {
-                            int adRefresh = box.get('adCounter');
-                            adRefresh = 10 - adRefresh;
-                            return Text(
-                                "Video Advert will appear in $adRefresh refreshes",
-                                style: const TextStyle(fontSize: 12));
-                          },
-                        )),
-                        SizedBox(
-                          height: 100,
-                          width: MediaQuery.of(context).size.width,
-                          child: snapshot.data,
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-            ),
+          buyaCoffeebutton(context),
           if (!gameweek.gameweekFinished)
             ToggleSwitch(
               customWidths: const [120.0, 90.0, 120.0],
               minHeight: 30.0,
+              activeFgColor: Colors.black,
               activeBgColors: [
                 [Theme.of(context).buttonTheme.colorScheme!.secondary],
                 [Theme.of(context).buttonTheme.colorScheme!.secondary],
@@ -237,8 +201,8 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
             FilterH2HMatches(options: getFilterOptions()),
           Container(
             // color: Theme.of(context).cardColor,
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Expanded(
                   flex: 1,
                   child: Text(

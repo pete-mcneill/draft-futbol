@@ -1,15 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:draft_futbol/baguley-features/widgets/baguley_league.dart';
 import 'package:draft_futbol/models/DraftTeam.dart';
-import 'package:draft_futbol/models/Gameweek.dart';
 import 'package:draft_futbol/models/fixture.dart';
 import 'package:draft_futbol/models/league_standing.dart';
-import 'package:draft_futbol/providers/providers.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
+import '../../models/draft_team.dart';
 import '../../ui/widgets/app_bar/draft_app_bar.dart';
 import '../services/league_service.dart';
 
@@ -43,11 +39,11 @@ class _BaguleyLeagueStandingsState
     return Scaffold(
         appBar: DraftAppBar(settings: false),
         body: FutureBuilder<List<LeagueStanding?>>(
-          future: getStandings("38", widget.seasonId),
+          future: getStandings(38, widget.seasonId),
           builder: (BuildContext context,
               AsyncSnapshot<List<LeagueStanding?>> snapshot) {
             if (snapshot.hasError) {
-              return Text("Error");
+              return const Text("Error");
             }
 
             if (snapshot.hasData && snapshot.data != null) {
@@ -57,10 +53,10 @@ class _BaguleyLeagueStandingsState
 
             if (snapshot.connectionState == ConnectionState.done) {
               print("Hello");
-              return Text("Hello");
+              return const Text("Hello");
             }
 
-            return Text("loading");
+            return const Text("loading");
           },
         ));
   }

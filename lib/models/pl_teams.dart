@@ -1,5 +1,3 @@
-import 'package:draft_futbol/models/players/bps.dart';
-import 'package:draft_futbol/models/players/stat.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PlTeamsNotifier extends StateNotifier<PlTeams> {
@@ -11,13 +9,13 @@ class PlTeamsNotifier extends StateNotifier<PlTeams> {
 }
 
 class PlTeams {
-  Map<String, PlTeam> plTeams = {};
+  Map<int, PlTeam> plTeams = {};
 
   PlTeams() : super();
 }
 
 class PlTeam {
-  String? id;
+  int? id;
   String? code;
   String? name;
   String? shortName;
@@ -26,7 +24,7 @@ class PlTeam {
 
   factory PlTeam.fromJson(var json) {
     return PlTeam(
-        id: json['id'].toString(),
+        id: json['id'],
         code: json['code'].toString(),
         name: json['name'],
         shortName: json['short_name']);

@@ -1,5 +1,3 @@
-import 'package:draft_futbol/models/players/match.dart';
-import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'draft_player.dart';
@@ -7,7 +5,7 @@ import 'draft_player.dart';
 class DraftSquadsNotifier extends StateNotifier<DraftSquads> {
   DraftSquadsNotifier() : super(DraftSquads());
   void getAllSquads(
-      var players, String leagueId, Map<int, DraftPlayer> draftPlayers) {
+      var players, int leagueId, Map<int, DraftPlayer> draftPlayers) {
     state.squads[leagueId] = {};
     for (var player in players['element_status']) {
       try {
@@ -32,7 +30,7 @@ class DraftSquadsNotifier extends StateNotifier<DraftSquads> {
 class DraftSquads {
   DraftSquads() : super();
 
-  Map<String, Map<int, DraftSquad>> squads = {};
+  Map<int, Map<int, DraftSquad>> squads = {};
 }
 
 class DraftSquad {

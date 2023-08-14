@@ -1,18 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cart_stepper/cart_stepper.dart';
 import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/ui/widgets/manage_league_dialog.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
-import 'package:settings_ui/settings_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/DraftTeam.dart';
 import '../../models/draft_leagues.dart';
+import '../../models/draft_team.dart';
 import '../../models/fixture.dart';
 import '../widgets/app_bar/draft_app_bar.dart';
 
@@ -20,38 +13,21 @@ class DraftFixturesResults extends ConsumerWidget {
   DraftFixturesResults({Key? key}) : super(key: key);
 
   Map<int, DraftTeam>? teams;
-  Map<String, List<Fixture>>? matches;
-  Map<String, List<Fixture>>? results;
-  Map<String, List<Fixture>>? fixtures;
+  Map<int, List<Fixture>>? matches;
+  Map<int, List<Fixture>>? results;
+  Map<int, List<Fixture>>? fixtures;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<DropdownMenuItem<String>> menuOptions = [];
-    List<DropdownMenuItem<String>> gwOptions = [];
-    String currentGW = ref.watch(gameweekProvider)!.currentGameweek;
-    String selectedGw = currentGW.toString();
-    for (var i = 1; i <= int.parse(currentGW); i++) {
-      gwOptions.add(DropdownMenuItem(
-          value: i.toString(),
-          child: Center(
-            child: Text(
-              i.toString(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          )));
-    }
+    int currentGW = ref.watch(fplGwDataProvider).gameweek!.currentGameweek;
 
-    String dropdownValue;
-    bool isLightTheme = ref.watch(utilsProvider).isLightTheme!;
+    int dropdownValue;
     // Provider.of<UtilsProvider>(context, listen: true).appTheme;
-    Map<String, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
+    Map<int, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
     leagueIds.forEach((key, value) {
       menuOptions.add(DropdownMenuItem(
-          value: key,
+          value: key.toString(),
           child: Center(
             child: Text(
               value['name'],
@@ -66,17 +42,18 @@ class DraftFixturesResults extends ConsumerWidget {
     dropdownValue = ref.watch(
         utilsProvider.select((connection) => connection.activeLeagueId!));
     DraftLeague activeLeague =
-        ref.read(draftLeaguesProvider).leagues[dropdownValue]!;
+        ref.read(fplGwDataProvider).leagues![dropdownValue]!;
     if (activeLeague.scoring == "h") {
-      teams = ref.read(draftTeamsProvider).teams![dropdownValue]!;
-      matches = ref.read(fixturesProvider).fixtures[dropdownValue]!;
+      teams = ref.read(fplGwDataProvider).teams![dropdownValue];
+      matches = ref.read(fplGwDataProvider).h2hFixtures![dropdownValue]!;
+      // ref.read(fixturesProvider).fixtures[dropdownValue]!;
       results = {
         for (final key in matches!.keys)
-          if (int.parse(key) <= int.parse(currentGW)) key: matches![key]!
+          if (key <= currentGW) key: matches![key]!
       };
       fixtures = {
         for (final key in matches!.keys)
-          if (int.parse(key) > int.parse(currentGW)) key: matches![key]!
+          if (key > currentGW) key: matches![key]!
       };
     }
 
@@ -91,7 +68,7 @@ class DraftFixturesResults extends ConsumerWidget {
           child: activeLeague.scoring == "h"
               ? Column(children: <Widget>[
                   Container(
-                    child: TabBar(
+                    child: const TabBar(
                       tabs: [
                         Tab(text: 'Fixtures'),
                         Tab(text: 'Results'),
@@ -104,16 +81,15 @@ class DraftFixturesResults extends ConsumerWidget {
                           shrinkWrap: true,
                           itemCount: fixtures!.length,
                           itemBuilder: (BuildContext context, int index) {
-                            String gameweek = fixtures!.keys.elementAt(index);
-                            int test = fixtures![gameweek]!.length;
+                            int gameweek = fixtures!.keys.elementAt(index);
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
-                                Text("Gameweek " + gameweek),
-                                Divider(
+                                Text("Gameweek " + gameweek.toString()),
+                                const Divider(
                                   thickness: 2,
                                 ),
                                 ListView.separated(
@@ -161,11 +137,11 @@ class DraftFixturesResults extends ConsumerWidget {
                                                   ),
                                                 ],
                                               )),
-                                          Expanded(
+                                          const Expanded(
                                             child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.center,
-                                                children: const <Widget>[
+                                                children: <Widget>[
                                                   Expanded(
                                                       child: VerticalDivider(
                                                     thickness: 1,
@@ -211,13 +187,13 @@ class DraftFixturesResults extends ConsumerWidget {
                                     ));
                                   },
                                   separatorBuilder: (context, index) {
-                                    return Divider(
+                                    return const Divider(
                                       thickness: 2,
                                     );
                                   },
                                 ),
                                 // Divider(thickness: 2,),
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 )
                               ],
@@ -228,16 +204,16 @@ class DraftFixturesResults extends ConsumerWidget {
                           itemCount: results!.length,
                           itemBuilder: (BuildContext context, int index) {
                             int reversedIndex = results!.length - 1 - index;
-                            String gameweek =
+                            int gameweek =
                                 results!.keys.elementAt(reversedIndex);
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
-                                Text("Gameweek " + gameweek),
-                                Divider(
+                                Text("Gameweek " + gameweek.toString()),
+                                const Divider(
                                   thickness: 2,
                                 ),
                                 ListView.separated(
@@ -291,11 +267,11 @@ class DraftFixturesResults extends ConsumerWidget {
                                                 _fixture.homeStaticPoints
                                                     .toString(),
                                               )),
-                                          Expanded(
+                                          const Expanded(
                                             child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.center,
-                                                children: const <Widget>[
+                                                children: <Widget>[
                                                   Expanded(
                                                       child: VerticalDivider(
                                                     thickness: 1,
@@ -349,13 +325,13 @@ class DraftFixturesResults extends ConsumerWidget {
                                         );
                                   },
                                   separatorBuilder: (context, index) {
-                                    return Divider(
+                                    return const Divider(
                                       thickness: 2,
                                     );
                                   },
                                 ),
                                 // Divider(thickness: 2,),
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 )
                               ],
@@ -364,9 +340,9 @@ class DraftFixturesResults extends ConsumerWidget {
                     ]),
                   )
                 ])
-              : Center(
-                  child: const Text(
-                      "Classic Scoring League, no fixtures available"))),
+              : const Center(
+                  child:
+                      Text("Classic Scoring League, no fixtures available"))),
 
       // Show next GW Fixtures
       // Option to navigate between each GW

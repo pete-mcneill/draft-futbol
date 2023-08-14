@@ -1,13 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/draft_player.dart';
-import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/ui/screens/pitch/player.dart';
-import 'package:draft_futbol/ui/screens/pitch/player_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../models/draft_team.dart';
 import '../../../models/transactions.dart';
 
 class Waiver extends ConsumerStatefulWidget {
@@ -103,11 +101,11 @@ class _WaiverState extends ConsumerState<Waiver> {
                 Expanded(
                   child: Center(
                     child: widget.transaction!.result == "a"
-                        ? FaIcon(
+                        ? const FaIcon(
                             FontAwesomeIcons.thumbsUp,
                             color: Colors.green,
                           )
-                        : FaIcon(
+                        : const FaIcon(
                             FontAwesomeIcons.thumbsDown,
                             color: Colors.red,
                           ),
@@ -119,7 +117,7 @@ class _WaiverState extends ConsumerState<Waiver> {
         ),
       );
     } else {
-      return SizedBox();
+      return const SizedBox();
     }
   }
 }

@@ -1,10 +1,6 @@
 import 'package:draft_futbol/baguley-features/models/baguley_draft_player.dart';
-import 'package:draft_futbol/baguley-features/models/fixture.dart';
-import 'package:draft_futbol/models/draft_player.dart';
-import 'package:draft_futbol/models/pl_match.dart';
 import 'package:draft_futbol/models/players/match.dart';
 import 'package:draft_futbol/models/players/stat.dart';
-import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,11 +22,11 @@ class _BaguleyPlayerPopupState extends ConsumerState<BaguleyPlayerPopup> {
     List<Widget> widgets = [];
     if (widget.player.matches!.isEmpty) {
       return [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Column(
-              children: const [
+              children: [
                 Text("Blank GW",
                     style: TextStyle(fontFamily: "Inter-SemiBold")),
                 Text("No Matches", style: TextStyle(fontFamily: "Inter-Thin"))
@@ -40,20 +36,20 @@ class _BaguleyPlayerPopupState extends ConsumerState<BaguleyPlayerPopup> {
         )
       ];
     } else {
-      for (Match _match in widget.player.matches!) {
+      for (PlMatchStats _match in widget.player.matches!) {
         String? matchId = _match.matchId.toString();
         // String matchTeams =
-            // "${livePlMatches![matchId]!.homeTeam} v ${livePlMatches![matchId]!.awayTeam}";
-        widgets.add(Row(
+        // "${livePlMatches![matchId]!.homeTeam} v ${livePlMatches![matchId]!.awayTeam}";
+        widgets.add(const Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text("Teams to be confirmed",
-                style: const TextStyle(fontFamily: "Inter-SemiBold")),
+                style: TextStyle(fontFamily: "Inter-SemiBold")),
           ],
         ));
         widgets.add(
-          Row(
-            children: const [
+          const Row(
+            children: [
               Expanded(
                 flex: 6,
                 child: Text(
@@ -83,40 +79,40 @@ class _BaguleyPlayerPopupState extends ConsumerState<BaguleyPlayerPopup> {
 
         List<Widget> stats = [];
         for (Stat stat in _match.stats!) {
-            widgets.add(
-              Row(
-                children: [
-                  Expanded(
-                    flex: 6,
-                    child: Text(stat.statName!),
+          widgets.add(
+            Row(
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: Text(stat.statName!),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    stat.value.toString(),
+                    textAlign: TextAlign.center,
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      stat.value.toString(),
-                      textAlign: TextAlign.center,
-                    ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    stat.fantasyPoints.toString(),
+                    textAlign: TextAlign.center,
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      stat.fantasyPoints.toString(),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            );
+                ),
+              ],
+            ),
+          );
+        }
       }
-      }
-    return widgets;
+      return widgets;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     Color bonusColour = Theme.of(context).primaryColorDark;
-    for (Match match in widget.player.matches!) {
+    for (PlMatchStats match in widget.player.matches!) {
       for (Stat stat in match.stats!) {
         if (stat.statName == "Bonus") {
           if (stat.value == 3) {

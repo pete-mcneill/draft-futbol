@@ -372,7 +372,7 @@
                     [
                         {
                             "name": "Minutes played",
-                            "points": 2,
+                            "points": 4,
                             "value": 90,
                             "stat": "minutes"
                         },
@@ -6402,8 +6402,8 @@
                     [
                         {
                             "name": "Minutes played",
-                            "points": 2,
-                            "value": 90,
+                            "points": 0,
+                            "value": 0,
                             "stat": "minutes"
                         }
                     ],
@@ -18666,7 +18666,7 @@
                     [
                         {
                             "name": "Minutes played",
-                            "points": 2,
+                            "points": 4,
                             "value": 88,
                             "stat": "minutes"
                         },
@@ -29444,8 +29444,8 @@
                 }
             ],
             "code": 2293180,
-            "finished": true,
-            "finished_provisional": true,
+            "finished": false,
+            "finished_provisional": false,
             "kickoff_time": "2023-05-28T15:30:00Z",
             "minutes": 0,
             "provisional_start_time": false,
@@ -29458,7 +29458,7 @@
         },
         {
             "id": 372,
-            "started": true,
+            "started": false,
             "stats": [
                 {
                     "s": "goals_scored",
@@ -29708,8 +29708,8 @@
                 }
             ],
             "code": 2293181,
-            "finished": true,
-            "finished_provisional": true,
+            "finished": false,
+            "finished_provisional": false,
             "kickoff_time": "2023-05-28T15:30:00Z",
             "minutes": 0,
             "provisional_start_time": false,
@@ -29722,7 +29722,7 @@
         },
         {
             "id": 373,
-            "started": true,
+            "started": false,
             "stats": [
                 {
                     "s": "goals_scored",
@@ -29945,8 +29945,8 @@
                 }
             ],
             "code": 2293182,
-            "finished": true,
-            "finished_provisional": true,
+            "finished": false,
+            "finished_provisional": false,
             "kickoff_time": "2023-05-28T15:30:00Z",
             "minutes": 0,
             "provisional_start_time": false,

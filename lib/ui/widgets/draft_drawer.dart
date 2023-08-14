@@ -7,8 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../screens/player_pool.dart';
-
 class DraftDrawer extends ConsumerStatefulWidget {
   const DraftDrawer({Key? key}) : super(key: key);
 
@@ -42,7 +40,7 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 "Draft Leagues",
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.start,
               ),
             ),
@@ -63,8 +61,10 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
               child: Text('Transactions'),
             ),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => new Transactions()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const Transactions()));
             },
           ),
           // ListTile(
@@ -98,27 +98,27 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
           //     ref.watch(purchasesProvider.notifier).makePurchases();
           //   },
           // ),
-          Divider(),
+          const Divider(),
           Container(
             padding: const EdgeInsets.only(left: 20),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: Text(
                 "Utilities",
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.start,
               ),
             ),
           ),
-          if (!ref.watch(purchasesProvider).noAdverts!)
-            ListTile(
-              title: const Center(
-                child: Text('Remove Ads'),
-              ),
-              onTap: () {
-                ref.watch(purchasesProvider.notifier).makePurchases();
-              },
+          // if (!ref.watch(purchasesProvider).noAdverts!)
+          ListTile(
+            title: const Center(
+              child: Text('Remove Ads'),
             ),
+            onTap: () {
+              // ref.watch(purchasesProvider.notifier).makePurchases();
+            },
+          ),
           ListTile(
             title: const Center(
               child: Text('Settings'),
@@ -128,9 +128,9 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
                   MaterialPageRoute(builder: (context) => SettingsScreen()));
             },
           ),
-          Spacer(),
-          Divider(),
-          Text("Issues or queries:"),
+          const Spacer(),
+          const Divider(),
+          const Text("Issues or queries:"),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -142,7 +142,8 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
                     size: 50,
                   ),
                   onPressed: () {
-                    launchUrl(Uri.parse("https://github.com/PSJMcNeill/draft-futbol/issues"));
+                    launchUrl(Uri.parse(
+                        "https://github.com/PSJMcNeill/draft-futbol/issues"));
                   }),
               IconButton(
                   // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
@@ -153,10 +154,10 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
                   ),
                   onPressed: () {
                     final Uri params = Uri(
-                        scheme: 'mailto',
-                        path: 'psjmcneill@gmail.com',
-                        query: 'subject=Draft Futbol', //add subject and body here
-                      );
+                      scheme: 'mailto',
+                      path: 'psjmcneill@gmail.com',
+                      query: 'subject=Draft Futbol', //add subject and body here
+                    );
                     launchUrl(params);
                   }),
               // IconButton(
@@ -171,7 +172,7 @@ class _DraftDrawerState extends ConsumerState<DraftDrawer> {
               //     }),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           )
         ],

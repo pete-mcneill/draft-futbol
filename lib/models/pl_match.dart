@@ -8,7 +8,7 @@ class PlMatchesNotifier extends StateNotifier<PlMatches> {
     state = state..plMatches!.addAll({match.matchId!: match});
   }
 
-  Future<void> getPlFixtures(dynamic staticData, String gameweek) async {
+  Future<void> getPlFixtures(dynamic staticData, int gameweek) async {
     Map<String, PlMatch> _matches = {};
     try {
       for (var _match in staticData['fixtures'][gameweek]) {

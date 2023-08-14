@@ -1,13 +1,8 @@
 import 'package:draft_futbol/baguley-features/models/baguley_draft_player.dart';
 import 'package:draft_futbol/baguley-features/models/baguley_draft_team.dart';
-import 'package:draft_futbol/baguley-features/models/fixture.dart';
 import 'package:draft_futbol/baguley-features/screen/pitch/baguley_draft_player.dart';
 import 'package:draft_futbol/baguley-features/screen/pitch/player_popup.dart';
-import 'package:draft_futbol/models/DraftTeam.dart';
-import 'package:draft_futbol/models/draft_player.dart';
 import 'package:draft_futbol/providers/providers.dart';
-import 'package:draft_futbol/ui/screens/pitch/player.dart';
-import 'package:draft_futbol/ui/screens/pitch/player_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,7 +59,6 @@ class _BaguleySquadState extends ConsumerState<BaguleySquad> {
     } catch (e) {
       print(e);
     }
-    Map<String, PlMatch> matches = ref.watch(plMatchesProvider).plMatches!;
     return Container(
       // width: MediaQuery.of(context).size.width
       // constraints: BoxConstraints(minWidth: 11, maxWidth: 110, minHeight: 36),

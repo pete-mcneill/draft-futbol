@@ -4,6 +4,8 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../models/draft_team.dart';
+
 class ClassicPitchHeader extends ConsumerStatefulWidget
     implements PreferredSizeWidget {
   DraftTeam team;
@@ -20,7 +22,9 @@ class _ClassicPitchHeaderState extends ConsumerState<ClassicPitchHeader> {
   @override
   Widget build(BuildContext context) {
     bool liveBonus = ref.watch(utilsProvider).liveBps!;
-
+    DraftTeam _team =
+        ref.watch(fplGwDataProvider.select((value) => value.teams))![
+            widget.team.leagueId]![widget.team.id]!;
     return AppBar(
       bottom: TabBar(
           indicatorColor: Theme.of(context).buttonTheme.colorScheme!.secondary,
@@ -38,11 +42,11 @@ class _ClassicPitchHeaderState extends ConsumerState<ClassicPitchHeader> {
                   maxLines: 1,
                 ),
                 liveBonus
-                    ? Text(widget.team.bonusPoints.toString(),
+                    ? Text(_team.bonusPoints.toString(),
                         style: const TextStyle(
                           fontSize: 14,
                         ))
-                    : Text(widget.team.points.toString(),
+                    : Text(_team.points.toString(),
                         style: const TextStyle(
                           fontSize: 14,
                         ))

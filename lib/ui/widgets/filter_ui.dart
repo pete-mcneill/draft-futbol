@@ -16,7 +16,7 @@ class ChipOptions {
 }
 
 class FilterH2HMatches extends ConsumerWidget {
-  FilterH2HMatches({
+  const FilterH2HMatches({
     required this.options,
     Key? key,
   }) : super(
@@ -34,7 +34,11 @@ class FilterH2HMatches extends ConsumerWidget {
         Wrap(spacing: 5.0, runAlignment: WrapAlignment.end, children: <Widget>[
           for (var option in options)
             ChoiceChip(
-              label: Text(option.label),
+              label: Text(
+                option.label,
+              ),
+              labelStyle: TextStyle(
+                  color: option.selected ? Colors.black : Colors.white),
               selected: option.selected,
               onSelected: (selected) {
                 option.onSelected(!option.selected);

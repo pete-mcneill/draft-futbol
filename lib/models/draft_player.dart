@@ -7,25 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class DraftPlayersNotifier extends StateNotifier<DraftPlayers> {
   DraftPlayersNotifier() : super(DraftPlayers());
 
-  void setPlayerStatus(var elementStatus, String leagueId){
-    try{
-       for(var _player in elementStatus){
-        try{
-             state.players[_player["element"]]!.playerStatus![leagueId] = _player["status"].toString();
-      if(_player["owner"] != null){
-        state.players[_player["element"]]!.draftTeamId![leagueId] = _player["owner"].toString();
-      }
-    }
-    catch (e) {
-    print(e);
-  }
-       }
-    } catch (e) {
-    print(e);
-  }
-   
-  }
-
   void createAllDraftPlayers(var staticPlayers) {
     for (var player in staticPlayers) {
       DraftPlayer _player = DraftPlayer.fromJson(player);
@@ -40,9 +21,9 @@ class DraftPlayersNotifier extends StateNotifier<DraftPlayers> {
   void getLivePlayerData(var liveData) async {
     try {
       liveData['elements'].forEach((k, v) {
-        List<Match> _matches = [];
+        List<PlMatchStats> _matches = [];
         for (var liveMatch in v['explain']) {
-          Match _match = Match.fromJson(liveMatch);
+          PlMatchStats _match = PlMatchStats.fromJson(liveMatch);
           _matches.add(_match);
         }
         state.players[int.parse(k)]!.updateMatches(_matches);
@@ -56,7 +37,7 @@ class DraftPlayersNotifier extends StateNotifier<DraftPlayers> {
     try {
       state.players.forEach((id, DraftPlayer player) {
         if (player.matches != null) {
-          for (Match match in player.matches!) {
+          for (PlMatchStats match in player.matches!) {
             PlMatch plMatch = plMatches[match.matchId.toString()]!;
             if (plMatch.started! && !plMatch.finished!) {
               Map<int, List<Bps>> bps = plMatch.bpsPlayers;
@@ -99,14 +80,14 @@ class DraftPlayers {
 }
 
 class DraftPlayer {
-  String? playerId;
+  int? playerId;
   String? playerName;
   String? position;
-  String? teamId;
-  String? playerCode;
-  Map<String, String>? playerStatus;
-  Map<String, String>? draftTeamId;
-  List<Match>? matches;
+  int? teamId;
+  int? playerCode;
+  Map<int, String>? playerStatus;
+  Map<int, int>? draftTeamId;
+  List<PlMatchStats>? matches;
 
   DraftPlayer(
       {this.playerId,
@@ -117,7 +98,7 @@ class DraftPlayer {
       this.playerStatus,
       this.draftTeamId});
 
-  void updateMatches(List<Match> _matches) {
+  void updateMatches(List<PlMatchStats> _matches) {
     matches = _matches;
   }
 
@@ -137,11 +118,11 @@ class DraftPlayer {
         position = "FWD";
     }
     return DraftPlayer(
-        playerId: json['id'].toString(),
+        playerId: json['id'],
         playerName: json['web_name'],
         position: position,
-        playerCode: json["code"].toString(),
-        teamId: json['team'].toString(),
+        playerCode: json["code"],
+        teamId: json['team'],
         draftTeamId: {},
         playerStatus: {});
   }

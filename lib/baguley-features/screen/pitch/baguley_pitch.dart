@@ -1,15 +1,10 @@
 import 'package:draft_futbol/baguley-features/models/baguley_draft_team.dart';
-import 'package:draft_futbol/baguley-features/models/fixture.dart';
 import 'package:draft_futbol/baguley-features/screen/pitch/squad.dart';
-import 'package:draft_futbol/models/fixture.dart';
 import 'package:draft_futbol/ui/screens/pitch/line_painter.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_background.dart';
-import 'package:draft_futbol/ui/screens/pitch/pitch_header.dart';
-import 'package:draft_futbol/ui/screens/pitch/squad.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:flutter/material.dart';
 
-import '../../../models/DraftTeam.dart';
 import 'baguley_pitch_header.dart';
 
 class Baguleypitch extends StatefulWidget {

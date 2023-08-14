@@ -3,22 +3,22 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/services/subs_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
 
 import '../../models/DraftTeam.dart';
-import '../../models/draft_subs.dart';
+import '../../models/draft_team.dart';
+import '../../models/sub.dart';
 
 class ResetSubsPopUp {
-  static showAlertDialog(BuildContext context, Map<int, DraftSub> draftSubs,
+  static showAlertDialog(BuildContext context, Map<int, Sub> Subs,
       Map<int, DraftPlayer> players, DraftTeam team) async {
     bool _isLoading = false;
-    Map<int, DraftSub> activeSubs = draftSubs;
-    Map<String, bool> subSelected = {};
-    Map<int, DraftSub> subsToRemove = {};
+    Map<int, Sub> activeSubs = Subs;
+    Map<int, bool> subSelected = {};
+    Map<int, Sub> subsToRemove = {};
     bool subsRemainingForTeam = true;
 
     Widget resetAll = ElevatedButton(
-      child: Text("Reset All"),
+      child: const Text("Reset All"),
       onPressed: () {
         print("REset All");
       },
@@ -26,26 +26,33 @@ class ResetSubsPopUp {
 
     Widget resetSelected(WidgetRef ref, setState) {
       return ElevatedButton(
-        child: Text("Reset Selected"),
+        child: const Text("Reset Selected"),
         onPressed: () async {
           try {
             setState(() {
               _isLoading = true;
             });
             print("Reset Selected");
-            Map<int, DraftSub> subs =
+
+            ref
+                .read(fplGwDataProvider.notifier)
+                .resetSelectedSubs(subsToRemove, team);
+            Map<int, Sub> subs =
                 await SubsService().removeSelectedSubs(subsToRemove, team.id!);
             // String gameweek = ref.read(gameweekProvider)!.currentGameweek;
             // await ref.read(draftTeamsProvider.notifier).refreshSquadAfterSubs(team.id!, gameweek, subs);
             // ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players);
-            ref.refresh(refreshFutureLiveDataProvider);
-            await ref.read(refreshFutureLiveDataProvider.future);
-            ref.read(utilsProvider.notifier).setSubsReset(true);
+            // ref.refresh(refreshFutureLiveDataProvider);
+            // await ref.read(refreshFutureLiveDataProvider.future);
+            // ref.read(utilsProvider.notifier).setSubsReset(true);
             setState(() {
               activeSubs = subs;
+              subsToRemove = {};
             });
             if (subs.isEmpty) {
               Navigator.of(context, rootNavigator: true).pop('dialog');
+            } else {
+              setState({_isLoading = false});
             }
           } catch (error) {
             print(error);
@@ -54,10 +61,10 @@ class ResetSubsPopUp {
       );
     }
 
-    List<Widget> generateSubs(setState, Map<String, bool> subSelected) {
+    List<Widget> generateSubs(setState, Map<int, bool> subSelected) {
       List<Widget> subs = [];
       for (var subEntry in activeSubs.entries) {
-        DraftSub sub = subEntry.value;
+        Sub sub = subEntry.value;
         DraftPlayer playerIn = players[sub.subInId]!;
         DraftPlayer playerOut = players[sub.subOutId]!;
         // subSelected[playerIn.playerId!+playerOut.playerId!] = false;
@@ -107,10 +114,8 @@ class ResetSubsPopUp {
             Checkbox(
               checkColor: Colors.white,
               // fillColor: MaterialStateProperty.resolveWith(Colors.green!),
-              value:
-                  subSelected[playerIn.playerId! + playerOut.playerId!] != null
-                      ? subSelected[playerIn.playerId! + playerOut.playerId!]
-                      : false,
+              value: subSelected[playerIn.playerId! + playerOut.playerId!] ??
+                  false,
               onChanged: (bool? value) {
                 setState(() {
                   subSelected[playerIn.playerId! + playerOut.playerId!] =
@@ -141,16 +146,16 @@ class ResetSubsPopUp {
               Column(children: [
                 _isLoading
                     ? Center(
-                        child: Container(
+                        child: SizedBox(
                             height: MediaQuery.of(context).size.height,
-                            child: Column(
+                            child: const Column(
                               children: [
                                 Text("Saving Changes"),
                                 CircularProgressIndicator(),
                               ],
                             )),
                       )
-                    : Text(
+                    : const Text(
                         "Sub In - Sub Out",
                         textAlign: TextAlign.center,
                       ),

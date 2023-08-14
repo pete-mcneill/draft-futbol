@@ -49,12 +49,12 @@ class _SeasonHistoryScreenState extends State<SeasonHistoryScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => new BaguleyLeagueStandings(
+                            builder: (context) => BaguleyLeagueStandings(
                                 seasonId: widget.seasonId)));
                   },
                   child: Card(
                     elevation: 8.0,
-                    margin: new EdgeInsets.symmetric(
+                    margin: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 6.0),
                     child: Container(
                       decoration: BoxDecoration(
@@ -69,11 +69,11 @@ class _SeasonHistoryScreenState extends State<SeasonHistoryScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                new BaguleyResults(seasonId: widget.seasonId)));
+                                BaguleyResults(seasonId: widget.seasonId)));
                   },
                   child: Card(
                     elevation: 8.0,
-                    margin: new EdgeInsets.symmetric(
+                    margin: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 6.0),
                     child: Container(
                       decoration: BoxDecoration(
@@ -91,17 +91,17 @@ class _SeasonHistoryScreenState extends State<SeasonHistoryScreen> {
   }
 
   makeListTile(String title, IconData icon) => ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       leading: Container(
-        padding: EdgeInsets.only(right: 12.0),
-        decoration: new BoxDecoration(
-            border: new Border(
-                right: new BorderSide(width: 1.0, color: Colors.white24))),
+        padding: const EdgeInsets.only(right: 12.0),
+        decoration: const BoxDecoration(
+            border: Border(
+                right: BorderSide(width: 1.0, color: Colors.white24))),
         child: Icon(icon, color: Colors.white),
       ),
       title: Text(
         title,
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
 
@@ -112,5 +112,5 @@ class _SeasonHistoryScreenState extends State<SeasonHistoryScreen> {
       //   ],
       // ),
       trailing:
-          Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0));
+          const Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 30.0));
 }

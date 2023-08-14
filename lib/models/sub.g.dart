@@ -1,23 +1,23 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'draft_subs.dart';
+part of 'sub.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class DraftSubAdapter extends TypeAdapter<DraftSub> {
+class SubAdapter extends TypeAdapter<Sub> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
-  DraftSub read(BinaryReader reader) {
+  Sub read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return DraftSub(
-      fields[0] as String,
+    return Sub(
+      fields[0] as int,
       fields[1] as int,
       fields[2] as int,
       fields[3] as int,
@@ -27,7 +27,7 @@ class DraftSubAdapter extends TypeAdapter<DraftSub> {
   }
 
   @override
-  void write(BinaryWriter writer, DraftSub obj) {
+  void write(BinaryWriter writer, Sub obj) {
     writer
       ..writeByte(6)
       ..writeByte(0)
@@ -50,7 +50,7 @@ class DraftSubAdapter extends TypeAdapter<DraftSub> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DraftSubAdapter &&
+      other is SubAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

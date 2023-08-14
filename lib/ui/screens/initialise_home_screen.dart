@@ -3,14 +3,12 @@ import 'package:draft_futbol/services/utils_service.dart';
 import 'package:draft_futbol/ui/screens/home_page.dart';
 import 'package:draft_futbol/ui/screens/on_boarding_screen.dart';
 import 'package:draft_futbol/ui/widgets/loading.dart';
-import 'package:draft_futbol/utils/color_scheme.dart';
 import 'package:draft_futbol/utils/utilities.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+// import 'package:purchases_flutter/purchases_flutter.dart';
 
 class InitialiseHomeScreen extends ConsumerStatefulWidget {
   const InitialiseHomeScreen({Key? key}) : super(key: key);
@@ -30,7 +28,7 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
     future = _asyncmethodCall();
   }
 
-  Future<void> _asyncmethodCall() async {
+  Future<Map<int, dynamic>> _asyncmethodCall() async {
     try {
       final settings = await Hive.openBox('settings');
       bool isLightTheme = settings.get('isLightTheme') ?? false;
@@ -48,44 +46,27 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
     }
 
     try {
-      await getLeagueIds();
+      return await getLeagueIds();
     } catch (e) {
       print(e);
+      return {};
     }
   }
 
-  Future<void> getLeagueIds() async {
+  Future<Map<int, dynamic>> getLeagueIds() async {
     try {
-      Map<String, dynamic> _leagueIds = await setLeagueIds();
+      Map<int, dynamic> _leagueIds = await setLeagueIds();
       ref.read(utilsProvider.notifier).setLeagueIds(_leagueIds);
       ref.read(utilsProvider.notifier).setDefaultActiveLeague();
-      Package package;
-      Offerings offerings = await Purchases.getOfferings();
-      if (offerings.current != null) {
-        try {
-          package = offerings.current!.availablePackages[0];
-          String price = package.product.priceString;
-          ref.read(purchasesProvider.notifier).updateSubscriptionPrice(price);
-        } on Exception catch (e) {
-          print("Failed to get subscription price");
-          ref.read(purchasesProvider.notifier).updateSubscriptionPrice("");
-        }
-      }
-      PurchaserInfo purchaserInfo = await Purchases.getPurchaserInfo();
-      if (purchaserInfo.entitlements.all["noAdverts"]!.isActive) {
-        print("User has subscription");
-        ref.read(purchasesProvider.notifier).updateNoAdvertsStatus(true);
-      } else {
-        ref.read(purchasesProvider.notifier).updateNoAdvertsStatus(false);
-      }
+      return _leagueIds;
     } catch (e) {
       print(e);
       print("Failed to get entitlements");
-      ref.read(purchasesProvider.notifier).updateNoAdvertsStatus(false);
+      return {};
     }
   }
 
-  bool checkLeagueIdsValid(Map<String, dynamic> leagueIds) {
+  bool checkLeagueIdsValid(Map<int, dynamic> leagueIds) {
     for (var league in leagueIds.values) {
       if (league['season'] == null) {
         clearLeagueIds();
@@ -100,7 +81,9 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
     if (utils.leagueIds!.isEmpty || !checkLeagueIdsValid(utils.leagueIds!)) {
       return const OnBoardingScreen();
     } else {
-      return HomePage(leagueType: "h");
+      Map<int, dynamic> leagueIds = ref.read(utilsProvider).leagueIds!;
+      List<int> ids = leagueIds.keys.toList();
+      return HomePage(leagueType: "h", leagueIds: ids);
     }
   }
 
@@ -111,20 +94,20 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Light Dark Theme',
+      title: 'Draft Futbol',
       // Theme config for FlexColorScheme version 7.1.x. Make sure you use
 // same or higher package version, but still same major version. If you
 // use a lower package version, some properties may not be supported.
 // In that case remove them after copying this theme to your app.
       theme: FlexThemeData.light(
         colors: const FlexSchemeColor(
-          primary: Color(0xff023047),
-          primaryContainer: Color(0xff8edbce),
-          secondary: Color(0xfff86541),
-          secondaryContainer: Color(0xffffad91),
-          tertiary: Color(0xfff07e24),
-          tertiaryContainer: Color(0xffffbf93),
-          appBarColor: Color(0xffffad91),
+          primary: Color(0xffb1cff5),
+          primaryContainer: Color(0xff3873ba),
+          secondary: Color(0xfff57859),
+          secondaryContainer: Color(0xfff57859),
+          tertiary: Color(0xfff57859),
+          tertiaryContainer: Color(0xff994600),
+          appBarColor: Color(0xfff57859),
           error: Color(0xffb00020),
         ),
         surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
@@ -168,6 +151,7 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
           navigationBarIndicatorOpacity: 1.00,
           navigationBarElevation: 10.0,
           tabBarItemSchemeColor: SchemeColor.secondaryContainer,
+          tabBarIndicatorSchemeColor: SchemeColor.secondaryContainer,
         ),
         useMaterial3ErrorColors: true,
         visualDensity: FlexColorScheme.comfortablePlatformDensity,

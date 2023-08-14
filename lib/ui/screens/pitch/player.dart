@@ -5,6 +5,7 @@ import 'package:draft_futbol/models/pl_teams.dart';
 import 'package:draft_futbol/models/players/match.dart';
 import 'package:draft_futbol/models/players/stat.dart';
 import 'package:draft_futbol/providers/providers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,13 +30,13 @@ class _PlayerState extends ConsumerState<Player> {
   bool matchesStarted = false;
   bool matchesFinished = false;
   bool liveBonus = false;
-  late Map<String, PlMatch> matches;
+  late Map<int, PlMatch> matches;
 
   int calculatePlayerScore() {
     int playerScore = 0;
     bool matchesStarted = false;
-    for (Match _match in widget.player.matches!) {
-      if (matches[_match.matchId.toString()]!.started!) {
+    for (PlMatchStats _match in widget.player.matches!) {
+      if (matches[_match.matchId]!.started!) {
         matchesStarted = true;
       }
       for (Stat stat in _match.stats!) {
@@ -53,7 +54,7 @@ class _PlayerState extends ConsumerState<Player> {
 
   List<Icon> getPlayerIcons() {
     List<Icon> icons = [];
-    for (Match _match in widget.player.matches!) {
+    for (PlMatchStats _match in widget.player.matches!) {
       for (Stat stat in _match.stats!) {
         switch (stat.statName) {
           case "Goals scored":
@@ -72,8 +73,8 @@ class _PlayerState extends ConsumerState<Player> {
 
   List<Widget> getPlayerFixtures() {
     List<Widget> fixtures = [];
-    for (Match _match in widget.player.matches!) {
-      PlMatch _plMatch = matches[_match.matchId.toString()]!;
+    for (PlMatchStats _match in widget.player.matches!) {
+      PlMatch _plMatch = matches[_match.matchId]!;
       if (!_plMatch.started!) {
         if (_plMatch.homeTeamId == widget.player.teamId) {
           fixtures.add(
@@ -115,14 +116,14 @@ class _PlayerState extends ConsumerState<Player> {
       print("test");
     }
     Color bonusColour = Theme.of(context).canvasColor;
-    matches = ref.watch(plMatchesProvider).plMatches!;
+    matches = ref.watch(fplGwDataProvider.select((value) => value.plMatches!));
     bool bonus = false;
     liveBonus = ref.watch(utilsProvider).liveBps!;
-    for (Match match in widget.player.matches!) {
-      if (matches[match.matchId.toString()]!.started!) {
+    for (PlMatchStats match in widget.player.matches!) {
+      if (matches[match.matchId]!.started!) {
         matchesStarted = true;
       }
-      if (matches[match.matchId.toString()]!.finished!) {
+      if (matches[match.matchId]!.finished!) {
         matchesFinished = true;
       }
       for (Stat stat in match.stats!) {
@@ -142,8 +143,8 @@ class _PlayerState extends ConsumerState<Player> {
     }
     String playerImage;
     // Store team metadata
-    PlTeam team =
-        ref.watch(plTeamsProvider).plTeams[widget.player.teamId.toString()]!;
+    PlTeam team = ref.read(fplGwDataProvider.select((value) => value.plTeams))![
+        widget.player.teamId]!;
     if (widget.player.position == "GK") {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-keeper.png';
@@ -152,7 +153,7 @@ class _PlayerState extends ConsumerState<Player> {
           'assets/images/kits/' + team.code.toString() + '-outfield.png';
     }
 
-    Color? playerBackgroundColor = null;
+    Color? playerBackgroundColor;
 
     if (widget.subModeEnabled && widget.subValid) {
       playerBackgroundColor = const Color(0xFF008000);
@@ -162,10 +163,13 @@ class _PlayerState extends ConsumerState<Player> {
     if (widget.subHighlighted! && widget.subValid) {
       playerBackgroundColor = Colors.blue;
     }
+    double pitchWidth = MediaQuery.of(context).size.width > 1000
+        ? 1000
+        : MediaQuery.of(context).size.width;
     return ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: 50,
-          maxWidth: MediaQuery.of(context).size.width / 5,
+          maxWidth: pitchWidth / 5,
           maxHeight: MediaQuery.of(context).size.height / 6,
         ),
         child: SizedBox(
@@ -192,7 +196,8 @@ class _PlayerState extends ConsumerState<Player> {
                           15,
                     ),
                     Container(
-                      constraints: BoxConstraints(minHeight: 50, minWidth: 100),
+                      constraints:
+                          const BoxConstraints(minHeight: 50, minWidth: 100),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.0),
                         // border: if(!bonus && !liveBonus) Border.all(),

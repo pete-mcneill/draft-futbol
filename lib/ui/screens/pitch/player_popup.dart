@@ -16,22 +16,23 @@ class PlayerPopup extends ConsumerStatefulWidget {
 
 class _PlayerPopupState extends ConsumerState<PlayerPopup> {
   bool liveBonus = false;
-  Map<String, PlMatch>? livePlMatches;
+  Map<int, PlMatch>? livePlMatches;
   @override
   void initState() {
     super.initState();
-    livePlMatches = ref.read(plMatchesProvider).plMatches;
+    livePlMatches =
+        ref.read(fplGwDataProvider.select((value) => value.plMatches));
   }
 
   List<Widget> getMatchStats() {
     List<Widget> widgets = [];
     if (widget.player.matches!.isEmpty) {
       return [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Column(
-              children: const [
+              children: [
                 Text("Blank GW",
                     style: TextStyle(fontFamily: "Inter-SemiBold")),
                 Text("No Matches", style: TextStyle(fontFamily: "Inter-Thin"))
@@ -41,8 +42,8 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
         )
       ];
     } else {
-      for (Match _match in widget.player.matches!) {
-        String? matchId = _match.matchId.toString();
+      for (PlMatchStats _match in widget.player.matches!) {
+        int? matchId = _match.matchId;
         String matchTeams =
             "${livePlMatches![matchId]!.homeTeam} v ${livePlMatches![matchId]!.awayTeam}";
         widgets.add(Row(
@@ -53,8 +54,8 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
           ],
         ));
         widgets.add(
-          Row(
-            children: const [
+          const Row(
+            children: [
               Expanded(
                 flex: 6,
                 child: Text(
@@ -147,7 +148,7 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
   Widget build(BuildContext context) {
     liveBonus = ref.watch(utilsProvider).liveBps!;
     Color bonusColour = Theme.of(context).primaryColorDark;
-    for (Match match in widget.player.matches!) {
+    for (PlMatchStats match in widget.player.matches!) {
       for (Stat stat in match.stats!) {
         if (stat.statName == "Bonus") {
           if (stat.value == 3) {

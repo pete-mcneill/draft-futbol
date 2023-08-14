@@ -2,17 +2,21 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<Map<String, dynamic>> setLeagueIds() async {
-  Map<String, dynamic> leagueIds = {};
+Future<Map<int, dynamic>> setLeagueIds() async {
+  Map<String, dynamic> _leagueIds = {};
+  Map<int, dynamic> convertedIds = {};
   try {
     final SharedPreferences _prefs = await SharedPreferences.getInstance();
     // _prefs.clear();
     String? sharedPrefIds = _prefs.getString('league_ids');
-    leagueIds = json.decode(sharedPrefIds!);
+    _leagueIds = json.decode(sharedPrefIds!);
+    convertedIds = _leagueIds.map<int, dynamic>(
+      (k, v) => MapEntry(int.parse(k), v), // parse String back to int
+    );
   } catch (e) {
     print(e);
   }
-  return leagueIds;
+  return convertedIds;
 }
 
 void clearLeagueIds() async {

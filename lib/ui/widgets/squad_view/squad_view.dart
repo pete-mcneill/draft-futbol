@@ -1,16 +1,12 @@
-import 'package:draft_futbol/ui/screens/pitch/classic_view/classic_pitch_header.dart';
 import 'package:draft_futbol/ui/screens/pitch/line_painter.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_background.dart';
-import 'package:draft_futbol/ui/screens/pitch/squad.dart';
-import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
-import 'package:draft_futbol/ui/widgets/pitch_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_header.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_pitch.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../models/DraftTeam.dart';
 import '../../../models/draft_player.dart';
 import '../../../providers/providers.dart';
 
@@ -26,7 +22,7 @@ class SquadView extends ConsumerStatefulWidget {
 
 class _SquadViewState extends ConsumerState<SquadView> {
   Map<int, DraftPlayer>? players;
-  String? activeLeague;
+  int? activeLeague;
   List<DraftPlayer> getSquad(int teamId) {
     var testing = players!.values
         .where((DraftPlayer player) =>
@@ -42,44 +38,58 @@ class _SquadViewState extends ConsumerState<SquadView> {
   @override
   Widget build(BuildContext context) {
     activeLeague = ref.watch(utilsProvider).activeLeagueId;
-    players = ref.read(draftPlayersProvider).players;
+    players = ref.read(fplGwDataProvider.select((value) => value.players));
     double pitchHeight =
         (MediaQuery.of(context).size.height - AppBar().preferredSize.height);
     double subsLength = (pitchHeight - (pitchHeight / 10) * 7);
     double lineLength = pitchHeight - subsLength;
+    double pitchWidth = MediaQuery.of(context).size.width > 1000
+        ? 1000
+        : MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: SquadAppBar(),
+      appBar: const SquadAppBar(),
       body: Container(
         child: DefaultTabController(
           animationDuration: Duration.zero,
           length: 1,
           child: Scaffold(
-            appBar: SquadHeader(teamName: widget.teamName),
-            body: TabBarView(
-              children: [
-                SingleChildScrollView(
-                  child: Stack(
-                    children: [
-                      PitchBackground(
-                        pitchHeight: pitchHeight,
-                      ),
-                      SizedBox(
-                          height: pitchHeight,
-                          width: MediaQuery.of(context).size.width,
-                          // color: Colors.black,
-                          child: CustomPaint(
-                            painter: LinePainter(pitchLength: lineLength),
-                          )),
-                      SquadPitch(squad: widget.players)
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+              appBar: SquadHeader(teamName: widget.teamName),
+              body: kIsWeb
+                  ? Center(
+                      child: ClipRect(
+                          child: SizedBox(
+                              width: 1000,
+                              child: getTabBars(
+                                  pitchHeight, pitchWidth, lineLength))))
+                  : getTabBars(pitchHeight, pitchWidth, lineLength)),
         ),
         // ],
       ),
+    );
+  }
+
+  TabBarView getTabBars(
+      double pitchHeight, double pitchWidth, double lineLength) {
+    return TabBarView(
+      children: [
+        SingleChildScrollView(
+          child: Stack(
+            children: [
+              PitchBackground(
+                pitchHeight: pitchHeight,
+              ),
+              SizedBox(
+                  height: pitchHeight,
+                  width: pitchWidth,
+                  // color: Colors.black,
+                  child: CustomPaint(
+                    painter: LinePainter(pitchLength: lineLength),
+                  )),
+              SquadPitch(squad: widget.players)
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
