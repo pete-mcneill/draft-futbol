@@ -9,7 +9,6 @@ import 'package:draft_futbol/services/draft_league_service.dart';
 import 'package:draft_futbol/services/draft_match_service.dart';
 import 'package:draft_futbol/services/draft_team_service.dart';
 import 'package:draft_futbol/services/premier_league_match_service.dart';
-import 'package:draft_futbol/services/subs_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
@@ -132,9 +131,11 @@ class FplDataNotifier extends StateNotifier<FplData> {
               List bonusStandings =
                   json.decode(json.encode(league.rawStandings));
               state.liveStandings![leagueId] = DraftleagueService()
-                  .getClassicLiveStandings(liveStandings, _teams, false);
+                  .getClassicLiveStandings(liveStandings, _teams, false,
+                      state.players!, state.plMatches!);
               state.bonusStanding![leagueId] = DraftleagueService()
-                  .getClassicLiveStandings(bonusStandings, _teams, true);
+                  .getClassicLiveStandings(bonusStandings, _teams, true,
+                      state.players!, state.plMatches!);
             } catch (e) {
               print(e);
             }

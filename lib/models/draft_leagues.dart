@@ -44,10 +44,11 @@ class DraftLeague {
     List<dynamic> h2hFixtures = [];
     for (var team in leagueData['league_entries']) {
       teams.add({
-        "name": team['entry_name'],
-        "manager": "${team['player_first_name']} ${team['player_last_name']}",
-        "entry_id": team['entry_id'],
-        "id": team["id"]
+        "name": team['entry_name'] ??= "Average",
+        "manager":
+            "${team['player_first_name'] ??= ""} ${team['player_last_name'] ??= "Average"}",
+        "entry_id": team['entry_id'] ??= 0,
+        "id": team["id"] ??= 0
       });
     }
     if (leagueData['league']['scoring'] == 'h') {

@@ -19,18 +19,20 @@ class DraftTeamService {
       Map<int, DraftTeam> teams = {};
       for (var team in league.teams) {
         DraftTeam _team = DraftTeam.fromJson(team, leagueId);
-        var squad = await _api.getSquad(_team.entryId!, gameweek);
-        for (var player in squad['picks']) {
-          _team.squad![player['element']] = player['position'];
-        }
-        if (subs.isNotEmpty) {
-          subs.forEach((key, value) {
-            if (value.teamId == _team.id) {
-              _team.squad![value.subInId] = value.subOutPosition;
-              _team.squad![value.subOutId] = value.subInPosition;
-              _team.userSubsActive = true;
-            }
-          });
+        if (_team.teamName != "Average") {
+          var squad = await _api.getSquad(_team.entryId!, gameweek);
+          for (var player in squad['picks']) {
+            _team.squad![player['element']] = player['position'];
+          }
+          if (subs.isNotEmpty) {
+            subs.forEach((key, value) {
+              if (value.teamId == _team.id) {
+                _team.squad![value.subInId] = value.subOutPosition;
+                _team.squad![value.subOutId] = value.subInPosition;
+                _team.userSubsActive = true;
+              }
+            });
+          }
         }
         teams[_team.id!] = _team;
       }
@@ -46,9 +48,6 @@ class DraftTeamService {
       var elementStatus, int leagueId, Map<int, DraftPlayer> players) {
     try {
       for (var _player in elementStatus) {
-        if (_player['element'] == 415) {
-          print("ISAK");
-        }
         try {
           players[_player["element"]]!.playerStatus![leagueId] =
               _player["status"];
@@ -95,7 +94,6 @@ class DraftTeamService {
       Map<int, DraftPlayer> players, Map<int, DraftTeam> draftTeams) {
     int leagueScore = 0;
     int leagueBonusScore = 0;
-    int teams = 0;
     int averageId = 0;
     int averageScore = 0;
     int averageBonusScore = 0;
@@ -103,16 +101,18 @@ class DraftTeamService {
     draftTeams.forEach((teamId, DraftTeam team) {
       if (team.teamName != "Average") {
         team = getTeamScore(team, players);
+        leagueScore += team.points!;
+        leagueBonusScore += team.bonusPoints!;
       } else {
         averageId = teamId;
       }
     });
-    // averageScore = leagueScore ~/ (_teams.length - 1).round();
-    // averageBonusScore = leagueBonusScore ~/ (_teams.length - 1).round();
-    // if (averageId != 0) {
-    //   _teams[averageId]!.points = averageScore;
-    //   _teams[averageId]!.bonusPoints = averageBonusScore;
-    // }
+    if (averageId != 0) {
+      averageScore = leagueScore ~/ (draftTeams.length - 1).round();
+      averageBonusScore = leagueBonusScore ~/ (draftTeams.length - 1).round();
+      draftTeams[averageId]!.points = averageScore;
+      draftTeams[averageId]!.bonusPoints = averageBonusScore;
+    }
     return draftTeams;
   }
 

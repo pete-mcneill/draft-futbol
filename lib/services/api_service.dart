@@ -8,8 +8,7 @@ class Api {
   String baseUrl = '';
 
   Api() {
-    // baseUrl = 'https://draft.premierleague.com';
-    baseUrl = 'http://192.168.38.114:3000';
+    baseUrl = 'https://draft.premierleague.com';
   }
 
   Future<dynamic> proxyViaFirebase(path) async {

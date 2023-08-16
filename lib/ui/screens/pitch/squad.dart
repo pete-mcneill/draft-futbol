@@ -188,8 +188,10 @@ class _SquadState extends ConsumerState<Squad> {
     // Check if player played a match already
     for (PlMatchStats match in player.matches!) {
       for (Stat stat in match.stats!) {
-        if (stat.statName == "Minutes played" && stat.value == 0) {
-          subAllowed = true;
+        if (stat.statName == "Minutes played") {
+          if (stat.value != 0) {
+            subAllowed = false;
+          }
           break;
         }
       }

@@ -132,7 +132,7 @@ class _TradeState extends ConsumerState<Trade> {
 
   @override
   Widget build(BuildContext context) {
-    return ref.refresh(allTrades).when(
+    return ref.watch(allTrades).when(
         loading: () => const Loading(),
         error: (err, stack) => Text('Error: $err'),
         data: (config) {
@@ -152,38 +152,40 @@ class _TradeState extends ConsumerState<Trade> {
                 onRefresh: () async {
                   ref.refresh(allTrades);
                 },
-                child: SingleChildScrollView(
-                  child: Column(children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          flex: 6,
-                          child: Text(
-                            "Offered",
-                            textAlign: TextAlign.center,
+                child: _trades.isEmpty
+                    ? Center(child: Text("No trades processed yet...."))
+                    : SingleChildScrollView(
+                        child: Column(children: [
+                          const SizedBox(
+                            height: 10,
                           ),
-                        ),
-                        Expanded(
-                          flex: 6,
-                          child: Text(
-                            "Requested",
-                            textAlign: TextAlign.center,
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                flex: 6,
+                                child: Text(
+                                  "Offered",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 6,
+                                child: Text(
+                                  "Requested",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    for (var trade in _trades) ...[
-                      generateTrade(trade),
-                      const SizedBox(
-                        height: 10,
-                      )
-                    ],
-                  ]),
-                ),
+                          for (var trade in _trades) ...[
+                            generateTrade(trade),
+                            const SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ]),
+                      ),
               ),
             );
           } else {

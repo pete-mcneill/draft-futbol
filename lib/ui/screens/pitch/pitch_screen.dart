@@ -49,6 +49,7 @@ class _PitchState extends ConsumerState<Pitch> {
     return Scaffold(
       appBar: const PitchAppBar(),
       body: DefaultTabController(
+        initialIndex: widget.homeTeam.teamName == "Average" ? 1 : 0,
         animationDuration: const Duration(seconds: 1),
         length: 2,
         child: Scaffold(

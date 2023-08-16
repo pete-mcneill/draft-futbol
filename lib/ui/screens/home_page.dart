@@ -126,22 +126,23 @@ class _HomePageState extends ConsumerState<HomePage> {
                     // margin:
                     //     const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
                     alignment: FractionalOffset.center,
-                    child:
-                        draftStatus == "pre" || gameweek!.currentGameweek == 0
-                            ? DraftPlaceholder(
-                                leagueData: leagueData,
-                              )
-                            : RefreshIndicator(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .secondaryContainer,
-                                child: leagueData.scoring == 'h'
-                                    ? h2hOptions[navBarIndex]
-                                    : classicOptions[navBarIndex],
-                                onRefresh: () async {
-                                  ref.refresh(getFplData(widget.leagueIds));
-                                },
-                              ),
+                    child: draftStatus == "pre" ||
+                            gameweek!.currentGameweek == 0
+                        ? DraftPlaceholder(
+                            leagueData: leagueData,
+                          )
+                        : RefreshIndicator(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
+                            child: leagueData.scoring == 'h'
+                                ? h2hOptions[navBarIndex]
+                                : classicOptions[navBarIndex],
+                            onRefresh: () async {
+                              var updatedData = await ref
+                                  .refresh(getFplData(widget.leagueIds).future);
+                            },
+                          ),
                   ),
                 )));
           },

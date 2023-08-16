@@ -93,7 +93,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
         .map((key) => MultiSelectItem(key.key, key.value.teamName!))
         .toList();
 
-    AsyncValue config = ref.refresh(allTransactions);
+    AsyncValue config = ref.watch(allTransactions);
 
     try {
       return config.when(
@@ -109,21 +109,29 @@ class _TransactionsState extends ConsumerState<Transactions> {
                 ref.read(fplGwDataProvider).players!;
             Gameweek gameweek =
                 ref.watch(fplGwDataProvider.select((value) => value.gameweek!));
-            // int currentGameweek = (gameweek.waiversProcessed
-            //     ? (int.parse(gameweek.currentGameweek) + 1).toString()
-            //     : gameweek.currentGameweek) as int;
-            int currentGameweek = 38;
+            int currentGameweek = (gameweek.waiversProcessed
+                ? (gameweek.currentGameweek + 1)
+                : gameweek.currentGameweek);
             if (!waiversFiltered) {
               _draftTeams = teams.keys.toList();
               visibleWaivers = [];
               visibleFreeAgents = [];
-              for (Transaction transaction
-                  in transactions[activeLeague]![currentGameweek]!) {
-                if (transaction.type == "w") {
-                  visibleWaivers.add(transaction);
-                } else if (transaction.type == "f") {
-                  visibleFreeAgents.add(transaction);
+              try {
+                for (Transaction transaction
+                    in transactions[activeLeague]![currentGameweek]!) {
+                  if (transaction.type == "w") {
+                    visibleWaivers.add(transaction);
+                  } else if (transaction.type == "f") {
+                    visibleFreeAgents.add(transaction);
+                  }
                 }
+              } catch (e) {
+                return Scaffold(
+                    appBar: DraftAppBar(
+                      leading: true,
+                      settings: false,
+                    ),
+                    body: Center(child: Text("No Transactions made this GW")));
               }
             }
 

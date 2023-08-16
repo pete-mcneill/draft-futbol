@@ -189,8 +189,8 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
                         ref
                             .read(utilsProvider.notifier)
                             .updateActiveLeague(activekey);
-                        final data =
-                            ref.refresh(getFplData(updatedIds.keys.toList()));
+                        final data = await ref.refresh(
+                            getFplData(updatedIds.keys.toList()).future);
                         if (ref.watch(utilsProvider).leagueIds!.isEmpty) {
                           Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(

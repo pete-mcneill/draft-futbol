@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'AppException.dart';
 
 class Commons {
-  // static const baseUrl = "https://draft.premierleague.com";
-  static const baseUrl = 'http://192.168.38.114:3000';
+  static const baseUrl = "https://draft.premierleague.com";
   static dynamic returnResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:

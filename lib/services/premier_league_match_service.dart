@@ -42,11 +42,11 @@ class PremierLeagueMatchService {
           }
         }
         PlMatch match = PlMatch.fromJson(
-            _match['id'].toString(),
+            _match['id'],
             homeTeamName,
             awayTeamName,
-            homeTeam.toString(),
-            awayTeam.toString(),
+            homeTeam,
+            awayTeam,
             homeCode,
             awayCode,
             _match['started'],
@@ -57,7 +57,8 @@ class PremierLeagueMatchService {
             awayShortName,
             _match['team_h_score'] ?? 0,
             _match['team_a_score'] ?? 0,
-            _match['stats']);
+            _match['stats'],
+            _match['kickoff_time']);
         _matches[_match['id']] = match;
       }
       return _matches;

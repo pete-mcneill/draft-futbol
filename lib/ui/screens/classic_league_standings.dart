@@ -239,7 +239,7 @@ class _ClassicLeagueStandingsState
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black)),
-                        Text(remainingSubsMatches,
+                        Text(team.remainingPlayersMatches.toString(),
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.black))
                       ],
@@ -257,7 +257,7 @@ class _ClassicLeagueStandingsState
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black)),
-                        Text(remainingSubsMatches,
+                        Text(team.remainingSubsMatches.toString(),
                             style: const TextStyle(
                                 fontSize: 12, color: Colors.black))
                       ],

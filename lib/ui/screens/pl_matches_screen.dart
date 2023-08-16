@@ -5,7 +5,7 @@ import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:intl/intl.dart';
 import '../../models/players/bps.dart';
 
 class PlMatchesScreen extends ConsumerStatefulWidget {
@@ -184,10 +184,11 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
             children: [...getTeam(match)],
           ),
           ...getBonusPoints(match.bpsPlayers, match),
-          ExpansionTile(
-              title:
-                  Container(child: const Center(child: Text("Detailed Stats"))),
-              children: [...getStats(match)]),
+          if (match.started!)
+            ExpansionTile(
+                title: Container(
+                    child: const Center(child: Text("Detailed Stats"))),
+                children: [...getStats(match)]),
         ]));
   }
 
@@ -216,7 +217,7 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
           ),
         ]),
       ];
-    } else {
+    } else if (match.started!) {
       List<String> _bpsPlayers = [];
       for (Bps bpsPlayer in bpsPlayers[3]!) {
         DraftPlayer _player = players[bpsPlayer.element!]!;
@@ -240,6 +241,42 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
               style: const TextStyle(fontWeight: FontWeight.w300)),
         ]),
       ];
+    } else {
+      return [];
+    }
+  }
+
+  Widget getMatchText(PlMatch match) {
+    if (!match.started!) {
+      var kickoffTime = DateTime.parse(match.kickOffTime!).toUtc();
+      var localKickOffTime = kickoffTime.toLocal();
+      var formatter = new DateFormat('H:ms');
+      return Column(
+        children: [
+          Text(
+            "${DateFormat('EEEE').format(localKickOffTime)} ${localKickOffTime.day} ${DateFormat('MMMM').format(localKickOffTime)} ${localKickOffTime.year}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "${formatter.format(localKickOffTime)}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Text(
+        "${match.homeScore} - ${match.awayScore}",
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      );
     }
   }
 
@@ -282,16 +319,7 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
                               .secondaryContainer))),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(
-                      child: Text(
-                    "${match.homeScore} - ${match.awayScore}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ))
-                ],
+                children: [Center(child: getMatchText(match))],
               ),
             ),
             if (match.started! &&

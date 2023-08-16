@@ -42,7 +42,7 @@ class DraftMatchService {
       return players;
     } catch (error) {
       print(error);
-      return {};
+      return players;
     }
   }
 }

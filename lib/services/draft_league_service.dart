@@ -1,8 +1,12 @@
-import '../models/DraftTeam.dart';
+import 'package:draft_futbol/models/draft_player.dart';
+import 'package:draft_futbol/models/pl_match.dart';
+import 'package:draft_futbol/models/players/match.dart';
+
 import '../models/draft_leagues.dart';
 import '../models/draft_team.dart';
 import '../models/fixture.dart';
 import '../models/league_standing.dart';
+import '../models/players/stat.dart';
 
 class DraftleagueService {
   Map<int, List<Fixture>> getAllH2HFixtures(DraftLeague league) {
@@ -133,12 +137,36 @@ class DraftleagueService {
   }
 
   List<LeagueStanding> getClassicLiveStandings(
-      List standings, Map<int, DraftTeam> draftTeams, bool bonus) {
+      List standings,
+      Map<int, DraftTeam> draftTeams,
+      bool bonus,
+      Map<int, DraftPlayer> players,
+      Map<int, PlMatch> plMatches) {
     List<LeagueStanding> liveStandings = [];
     try {
       for (var standing in standings) {
         DraftTeam team = draftTeams[standing['league_entry']]!;
-        standing['total'] += (bonus ? team.bonusPoints : team.points)!;
+        int liveScore = 0;
+        for (MapEntry entry in team.squad!.entries) {
+          int playerId = entry.key;
+          int playerPosition = entry.value;
+          if (playerPosition < 12) {
+            DraftPlayer _player = players[playerId]!;
+            for (PlMatchStats match in _player.matches!) {
+              PlMatch _match = plMatches[match.matchId]!;
+              if (_match.started! && !_match.finished!) {
+                for (Stat stat in match.stats!) {
+                  if (stat.statName != "Live Bonus Points") {
+                    liveScore += stat.fantasyPoints!;
+                  } else if (bonus) {
+                    liveScore += stat.fantasyPoints!;
+                  }
+                }
+              }
+            }
+          }
+        }
+        standing['total'] += liveScore;
         LeagueStanding _standing = LeagueStanding.fromJson(
             standing, draftTeams[standing['league_entry']]!);
         liveStandings.add(_standing);
