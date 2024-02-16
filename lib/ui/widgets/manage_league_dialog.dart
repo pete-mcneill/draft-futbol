@@ -25,77 +25,6 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
   bool loading = false;
   bool success = false;
 
-  @override
-  void initState() {
-    super.initState();
-
-    myController.addListener(setLeagueId);
-  }
-
-  @override
-  void dispose() {
-    myController.dispose();
-    super.dispose();
-  }
-
-  void setLeagueId() {
-    setState(() {
-      leagueId = myController.text;
-      leagueIdExists = false;
-    });
-    if (leagueId == "") {
-      showSubmitButton = false;
-    }
-  }
-
-  void checkIfLeagueAlreadyAdded(Map<int, dynamic> leagueIds) {
-    if (leagueIds.containsKey(leagueId)) {
-      setState(() {
-        leagueIdExists = true;
-      });
-    } else {
-      setState(() {
-        leagueIdExists = false;
-      });
-    }
-  }
-
-  Future<Map<int, dynamic>> addNewLeague() async {
-    final SharedPreferences _prefs = await SharedPreferences.getInstance();
-    String? leagueIds;
-    Map<String, dynamic>? leagueMap;
-    try {
-      leagueIds = _prefs.getString('league_ids');
-      leagueMap = json.decode(leagueIds!);
-      leagueMap![leagueId!] = {"name": newLeagueName, "season": "23/24"};
-    } catch (e) {
-      leagueMap = {
-        leagueId!: {"name": newLeagueName, "season": "23/24"}
-      };
-    }
-    await _prefs.setString('league_ids', json.encode(leagueMap));
-    Map<int, dynamic> convertedIds = leagueMap.map<int, dynamic>(
-      (k, v) => MapEntry(int.parse(k), v), // parse String back to int
-    );
-    ref.watch(utilsProvider.notifier).setLeagueIds(convertedIds);
-    return convertedIds;
-  }
-
-  Future<Map<int, dynamic>> removeLeague(
-      int key, Map<int, dynamic> leagueIds) async {
-    final SharedPreferences _prefs = await SharedPreferences.getInstance();
-    String? leagueIds = _prefs.getString('league_ids');
-    Map<String, dynamic>? leagueMap;
-    leagueMap = json.decode(leagueIds!);
-    leagueMap!.remove(key.toString());
-    await _prefs.setString('league_ids', json.encode(leagueMap));
-    Map<int, dynamic> convertedIds = leagueMap.map<int, dynamic>(
-      (k, v) => MapEntry(int.parse(k), v), // parse String back to int
-    );
-    ref.watch(utilsProvider.notifier).setLeagueIds(convertedIds);
-    return convertedIds;
-  }
-
   Widget addLeagueWidget(Map<int, dynamic> leagueIds, Api _api) {
     return Dialog(
         shape: RoundedRectangleBorder(
@@ -105,6 +34,21 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         // backgroundColor: Colors.transparent,
 
         child: Stack(children: <Widget>[
+          Positioned(
+            top: 0.0,
+            right: 0.0,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton(
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+            ),
+          ),
           Container(
             margin: const EdgeInsets.all(10),
             child: Column(
@@ -225,6 +169,79 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         ]));
   }
 
+  Future<Map<int, dynamic>> addNewLeague() async {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+    String? leagueIds;
+    Map<String, dynamic>? leagueMap;
+    try {
+      leagueIds = _prefs.getString('league_ids');
+      leagueMap = json.decode(leagueIds!);
+      leagueMap![leagueId!] = {"name": newLeagueName, "season": "23/24"};
+    } catch (e) {
+      leagueMap = {
+        leagueId!: {"name": newLeagueName, "season": "23/24"}
+      };
+    }
+    await _prefs.setString('league_ids', json.encode(leagueMap));
+    Map<int, dynamic> convertedIds = leagueMap.map<int, dynamic>(
+      (k, v) => MapEntry(int.parse(k), v), // parse String back to int
+    );
+    ref.watch(utilsProvider.notifier).setLeagueIds(convertedIds);
+    return convertedIds;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Api _api = Api();
+    Map<int, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
+    if (widget.type == "add") {
+      return SingleChildScrollView(child: addLeagueWidget(leagueIds, _api));
+    } else if (widget.type == "remove") {
+      return SingleChildScrollView(child: removeLeagueWidget(leagueIds, _api));
+    }
+    return Container();
+  }
+
+  void checkIfLeagueAlreadyAdded(Map<int, dynamic> leagueIds) {
+    if (leagueIds.containsKey(leagueId)) {
+      setState(() {
+        leagueIdExists = true;
+      });
+    } else {
+      setState(() {
+        leagueIdExists = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    myController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    myController.addListener(setLeagueId);
+  }
+
+  Future<Map<int, dynamic>> removeLeague(
+      int key, Map<int, dynamic> leagueIds) async {
+    final SharedPreferences _prefs = await SharedPreferences.getInstance();
+    String? leagueIds = _prefs.getString('league_ids');
+    Map<String, dynamic>? leagueMap;
+    leagueMap = json.decode(leagueIds!);
+    leagueMap!.remove(key.toString());
+    await _prefs.setString('league_ids', json.encode(leagueMap));
+    Map<int, dynamic> convertedIds = leagueMap.map<int, dynamic>(
+      (k, v) => MapEntry(int.parse(k), v), // parse String back to int
+    );
+    ref.watch(utilsProvider.notifier).setLeagueIds(convertedIds);
+    return convertedIds;
+  }
+
   Widget removeLeagueWidget(Map<int, dynamic> leagueIds, Api _api) {
     return Dialog(
         shape: RoundedRectangleBorder(
@@ -233,6 +250,21 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         elevation: 0.0,
         // backgroundColor: Colors.transparent,
         child: Stack(children: <Widget>[
+          Positioned(
+            top: 0.0,
+            right: 0.0,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton(
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+            ),
+          ),
           Container(
             margin: const EdgeInsets.all(10),
             child: Column(
@@ -298,6 +330,16 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         ]));
   }
 
+  void setLeagueId() {
+    setState(() {
+      leagueId = myController.text;
+      leagueIdExists = false;
+    });
+    if (leagueId == "") {
+      showSubmitButton = false;
+    }
+  }
+
   void _showAddedToast(BuildContext context) {
     final scaffold = ScaffoldMessenger.of(context);
     scaffold.showSnackBar(
@@ -305,17 +347,5 @@ class _ManageleagueDialogState extends ConsumerState<ManageleagueDialog> {
         content: Text('Added League'),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    Api _api = Api();
-    Map<int, dynamic> leagueIds = ref.watch(utilsProvider).leagueIds!;
-    if (widget.type == "add") {
-      return addLeagueWidget(leagueIds, _api);
-    } else if (widget.type == "remove") {
-      return removeLeagueWidget(leagueIds, _api);
-    }
-    return Container();
   }
 }

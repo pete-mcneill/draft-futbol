@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/services/api_service.dart';
 import 'package:draft_futbol/ui/screens/initialise_home_screen.dart';
 import 'package:draft_futbol/ui/widgets/coffee.dart';
@@ -29,31 +28,6 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
   bool leagueSet = false;
   bool leagueError = false;
   late String leagueErrorMessage;
-
-  void _onIntroEnd(context) async {
-    if (_formKey.currentState!.validate() && leagueSet) {
-      final SharedPreferences _prefs = await SharedPreferences.getInstance();
-      Map<String, dynamic>? leagueMap;
-      // _prefs.clear();
-      String? leagueIds;
-      try {
-        leagueIds = _prefs.getString('league_ids');
-        leagueMap = json.decode(leagueIds!);
-        leagueMap![leagueId.toString()] = {
-          "name": leagueName,
-          "season": "23/24"
-        };
-      } catch (e) {
-        leagueMap = {
-          leagueId.toString(): {"name": leagueName, "season": "23/24"}
-        };
-      }
-      await _prefs.setString('league_ids', jsonEncode(leagueMap));
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const InitialiseHomeScreen()),
-          (Route<dynamic> route) => false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,16 +88,16 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                       style: TextStyle(
                         color: Theme.of(context).textTheme.bodyMedium!.color,
                       ),
-                      children: <TextSpan>[
-                        const TextSpan(
+                      children: const <TextSpan>[
+                        TextSpan(
                           text:
                               "\n I develop this app in my spare time, primarily for my own draft league but wanted to share it with the community",
                         ),
-                        const TextSpan(
+                        TextSpan(
                           text:
                               "\n \n If you like or get good use of the app, any donations to keep it on the app store would be appreciated!",
                         ),
-                        const TextSpan(
+                        TextSpan(
                           text: '\n \n Thanks for downloading!',
                         ),
                       ],
@@ -396,5 +370,30 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
         ),
       ),
     );
+  }
+
+  void _onIntroEnd(context) async {
+    if (_formKey.currentState!.validate() && leagueSet) {
+      final SharedPreferences _prefs = await SharedPreferences.getInstance();
+      Map<String, dynamic>? leagueMap;
+      _prefs.clear();
+      String? leagueIds;
+      try {
+        leagueIds = _prefs.getString('league_ids');
+        leagueMap = json.decode(leagueIds!);
+        leagueMap![leagueId.toString()] = {
+          "name": leagueName,
+          "season": "23/24"
+        };
+      } catch (e) {
+        leagueMap = {
+          leagueId.toString(): {"name": leagueName, "season": "23/24"}
+        };
+      }
+      await _prefs.setString('league_ids', jsonEncode(leagueMap));
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const InitialiseHomeScreen()),
+          (Route<dynamic> route) => false);
+    }
   }
 }

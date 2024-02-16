@@ -6,6 +6,7 @@ import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../../models/players/bps.dart';
 
 class PlMatchesScreen extends ConsumerStatefulWidget {
@@ -19,8 +20,40 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
   Map<int, DraftPlayer> players = {};
   List elementNames = [];
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
+    // elementNames = Provider.of<StaticDataProvider>(context, listen: true)
+    //     .staticData!['element_stats'];
+    players = ref.watch(fplGwDataProvider.select((value) => value.players!));
+    Map<int, PlMatch> matches =
+        ref.watch(fplGwDataProvider.select((value) => value.plMatches!));
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          buyaCoffeebutton(context),
+          for (int matchId in matches.keys) createMatchWidget(matches[matchId]!)
+          // createPlMatchWidget(matches[matchId]!)
+        ],
+      ),
+    );
+  }
+
+  createMatchWidget(PlMatch match) {
+    return Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
+        margin: const EdgeInsets.only(bottom: 8),
+        elevation: 10,
+        child: Column(children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [...getTeam(match)],
+          ),
+          ...getBonusPoints(match.bpsPlayers, match),
+          if (match.started!)
+            ExpansionTile(
+                title: Container(
+                    child: const Center(child: Text("Detailed Stats"))),
+                children: [...getStats(match)]),
+        ]));
   }
 
   Widget createPlMatchWidget(PlMatch match) {
@@ -85,6 +118,105 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
               ],
             ),
             children: [...getStats(match)]));
+  }
+
+  getBonusPoints(Map<int, List<Bps>> bpsPlayers, PlMatch match) {
+    if (match.finished!) {
+      List<String> bonusPoints = [];
+      for (var stat in match.stats!) {
+        if (stat['s'] == 'bonus') {
+          var bonusList = [stat['h'], stat['a']].expand((x) => x).toList();
+          bonusList.sort((a, b) => b['value'].compareTo(a['value']));
+          for (var bonus in bonusList) {
+            DraftPlayer player = players[bonus['element']]!;
+            bonusPoints.add("${player.playerName}(${bonus['value']})");
+          }
+        }
+      }
+      return [
+        const Text("Offical Bonus Points",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        Wrap(children: [
+          Text(
+            bonusPoints.join(" "),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w300),
+          ),
+        ]),
+      ];
+    } else if (match.started!) {
+      List<String> _bpsPlayers = [];
+      for (Bps bpsPlayer in bpsPlayers[3]!) {
+        DraftPlayer _player = players[bpsPlayer.element!]!;
+        _bpsPlayers.add(_player.playerName! + ("(3)"));
+      }
+      for (Bps bpsPlayer in bpsPlayers[2]!) {
+        DraftPlayer _player = players[bpsPlayer.element!]!;
+        _bpsPlayers.add(_player.playerName! + ("(2)"));
+      }
+      for (Bps bpsPlayer in bpsPlayers[1]!) {
+        DraftPlayer _player = players[bpsPlayer.element!]!;
+        _bpsPlayers.add(_player.playerName! + ("(1)"));
+      }
+      return [
+        const Text("Live Bonus Points",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        Wrap(children: [
+          Text(_bpsPlayers.join(" "),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w300)),
+        ]),
+      ];
+    } else {
+      return [];
+    }
+  }
+
+  getCardStats(int elementId, int value) {
+    DraftPlayer player = players[elementId]!;
+    if (value > 1) {
+      return Text("${player.playerName}($value)",
+          style: const TextStyle(fontWeight: FontWeight.w300));
+    } else {
+      return Text("${player.playerName}",
+          style: const TextStyle(fontWeight: FontWeight.w300));
+    }
+  }
+
+  Widget getMatchText(PlMatch match) {
+    if (!match.started!) {
+      var kickoffTime = DateTime.parse(match.kickOffTime!).toUtc();
+      var localKickOffTime = kickoffTime.toLocal();
+      var formatter = DateFormat('H:ms');
+      return Column(
+        children: [
+          Text(
+            "${DateFormat('EEEE').format(localKickOffTime)} ${localKickOffTime.day} ${DateFormat('MMMM').format(localKickOffTime)} ${localKickOffTime.year}",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            formatter.format(localKickOffTime),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Text(
+        "${match.homeScore} - ${match.awayScore}",
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    }
   }
 
   List<Column> getStats(PlMatch match) {
@@ -171,113 +303,6 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
       }
     }
     return widgetStats;
-  }
-
-  createMatchWidget(PlMatch match) {
-    return Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: const EdgeInsets.only(bottom: 8),
-        elevation: 10,
-        child: Column(children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [...getTeam(match)],
-          ),
-          ...getBonusPoints(match.bpsPlayers, match),
-          if (match.started!)
-            ExpansionTile(
-                title: Container(
-                    child: const Center(child: Text("Detailed Stats"))),
-                children: [...getStats(match)]),
-        ]));
-  }
-
-  getBonusPoints(Map<int, List<Bps>> bpsPlayers, PlMatch match) {
-    if (match.finished!) {
-      List<String> bonusPoints = [];
-      for (var stat in match.stats!) {
-        if (stat['s'] == 'bonus') {
-          var bonusList = [stat['h'], stat['a']].expand((x) => x).toList();
-          bonusList.sort((a, b) => b['value'].compareTo(a['value']));
-          for (var bonus in bonusList) {
-            DraftPlayer player = players[bonus['element']]!;
-            bonusPoints.add("${player.playerName}(${bonus['value']})");
-          }
-        }
-      }
-      return [
-        const Text("Offical Bonus Points",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        Wrap(children: [
-          Text(
-            bonusPoints.join(" "),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w300),
-          ),
-        ]),
-      ];
-    } else if (match.started!) {
-      List<String> _bpsPlayers = [];
-      for (Bps bpsPlayer in bpsPlayers[3]!) {
-        DraftPlayer _player = players[bpsPlayer.element!]!;
-        _bpsPlayers.add(_player.playerName! + ("(3)"));
-      }
-      for (Bps bpsPlayer in bpsPlayers[2]!) {
-        DraftPlayer _player = players[bpsPlayer.element!]!;
-        _bpsPlayers.add(_player.playerName! + ("(2)"));
-      }
-      for (Bps bpsPlayer in bpsPlayers[1]!) {
-        DraftPlayer _player = players[bpsPlayer.element!]!;
-        _bpsPlayers.add(_player.playerName! + ("(1)"));
-      }
-      return [
-        const Text("Live Bonus Points",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        Wrap(children: [
-          Text(_bpsPlayers.join(" "),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w300)),
-        ]),
-      ];
-    } else {
-      return [];
-    }
-  }
-
-  Widget getMatchText(PlMatch match) {
-    if (!match.started!) {
-      var kickoffTime = DateTime.parse(match.kickOffTime!).toUtc();
-      var localKickOffTime = kickoffTime.toLocal();
-      var formatter = new DateFormat('H:ms');
-      return Column(
-        children: [
-          Text(
-            "${DateFormat('EEEE').format(localKickOffTime)} ${localKickOffTime.day} ${DateFormat('MMMM').format(localKickOffTime)} ${localKickOffTime.year}",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            "${formatter.format(localKickOffTime)}",
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Text(
-        "${match.homeScore} - ${match.awayScore}",
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      );
-    }
   }
 
   List<Widget> getTeam(PlMatch match) {
@@ -398,32 +423,8 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
     ];
   }
 
-  getCardStats(int elementId, int value) {
-    DraftPlayer player = players[elementId]!;
-    if (value > 1) {
-      return Text("${player.playerName}($value)",
-          style: const TextStyle(fontWeight: FontWeight.w300));
-    } else {
-      return Text("${player.playerName}",
-          style: const TextStyle(fontWeight: FontWeight.w300));
-    }
-  }
-
   @override
-  Widget build(BuildContext context) {
-    // elementNames = Provider.of<StaticDataProvider>(context, listen: true)
-    //     .staticData!['element_stats'];
-    players = ref.watch(fplGwDataProvider.select((value) => value.players!));
-    Map<int, PlMatch> matches =
-        ref.watch(fplGwDataProvider.select((value) => value.plMatches!));
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          buyaCoffeebutton(context),
-          for (int matchId in matches.keys) createMatchWidget(matches[matchId]!)
-          // createPlMatchWidget(matches[matchId]!)
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
   }
 }

@@ -1,23 +1,23 @@
-import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/fixture.dart';
 import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/screens/classic_league_standings.dart';
-import 'package:draft_futbol/ui/widgets/h2h/h2h_draft_matches.dart';
 import 'package:draft_futbol/ui/screens/league_standings.dart';
 import 'package:draft_futbol/ui/screens/pl_matches_screen.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
 import 'package:draft_futbol/ui/widgets/draft_bottom_bar.dart';
 import 'package:draft_futbol/ui/widgets/draft_drawer.dart';
 import 'package:draft_futbol/ui/widgets/draft_placeholder.dart';
+import 'package:draft_futbol/ui/widgets/h2h/h2h_draft_matches.dart';
 import 'package:draft_futbol/ui/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
 
 import '../../models/draft_leagues.dart';
 import '../../models/draft_team.dart';
 import '../widgets/more.dart';
+
+const int maxFailedLoadAttempts = 3;
 
 class HomePage extends ConsumerStatefulWidget {
   final List squads = [];
@@ -31,8 +31,6 @@ class HomePage extends ConsumerStatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-const int maxFailedLoadAttempts = 3;
-
 class _HomePageState extends ConsumerState<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Gameweek? gameweek;
@@ -42,22 +40,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   int navBarIndex = 0;
   bool showBottomNav = true;
   int? activeLeague;
-
-  @override
-  void initState() {
-    super.initState();
-    // if (!ref.read(purchasesProvider).noAdverts!) {
-    //   _createInterstitialAd();
-    // }
-  }
-
-  @override
-  void dispose() {
-    // if (!ref.read(purchasesProvider).noAdverts!) {
-    //   _interstitialAd?.dispose();
-    // }
-    super.dispose();
-  }
 
   // ignore: prefer_final_fields
   List<Widget> h2hOptions = <Widget>[
@@ -72,12 +54,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     const PlMatchesScreen(),
     const More()
   ];
-
-  updateIndex(int index) {
-    setState(() {
-      navBarIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +101,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     // color: Theme.of(context).scaffoldBackgroundColor,
                     // margin:
                     //     const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
-                    alignment: FractionalOffset.center,
+                    // alignment: FractionalOffset.center,
                     child: draftStatus == "pre" ||
                             gameweek!.currentGameweek == 0
                         ? DraftPlaceholder(
@@ -147,5 +123,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                 )));
           },
         );
+  }
+
+  @override
+  void dispose() {
+    // if (!ref.read(purchasesProvider).noAdverts!) {
+    //   _interstitialAd?.dispose();
+    // }
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // if (!ref.read(purchasesProvider).noAdverts!) {
+    //   _createInterstitialAd();
+    // }
+  }
+
+  updateIndex(int index) {
+    setState(() {
+      navBarIndex = index;
+    });
   }
 }

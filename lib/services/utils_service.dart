@@ -14,7 +14,7 @@ Future<Map<int, dynamic>> setLeagueIds() async {
       (k, v) => MapEntry(int.parse(k), v), // parse String back to int
     );
   } catch (e) {
-    print(e);
+    print("No League ids: ${e}");
   }
   return convertedIds;
 }

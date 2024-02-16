@@ -5,7 +5,7 @@ import 'package:draft_futbol/ui/widgets/custom_error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import '../../models/DraftTeam.dart';
+
 import '../../models/draft_player.dart';
 import '../../models/draft_team.dart';
 import '../../models/transactions.dart';
@@ -31,33 +31,6 @@ class _TransactionsState extends ConsumerState<Transactions> {
   bool waiversFiltered = false;
   int? currentGW;
   int? dropdownValue;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void setPossibleGameweeks() {
-    for (var i = 1; i <= currentGW!; i++) {
-      gwOptions.add(DropdownMenuItem(
-          value: i.toString(),
-          child: Center(
-            child: Text(
-              i.toString(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          )));
-    }
-  }
 
   var waiverResults = [
     MultiSelectItem("a", "Accepted"),
@@ -131,7 +104,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
                       leading: true,
                       settings: false,
                     ),
-                    body: Center(child: Text("No Transactions made this GW")));
+                    body: const Center(child: Text("No Transactions made this GW")));
               }
             }
 
@@ -144,7 +117,7 @@ class _TransactionsState extends ConsumerState<Transactions> {
                 settings: false,
               ),
               body: DefaultTabController(
-                  length: 2, // length of tabs
+                  length: 2, // length of tabsDraft not complete
                   initialIndex: 0,
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -201,8 +174,49 @@ class _TransactionsState extends ConsumerState<Transactions> {
             );
           });
     } catch (e) {
-      return const CustomError();
+      return CustomError();
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void filterWaiversAndFreeAgents(
+      List<Object?> values,
+      Map<String, Map<String, List<Transaction>>> transactions,
+      String activeLeague,
+      String currentGameweek,
+      Map<int, DraftTeam> teams) {
+    List<Object?> _teams = values;
+    List<Transaction> _visibleWaivers = [];
+    List<Transaction> _visibleFreeAgents = [];
+    for (Transaction _transaction
+        in transactions[activeLeague]![currentGameweek]!) {
+      if (values.isEmpty && _transaction.type == "w") {
+        _visibleWaivers.add(_transaction);
+        _transaction.visible = true;
+        _teams = teams.keys.toList();
+      } else if (values.contains(int.parse(_transaction.teamId)) &&
+          _transaction.type == "w") {
+        _visibleWaivers.add(_transaction);
+        _transaction.visible = true;
+      } else if (values.contains(int.parse(_transaction.teamId)) &&
+          _transaction.type == "f") {
+        _visibleFreeAgents.add(_transaction);
+        _transaction.visible = true;
+      } else {
+        _transaction.visible = false;
+      }
+    }
+
+    setState(() {
+      visibleWaivers = _visibleWaivers;
+      visibleFreeAgents = _visibleFreeAgents;
+      waiversFiltered = true;
+      _draftTeams = _teams;
+    });
   }
 
   SingleChildScrollView freeAgentsTab(
@@ -295,6 +309,28 @@ class _TransactionsState extends ConsumerState<Transactions> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void setPossibleGameweeks() {
+    for (var i = 1; i <= currentGW!; i++) {
+      gwOptions.add(DropdownMenuItem(
+          value: i.toString(),
+          child: Center(
+            child: Text(
+              i.toString(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          )));
+    }
+  }
+
   SingleChildScrollView waiversTab(
       List<MultiSelectItem<int>> _draftTeamFilters,
       Map<int, Map<int, List<Transaction>>> transactions,
@@ -329,107 +365,108 @@ class _TransactionsState extends ConsumerState<Transactions> {
                     child: Text("Draft Teams",
                         style: TextStyle(fontWeight: FontWeight.bold))
 
-                    // MultiSelectBottomSheetField(
-                    //   initialChildSize: 0.5,
-                    //   title: const Text("Draft Teams"),
-                    //   buttonText: const Text("Draft Teams",
-                    //       style: TextStyle(
-                    //           fontWeight: FontWeight.bold)),
-                    //   searchable: true,
-                    //   chipDisplay:
-                    //       MultiSelectChipDisplay.none(),
-                    //   items: _draftTeamFilters,
-                    //   initialValue: _draftTeams,
-                    //   listType: MultiSelectListType.CHIP,
-                    //   onConfirm: (values) {
-                    //     filterWaiversAndFreeAgents(
-                    //         values,
-                    //         transactions,
-                    //         activeLeague,
-                    //         currentGameweek,
-                    //         teams);
-                    //   },
-                    // ),
-                    ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Center(
-                    child: Text("Result",
-                        style: TextStyle(fontWeight: FontWeight.bold))
-                    // MultiSelectBottomSheetField(
-                    //   initialChildSize: 0.5,
-                    //   title: const Text("Result"),
-                    //   buttonText: const Text("Result"),
-                    //   chipDisplay:
-                    //       MultiSelectChipDisplay.none(),
-                    //   items: waiverResults,
-                    //   initialValue: _waiverResults,
-                    //   listType: MultiSelectListType.CHIP,
-                    //   onConfirm: (values) {
-                    //     print(values);
+                      // MultiSelectBottomSheetField(
+                      //   initialChildSize: 0.5,
+                      //   title: const Text("Draft Teams"),
+                      //   buttonText: const Text("Draft Teams",
+                      //       style: TextStyle(
+                      //           fontWeight: FontWeight.bold)),
+                      //   searchable: true,
+                      //   chipDisplay:
+                      //       MultiSelectChipDisplay.none(),
+                      //   items: _draftTeamFilters,
+                      //   initialValue: _draftTeams,
+                      //   listType: MultiSelectListType.CHIP,
+                      //   onConfirm: (values) {
+                      //     filterWaiversAndFreeAgents(
+                      //         values,
+                      //         transactions,
+                      //         activeLeague,
+                      //         currentGameweek,
+                      //         teams);
+                      //   },
+                      // ),
+                      ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                      child: Text("Result",
+                          style: TextStyle(fontWeight: FontWeight.bold))
+                      // MultiSelectBottomSheetField(
+                      //   initialChildSize: 0.5,
+                      //   title: const Text("Result"),
+                      //   buttonText: const Text("Result"),
+                      //   chipDisplay:
+                      //       MultiSelectChipDisplay.none(),
+                      //   items: waiverResults,
+                      //   initialValue: _waiverResults,
+                      //   listType: MultiSelectListType.CHIP,
+                      //   onConfirm: (values) {
+                      //     print(values);
 
-                    //     if ((values.contains("a") && values.contains("r")) || values.isEmpty) {
-                    //       for (Transaction _transaction
-                    //           in transactions[
-                    //                   activeLeague]![
-                    //               currentGameweek]!) {
-                    //         _transaction.visible = true;
-                    //       }
-                    //     } else if (values.contains("a")) {
-                    //       for (Transaction _transaction
-                    //           in transactions[
-                    //                   activeLeague]![
-                    //               currentGameweek]!) {
-                    //         if (_transaction.result ==
-                    //             "a") {
-                    //           _transaction.visible = true;
-                    //         } else {
-                    //           _transaction.visible = false;
-                    //         }
-                    //       }
-                    //     } else if (values.contains("r")) {
-                    //       for (Transaction _transaction
-                    //           in transactions[
-                    //                   activeLeague]![
-                    //               currentGameweek]!) {
-                    //         if (_transaction.result !=
-                    //             "a") {
-                    //           _transaction.visible = true;
-                    //         } else {
-                    //           _transaction.visible = false;
-                    //         }
-                    //       }
-                    //     }
-                    //     setState(() {
+                      //     if ((values.contains("a") && values.contains("r")) || values.isEmpty) {
+                      //       for (Transaction _transaction
+                      //           in transactions[
+                      //                   activeLeague]![
+                      //               currentGameweek]!) {
+                      //         _transaction.visible = true;
+                      //       }
+                      //     } else if (values.contains("a")) {
+                      //       for (Transaction _transaction
+                      //           in transactions[
+                      //                   activeLeague]![
+                      //               currentGameweek]!) {
+                      //         if (_transaction.result ==
+                      //             "a") {
+                      //           _transaction.visible = true;
+                      //         } else {
+                      //           _transaction.visible = false;
+                      //         }
+                      //       }
+                      //     } else if (values.contains("r")) {
+                      //       for (Transaction _transaction
+                      //           in transactions[
+                      //                   activeLeague]![
+                      //               currentGameweek]!) {
+                      //         if (_transaction.result !=
+                      //             "a") {
+                      //           _transaction.visible = true;
+                      //         } else {
+                      //           _transaction.visible = false;
+                      //         }
+                      //       }
+                      //     }
+                      //     setState(() {
 
-                    //     });
-                    //   },
-                    // ),
-                    ),
-              ),
-            ],
-          ),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: visibleWaivers.length,
-            itemBuilder: (context, i) {
-              List<Transaction> _transactions = [];
-              Transaction _transaction = visibleWaivers[i];
-              DraftPlayer playerIn =
-                  players[int.parse(_transaction.playerInId)]!;
-              DraftPlayer playerOut =
-                  players[int.parse(_transaction.playerOutId)]!;
-              DraftTeam? _team;
-              for (DraftTeam team in teams.values) {
-                if (team.entryId.toString() == _transaction.teamId.toString()) {
-                  _team = team;
+                      //     });
+                      //   },
+                      // ),
+                      ),
+                ),
+              ],
+            ),
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: visibleWaivers.length,
+              itemBuilder: (context, i) {
+                List<Transaction> _transactions = [];
+                Transaction _transaction = visibleWaivers[i];
+                DraftPlayer playerIn =
+                    players[int.parse(_transaction.playerInId)]!;
+                DraftPlayer playerOut =
+                    players[int.parse(_transaction.playerOutId)]!;
+                DraftTeam? _team;
+                for (DraftTeam team in teams.values) {
+                  if (team.entryId.toString() ==
+                      _transaction.teamId.toString()) {
+                    _team = team;
+                  }
                 }
-              }
-              if (_transaction.visible && _transaction.type == "w") {
-                _transactions.add(_transaction);
-              }
+                if (_transaction.visible && _transaction.type == "w") {
+                  _transactions.add(_transaction);
+                }
 
               return Column(
                 children: [
@@ -449,41 +486,5 @@ class _TransactionsState extends ConsumerState<Transactions> {
         ],
       ),
     );
-  }
-
-  void filterWaiversAndFreeAgents(
-      List<Object?> values,
-      Map<String, Map<String, List<Transaction>>> transactions,
-      String activeLeague,
-      String currentGameweek,
-      Map<int, DraftTeam> teams) {
-    List<Object?> _teams = values;
-    List<Transaction> _visibleWaivers = [];
-    List<Transaction> _visibleFreeAgents = [];
-    for (Transaction _transaction
-        in transactions[activeLeague]![currentGameweek]!) {
-      if (values.isEmpty && _transaction.type == "w") {
-        _visibleWaivers.add(_transaction);
-        _transaction.visible = true;
-        _teams = teams.keys.toList();
-      } else if (values.contains(int.parse(_transaction.teamId)) &&
-          _transaction.type == "w") {
-        _visibleWaivers.add(_transaction);
-        _transaction.visible = true;
-      } else if (values.contains(int.parse(_transaction.teamId)) &&
-          _transaction.type == "f") {
-        _visibleFreeAgents.add(_transaction);
-        _transaction.visible = true;
-      } else {
-        _transaction.visible = false;
-      }
-    }
-
-    setState(() {
-      visibleWaivers = _visibleWaivers;
-      visibleFreeAgents = _visibleFreeAgents;
-      waiversFiltered = true;
-      _draftTeams = _teams;
-    });
   }
 }

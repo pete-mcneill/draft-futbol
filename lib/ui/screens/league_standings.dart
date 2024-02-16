@@ -1,4 +1,3 @@
-import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/fixture.dart';
 import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/models/league_standing.dart';
@@ -30,122 +29,6 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
   List<LeagueStanding> liveStandings = [];
   List<LeagueStanding> liveBpsStandings = [];
   int? activeLeague;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Widget getLeagueStanding(LeagueStanding standing) {
-    DraftTeam? team = teams[standing.teamId];
-    Color rowColor = Theme.of(context).cardColor;
-    if (standing.rank == 1) {
-      rowColor = Colors.green;
-    }
-    // if (standing.rank!.isEven) {
-    //   rowColor = Theme.of(context).;
-    // }
-    return SizedBox(
-      height: 50,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
-        margin: const EdgeInsets.all(0),
-        color: rowColor,
-        elevation: 10,
-        child: Row(
-          children: [
-            Expanded(
-                flex: 1,
-                child: Text(
-                  standing.rank.toString(),
-                  style: standing.rank == 1
-                      ? const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)
-                      : const TextStyle(fontSize: 14),
-                  textAlign: TextAlign.left,
-                )),
-            Expanded(
-                flex: 4,
-                child: Text(
-                  team!.teamName!,
-                  style: standing.rank == 1
-                      ? const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)
-                      : const TextStyle(fontSize: 14),
-                  textAlign: TextAlign.left,
-                )),
-            Expanded(
-                flex: 2,
-                child: Text(
-                  standing.pointsFor.toString(),
-                  style: standing.rank == 1
-                      ? const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)
-                      : const TextStyle(fontSize: 14),
-                  textAlign: TextAlign.center,
-                )),
-            Expanded(
-                flex: 2,
-                child: Text(
-                  standing.leaguePoints.toString(),
-                  style: standing.rank == 1
-                      ? const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)
-                      : const TextStyle(fontSize: 14),
-                  textAlign: TextAlign.center,
-                ))
-          ],
-        ),
-      ),
-    );
-  }
-
-  updateView(index) {
-    setState(() {
-      view = index!;
-    });
-  }
-
-  List<ChipOptions> getFilterOptions() {
-    List<ChipOptions> options = [
-      // if (!gameweek!.gameweekFinished)
-      ChipOptions(
-          label: "Live Bonus Points",
-          selected: liveBps,
-          onSelected: (bool selected) {
-            ref.read(utilsProvider.notifier).updateLiveBps(selected);
-          }),
-      // if (!gameweek!.gameweekFinished)
-      //   ChipOptions(
-      //       label: "Remaining Players",
-      //       selected: remainingPlayersFilter,
-      //       onSelected: (bool selected) {
-      //         ref
-      //             .read(utilsProvider.notifier)
-      //             .setRemainingPlayersView(selected);
-      //       }),
-      // ChipOptions(
-      //     label: "Icons Summary",
-      //     selected: iconsSummaryFilter,
-      //     onSelected: (bool selected) {
-      //       ref.read(utilsProvider.notifier).setIconSummaryView(selected);
-      //     })
-    ];
-    return options;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,5 +133,121 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  List<ChipOptions> getFilterOptions() {
+    List<ChipOptions> options = [
+      // if (!gameweek!.gameweekFinished)
+      ChipOptions(
+          label: "Live Bonus Points",
+          selected: liveBps,
+          onSelected: (bool selected) {
+            ref.read(utilsProvider.notifier).updateLiveBps(selected);
+          }),
+      // if (!gameweek!.gameweekFinished)
+      //   ChipOptions(
+      //       label: "Remaining Players",
+      //       selected: remainingPlayersFilter,
+      //       onSelected: (bool selected) {
+      //         ref
+      //             .read(utilsProvider.notifier)
+      //             .setRemainingPlayersView(selected);
+      //       }),
+      // ChipOptions(
+      //     label: "Icons Summary",
+      //     selected: iconsSummaryFilter,
+      //     onSelected: (bool selected) {
+      //       ref.read(utilsProvider.notifier).setIconSummaryView(selected);
+      //     })
+    ];
+    return options;
+  }
+
+  Widget getLeagueStanding(LeagueStanding standing) {
+    DraftTeam? team = teams[standing.teamId];
+    Color rowColor = Theme.of(context).cardColor;
+    if (standing.rank == 1) {
+      rowColor = Colors.green;
+    }
+    // if (standing.rank!.isEven) {
+    //   rowColor = Theme.of(context).;
+    // }
+    return SizedBox(
+      height: 50,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
+        margin: const EdgeInsets.all(0),
+        color: rowColor,
+        elevation: 10,
+        child: Row(
+          children: [
+            Expanded(
+                flex: 1,
+                child: Text(
+                  standing.rank.toString(),
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.left,
+                )),
+            Expanded(
+                flex: 4,
+                child: Text(
+                  team!.teamName!,
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.left,
+                )),
+            Expanded(
+                flex: 2,
+                child: Text(
+                  standing.pointsFor.toString(),
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                )),
+            Expanded(
+                flex: 2,
+                child: Text(
+                  standing.leaguePoints.toString(),
+                  style: standing.rank == 1
+                      ? const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)
+                      : const TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ))
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  updateView(index) {
+    setState(() {
+      view = index!;
+    });
   }
 }

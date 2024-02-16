@@ -11,196 +11,6 @@ class Api {
     baseUrl = 'https://draft.premierleague.com';
   }
 
-  Future<dynamic> proxyViaFirebase(path) async {
-    try {
-      final result =
-          await FirebaseFunctions.instance.httpsCallable('fplProxyv2').call(
-        {
-          "path": path,
-        },
-      );
-      return result.data;
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  Future<Map?> getLeagueTrades(leagueId) async {
-    try {
-      if (kIsWeb) {
-        return await proxyViaFirebase("/api/draft/league/$leagueId/trades");
-      } else {
-        final response = await http.get((Uri.parse(
-            Commons.baseUrl + "/api/draft/league/$leagueId/trades")));
-        if (response.statusCode == 200) {
-          return Commons.returnResponse(response);
-        } else {
-          return null;
-        }
-      }
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  Future<Map?> getPlayerStatus(leagueId) async {
-    try {
-      if (kIsWeb) {
-        return await proxyViaFirebase("/api/league/$leagueId/element-status");
-      } else {
-        final response = await http.get((Uri.parse(
-            Commons.baseUrl + "/api/league/$leagueId/element-status")));
-        if (response.statusCode == 200) {
-          return Commons.returnResponse(response);
-        } else {
-          return null;
-        }
-      }
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  Future<Map?> getTransactions(leagueId) async {
-    try {
-      if (kIsWeb) {
-        return await proxyViaFirebase(
-            "/api/draft/league/$leagueId/transactions");
-      } else {
-        final response = await http.get((Uri.parse(
-            Commons.baseUrl + "/api/draft/league/$leagueId/transactions")));
-        if (response.statusCode == 200) {
-          return Commons.returnResponse(response);
-        } else {
-          return null;
-        }
-      }
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  Future<dynamic> getCurrentGameweek() async {
-    if (kIsWeb) {
-      return await proxyViaFirebase("/api/game");
-    } else {
-      try {
-        final response =
-            await http.get((Uri.parse(Commons.baseUrl + "/api/game")));
-        if (response.statusCode == 200) {
-          return Commons.returnResponse(response);
-        } else {
-          return null;
-        }
-      } catch (e) {
-        print(e);
-        return null;
-      }
-    }
-  }
-
-  Future<dynamic> getSquad(int teamId, int gameweek) async {
-    if (kIsWeb) {
-      return await proxyViaFirebase(
-          "/api/entry/" + teamId.toString() + "/event/" + gameweek.toString());
-    } else {
-      final response = await http.get((Uri.parse(Commons.baseUrl +
-          "/api/entry/" +
-          teamId.toString() +
-          "/event/" +
-          gameweek.toString())));
-      if (response.statusCode == 200) {
-        return Commons.returnResponse(response);
-      } else {
-        print(response.statusCode);
-        print("failed to get response");
-        throw Exception('Failed to get response from FPL');
-      }
-    }
-  }
-
-  Future<Map> getLeagueDetails(leagueId) async {
-    if (kIsWeb) {
-      return await proxyViaFirebase('/api/league/$leagueId/details');
-    } else {
-      final response =
-          await http.get(Uri.parse('$baseUrl/api/league/$leagueId/details'));
-      if (response.statusCode == 200) {
-        return Commons.returnResponse(response);
-      } else {
-        print(response.statusCode);
-        print("failed to get response");
-        throw Exception('Failed to get response from FPL');
-      }
-    }
-  }
-
-  Future<dynamic> getLiveData(int gameweek) async {
-    if (kIsWeb) {
-      return await proxyViaFirebase(
-          "/api/event/" + gameweek.toString() + "/live");
-    } else {
-      try {
-        final liveDetailsResponse = await http.get((Uri.parse(
-            Commons.baseUrl + "/api/event/" + gameweek.toString() + "/live")));
-        if (liveDetailsResponse.statusCode == 200) {
-          var response = Commons.returnResponse(liveDetailsResponse);
-          return response;
-        }
-      } on Exception {
-        return null;
-      }
-    }
-  }
-
-  Future<dynamic> getStaticData() async {
-    if (kIsWeb) {
-      return await proxyViaFirebase("/api/bootstrap-static");
-    } else {
-      try {
-        final staticDetailsResponse = await http
-            .get((Uri.parse(Commons.baseUrl + "/api/bootstrap-static")));
-        if (staticDetailsResponse.statusCode == 200) {
-          var response = Commons.returnResponse(staticDetailsResponse);
-          return response;
-        }
-      } on Exception {
-        return null;
-      }
-    }
-  }
-
-  Future<Map> get_gw_squad(teamId, gameweek) async {
-    if (kIsWeb) {
-      return await proxyViaFirebase("/api/entry/$teamId/event/$gameweek");
-    } else {
-      final response = await http
-          .get(Uri.parse('$baseUrl/api/entry/$teamId/event/$gameweek'));
-      if (response.statusCode == 200) {
-        return Commons.returnResponse(response);
-      } else {
-        print(response.statusCode);
-        print("failed to get response");
-        throw Exception('Failed to get response from FPL');
-      }
-    }
-  }
-
-  Future<List<dynamic>> get_live_squads(leagueId, gameweek) async {
-    final leagueDetails = await getLeagueDetails(leagueId);
-    List draftSquads = [];
-    for (var team in leagueDetails['league_entries']) {
-      int teamId = team['entry_id'];
-      var squad = get_gw_squad(teamId, gameweek);
-      var squadDetails = {"id": teamId, "squad": squad};
-      draftSquads.add(squadDetails);
-    }
-    return draftSquads;
-  }
-
   Future<Map<String, dynamic>> checkLeagueExists(String leagueId) async {
     final response = await http.get(Uri.parse(
         Commons.baseUrl + '/api/league/${leagueId.toString()}/details'));
@@ -235,6 +45,196 @@ class Api {
     } else {
       print("Non 200 repsonse");
       return {"valid": false, "reason": "League not found"};
+    }
+  }
+
+  Future<Map> get_gw_squad(teamId, gameweek) async {
+    if (kIsWeb) {
+      return await proxyViaFirebase("/api/entry/$teamId/event/$gameweek");
+    } else {
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/entry/$teamId/event/$gameweek'));
+      if (response.statusCode == 200) {
+        return Commons.returnResponse(response);
+      } else {
+        print(response.statusCode);
+        print("failed to get response");
+        throw Exception('Failed to get response from FPL');
+      }
+    }
+  }
+
+  Future<List<dynamic>> get_live_squads(leagueId, gameweek) async {
+    final leagueDetails = await getLeagueDetails(leagueId);
+    List draftSquads = [];
+    for (var team in leagueDetails['league_entries']) {
+      int teamId = team['entry_id'];
+      var squad = get_gw_squad(teamId, gameweek);
+      var squadDetails = {"id": teamId, "squad": squad};
+      draftSquads.add(squadDetails);
+    }
+    return draftSquads;
+  }
+
+  Future<dynamic> getCurrentGameweek() async {
+    if (kIsWeb) {
+      return await proxyViaFirebase("/api/game");
+    } else {
+      try {
+        final response =
+            await http.get((Uri.parse(Commons.baseUrl + "/api/game")));
+        if (response.statusCode == 200) {
+          return Commons.returnResponse(response);
+        } else {
+          return null;
+        }
+      } catch (e) {
+        print(e);
+        return null;
+      }
+    }
+  }
+
+  Future<Map> getLeagueDetails(leagueId) async {
+    if (kIsWeb) {
+      return await proxyViaFirebase('/api/league/$leagueId/details');
+    } else {
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/league/$leagueId/details'));
+      if (response.statusCode == 200) {
+        return Commons.returnResponse(response);
+      } else {
+        print(response.statusCode);
+        print("failed to get response");
+        throw Exception('Failed to get response from FPL');
+      }
+    }
+  }
+
+  Future<Map?> getLeagueTrades(leagueId) async {
+    try {
+      if (kIsWeb) {
+        return await proxyViaFirebase("/api/draft/league/$leagueId/trades");
+      } else {
+        final response = await http.get((Uri.parse(
+            Commons.baseUrl + "/api/draft/league/$leagueId/trades")));
+        if (response.statusCode == 200) {
+          return Commons.returnResponse(response);
+        } else {
+          return null;
+        }
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<dynamic> getLiveData(int gameweek) async {
+    if (kIsWeb) {
+      return await proxyViaFirebase(
+          "/api/event/" + gameweek.toString() + "/live");
+    } else {
+      try {
+        final liveDetailsResponse = await http.get((Uri.parse(
+            Commons.baseUrl + "/api/event/" + gameweek.toString() + "/live")));
+        if (liveDetailsResponse.statusCode == 200) {
+          var response = Commons.returnResponse(liveDetailsResponse);
+          return response;
+        }
+      } on Exception {
+        return null;
+      }
+    }
+  }
+
+  Future<Map?> getPlayerStatus(leagueId) async {
+    try {
+      if (kIsWeb) {
+        return await proxyViaFirebase("/api/league/$leagueId/element-status");
+      } else {
+        final response = await http.get((Uri.parse(
+            Commons.baseUrl + "/api/league/$leagueId/element-status")));
+        if (response.statusCode == 200) {
+          return Commons.returnResponse(response);
+        } else {
+          return null;
+        }
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<dynamic> getSquad(int teamId, int gameweek) async {
+    if (kIsWeb) {
+      return await proxyViaFirebase(
+          "/api/entry/" + teamId.toString() + "/event/" + gameweek.toString());
+    } else {
+      final response = await http.get((Uri.parse(Commons.baseUrl +
+          "/api/entry/" +
+          teamId.toString() +
+          "/event/" +
+          gameweek.toString())));
+      if (response.statusCode == 200) {
+        return Commons.returnResponse(response);
+      } else {
+        print(response.statusCode);
+        print("failed to get response");
+        throw Exception('Failed to get response from FPL');
+      }
+    }
+  }
+
+  Future<dynamic> getStaticData() async {
+    if (kIsWeb) {
+      return await proxyViaFirebase("/api/bootstrap-static");
+    } else {
+      try {
+        final staticDetailsResponse = await http
+            .get((Uri.parse(Commons.baseUrl + "/api/bootstrap-static")));
+        if (staticDetailsResponse.statusCode == 200) {
+          var response = Commons.returnResponse(staticDetailsResponse);
+          return response;
+        }
+      } on Exception {
+        return null;
+      }
+    }
+  }
+
+  Future<Map?> getTransactions(leagueId) async {
+    try {
+      if (kIsWeb) {
+        return await proxyViaFirebase(
+            "/api/draft/league/$leagueId/transactions");
+      } else {
+        final response = await http.get((Uri.parse(
+            Commons.baseUrl + "/api/draft/league/$leagueId/transactions")));
+        if (response.statusCode == 200) {
+          return Commons.returnResponse(response);
+        } else {
+          return null;
+        }
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<dynamic> proxyViaFirebase(path) async {
+    try {
+      final result =
+          await FirebaseFunctions.instance.httpsCallable('fplProxyv2').call(
+        {
+          "path": path,
+        },
+      );
+      return result.data;
+    } catch (e) {
+      print(e);
     }
   }
 }

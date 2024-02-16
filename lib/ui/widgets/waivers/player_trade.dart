@@ -1,4 +1,3 @@
-import 'package:draft_futbol/models/DraftTeam.dart';
 import 'package:draft_futbol/models/draft_player.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
@@ -35,8 +34,77 @@ class _TradeState extends ConsumerState<Trade> {
   Map<int, DraftPlayer>? _players;
 
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
+    return ref.watch(allTrades).when(
+        loading: () => const Loading(),
+        error: (err, stack) => Text('Error: $err'),
+        data: (config) {
+          int activeLeague = ref.watch(utilsProvider).activeLeagueId!;
+          teams = ref.read(fplGwDataProvider).teams![activeLeague];
+          if (ref.read(tradesProvider).trades[activeLeague] != null) {
+            List<playerTrade.Trade> _trades =
+                ref.read(tradesProvider).trades[activeLeague]!;
+            _players = ref.read(fplGwDataProvider).players;
+            return Scaffold(
+              appBar: DraftAppBar(
+                leading: true,
+                settings: false,
+              ),
+              body: RefreshIndicator(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                onRefresh: () async {
+                  ref.refresh(allTrades);
+                },
+                child: _trades.isEmpty
+                    ? const Center(child: Text("No trades processed yet...."))
+                    : SingleChildScrollView(
+                        child: Column(children: [
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                flex: 6,
+                                child: Text(
+                                  "Offered",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 6,
+                                child: Text(
+                                  "Requested",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                          for (var trade in _trades) ...[
+                            generateTrade(trade),
+                            const SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ]),
+                      ),
+              ),
+            );
+          } else {
+            return Scaffold(
+                appBar: DraftAppBar(
+                  leading: true,
+                  settings: false,
+                ),
+                body: RefreshIndicator(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    onRefresh: () async {
+                      ref.refresh(allTrades);
+                    },
+                    child: const Text("No Trades processed yet")));
+          }
+        });
   }
 
   Container generateTrade(playerTrade.Trade trade) {
@@ -131,76 +199,7 @@ class _TradeState extends ConsumerState<Trade> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ref.watch(allTrades).when(
-        loading: () => const Loading(),
-        error: (err, stack) => Text('Error: $err'),
-        data: (config) {
-          int activeLeague = ref.watch(utilsProvider).activeLeagueId!;
-          teams = ref.read(fplGwDataProvider).teams![activeLeague];
-          if (ref.read(tradesProvider).trades[activeLeague] != null) {
-            List<playerTrade.Trade> _trades =
-                ref.read(tradesProvider).trades[activeLeague]!;
-            _players = ref.read(fplGwDataProvider).players;
-            return Scaffold(
-              appBar: DraftAppBar(
-                leading: true,
-                settings: false,
-              ),
-              body: RefreshIndicator(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                onRefresh: () async {
-                  ref.refresh(allTrades);
-                },
-                child: _trades.isEmpty
-                    ? Center(child: Text("No trades processed yet...."))
-                    : SingleChildScrollView(
-                        child: Column(children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Expanded(
-                                flex: 6,
-                                child: Text(
-                                  "Offered",
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 6,
-                                child: Text(
-                                  "Requested",
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
-                          ),
-                          for (var trade in _trades) ...[
-                            generateTrade(trade),
-                            const SizedBox(
-                              height: 10,
-                            )
-                          ],
-                        ]),
-                      ),
-              ),
-            );
-          } else {
-            return Scaffold(
-                appBar: DraftAppBar(
-                  leading: true,
-                  settings: false,
-                ),
-                body: RefreshIndicator(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    onRefresh: () async {
-                      ref.refresh(allTrades);
-                    },
-                    child: Text("No Trades processed yet")));
-          }
-        });
+  void initState() {
+    super.initState();
   }
 }

@@ -47,9 +47,9 @@ void main() async {
               if (key == "ids") {
                 try {
                   List _ids = value.split(",");
-                  _ids.forEach((element) {
+                  for (var element in _ids) {
                     ids.add(int.parse(element));
-                  });
+                  }
                 } catch (error) {
                   print(error);
                   ids.add(int.parse(value));

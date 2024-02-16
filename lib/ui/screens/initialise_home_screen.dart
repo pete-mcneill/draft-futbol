@@ -23,71 +23,6 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
   late Map<dynamic, dynamic> leagueIds;
 
   @override
-  void initState() {
-    super.initState();
-    future = _asyncmethodCall();
-  }
-
-  Future<Map<int, dynamic>> _asyncmethodCall() async {
-    try {
-      final settings = await Hive.openBox('settings');
-      bool isLightTheme = settings.get('isLightTheme') ?? false;
-      isLightTheme
-          ? ref.read(utilsProvider.notifier).updateIsLightTheme(true)
-          : ref.read(utilsProvider.notifier).updateIsLightTheme(false);
-      bool remainingPlayersView = settings.get("remainingPlayersView");
-      bool iconsSummaryView = settings.get("iconSummaryView");
-      ref
-          .read(utilsProvider.notifier)
-          .setRemainingPlayersView(remainingPlayersView);
-      ref.read(utilsProvider.notifier).setIconSummaryView(iconsSummaryView);
-    } catch (e) {
-      print(e);
-    }
-
-    try {
-      return await getLeagueIds();
-    } catch (e) {
-      print(e);
-      return {};
-    }
-  }
-
-  Future<Map<int, dynamic>> getLeagueIds() async {
-    try {
-      Map<int, dynamic> _leagueIds = await setLeagueIds();
-      ref.read(utilsProvider.notifier).setLeagueIds(_leagueIds);
-      ref.read(utilsProvider.notifier).setDefaultActiveLeague();
-      return _leagueIds;
-    } catch (e) {
-      print(e);
-      print("Failed to get entitlements");
-      return {};
-    }
-  }
-
-  bool checkLeagueIdsValid(Map<int, dynamic> leagueIds) {
-    for (var league in leagueIds.values) {
-      if (league['season'] == null) {
-        clearLeagueIds();
-        return false;
-      }
-    }
-    return true;
-  }
-
-  Widget checkLeagueIdsSet() {
-    Utilities utils = ref.read(utilsProvider);
-    if (utils.leagueIds!.isEmpty || !checkLeagueIdsValid(utils.leagueIds!)) {
-      return const OnBoardingScreen();
-    } else {
-      Map<int, dynamic> leagueIds = ref.read(utilsProvider).leagueIds!;
-      List<int> ids = leagueIds.keys.toList();
-      return HomePage(leagueType: "h", leagueIds: ids);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     ThemeMode theme = ThemeMode.dark;
     bool isLightTheme = false;
@@ -205,8 +140,73 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
     );
   }
 
+  Widget checkLeagueIdsSet() {
+    Utilities utils = ref.read(utilsProvider);
+    if (utils.leagueIds!.isEmpty || !checkLeagueIdsValid(utils.leagueIds!)) {
+      return const OnBoardingScreen();
+    } else {
+      Map<int, dynamic> leagueIds = ref.read(utilsProvider).leagueIds!;
+      List<int> ids = leagueIds.keys.toList();
+      return HomePage(leagueType: "h", leagueIds: ids);
+    }
+  }
+
+  bool checkLeagueIdsValid(Map<int, dynamic> leagueIds) {
+    for (var league in leagueIds.values) {
+      if (league['season'] == null) {
+        clearLeagueIds();
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<Map<int, dynamic>> getLeagueIds() async {
+    try {
+      Map<int, dynamic> _leagueIds = await setLeagueIds();
+      ref.read(utilsProvider.notifier).setLeagueIds(_leagueIds);
+      ref.read(utilsProvider.notifier).setDefaultActiveLeague();
+      return _leagueIds;
+    } catch (e) {
+      print(e);
+      print("Failed to get entitlements");
+      return {};
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    future = _asyncmethodCall();
+  }
+
+  Future<Map<int, dynamic>> _asyncmethodCall() async {
+    try {
+      final settings = await Hive.openBox('settings');
+      bool isLightTheme = settings.get('isLightTheme') ?? false;
+      isLightTheme
+          ? ref.read(utilsProvider.notifier).updateIsLightTheme(true)
+          : ref.read(utilsProvider.notifier).updateIsLightTheme(false);
+      bool remainingPlayersView = settings.get("remainingPlayersView");
+      bool iconsSummaryView = settings.get("iconSummaryView");
+      ref
+          .read(utilsProvider.notifier)
+          .setRemainingPlayersView(remainingPlayersView);
+      ref.read(utilsProvider.notifier).setIconSummaryView(iconsSummaryView);
+    } catch (e) {
+      print(e);
+    }
+
+    try {
+      return await getLeagueIds();
+    } catch (e) {
+      print(e);
+      return {};
+    }
   }
 }

@@ -6,7 +6,6 @@ import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/draft_player.dart';
 
@@ -15,16 +14,61 @@ class DraftPlaceholder extends ConsumerWidget {
 
   DraftPlaceholder({Key? key, required this.leagueData}) : super(key: key);
 
-  List<DraftPlayer> getSquad(int teamId, Map<int, DraftPlayer> players) {
-    var testing = players.values
-        .where((DraftPlayer player) =>
-            player.draftTeamId!.containsKey(leagueData.leagueId))
-        .toList();
-    var teamSquad = testing
-        .where((DraftPlayer player) =>
-            player.draftTeamId![leagueData.leagueId] == teamId)
-        .toList();
-    return teamSquad;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    Map<int, DraftPlayer> players =
+        ref.read(fplGwDataProvider.select((value) => value.players!));
+    String leagueStatus = leagueData.draftStatus;
+    if (leagueStatus == "pre") {
+      return SingleChildScrollView(
+        child: Column(children: [
+          ...appStoreLinks(),
+          buyaCoffeebutton(context),
+          const Center(
+            child: AutoSizeText(
+              'Draft has not been completed',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              maxLines: 1,
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Container(
+            child: generatePlaceholder(context, ref, players, false),
+          )
+        ]),
+      );
+    } else {
+      Map<int, DraftPlayer> players =
+          ref.read(fplGwDataProvider.select((value) => value.players!));
+      return SingleChildScrollView(
+        child: Column(children: [
+          ...appStoreLinks(),
+          buyaCoffeebutton(context),
+          Center(
+            child: AutoSizeText(
+              leagueData.draftStatus == 'pre'
+                  ? 'Draft has not been completed'
+                  : 'Season has not started yet',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              maxLines: 1,
+            ),
+          ),
+          const Center(
+            child: AutoSizeText(
+              'Tap to view squads below',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              maxLines: 1,
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          generatePlaceholder(context, ref, players, true)
+        ]),
+      );
+    }
   }
 
   Widget generatePlaceholder(BuildContext context, WidgetRef ref,
@@ -89,60 +133,15 @@ class DraftPlaceholder extends ConsumerWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Map<int, DraftPlayer> players =
-        ref.read(fplGwDataProvider.select((value) => value.players!));
-    String leagueStatus = leagueData.draftStatus;
-    if (leagueStatus == "pre") {
-      return SingleChildScrollView(
-        child: Column(children: [
-          ...appStoreLinks(),
-          buyaCoffeebutton(context),
-          const Center(
-            child: AutoSizeText(
-              'Draft has not been completed',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              maxLines: 1,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            child: generatePlaceholder(context, ref, players, false),
-          )
-        ]),
-      );
-    } else {
-      Map<int, DraftPlayer> players =
-          ref.read(fplGwDataProvider.select((value) => value.players!));
-      return SingleChildScrollView(
-        child: Column(children: [
-          ...appStoreLinks(),
-          buyaCoffeebutton(context),
-          Center(
-            child: AutoSizeText(
-              leagueData.draftStatus == 'pre'
-                  ? 'Draft has not been completed'
-                  : 'Season has not started yet',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              maxLines: 1,
-            ),
-          ),
-          const Center(
-            child: AutoSizeText(
-              'Tap to view squads below',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              maxLines: 1,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          generatePlaceholder(context, ref, players, true)
-        ]),
-      );
-    }
+  List<DraftPlayer> getSquad(int teamId, Map<int, DraftPlayer> players) {
+    var testing = players.values
+        .where((DraftPlayer player) =>
+            player.draftTeamId!.containsKey(leagueData.leagueId))
+        .toList();
+    var teamSquad = testing
+        .where((DraftPlayer player) =>
+            player.draftTeamId![leagueData.leagueId] == teamId)
+        .toList();
+    return teamSquad;
   }
 }
