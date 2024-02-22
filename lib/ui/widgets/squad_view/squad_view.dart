@@ -1,3 +1,4 @@
+import 'package:draft_futbol/models/gameweek.dart';
 import 'package:draft_futbol/ui/screens/pitch/line_painter.dart';
 import 'package:draft_futbol/ui/screens/pitch/pitch_background.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_app_bar.dart';
@@ -23,6 +24,7 @@ class SquadView extends ConsumerStatefulWidget {
 class _SquadViewState extends ConsumerState<SquadView> {
   Map<int, DraftPlayer>? players;
   int? activeLeague;
+  Gameweek? currentGameweek;
   List<DraftPlayer> getSquad(int teamId) {
     var testing = players!.values
         .where((DraftPlayer player) =>
@@ -37,6 +39,7 @@ class _SquadViewState extends ConsumerState<SquadView> {
 
   @override
   Widget build(BuildContext context) {
+    currentGameweek = ref.read(fplGwDataProvider.select((value) => value.gameweek));
     activeLeague = ref.watch(utilsProvider).activeLeagueId;
     players = ref.read(fplGwDataProvider.select((value) => value.players));
     double pitchHeight =
@@ -46,15 +49,11 @@ class _SquadViewState extends ConsumerState<SquadView> {
     double pitchWidth = MediaQuery.of(context).size.width > 1000
         ? 1000
         : MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: const SquadAppBar(),
-      body: Container(
+    return Container(
         child: DefaultTabController(
           animationDuration: Duration.zero,
           length: 1,
-          child: Scaffold(
-              appBar: SquadHeader(teamName: widget.teamName),
-              body: kIsWeb
+          child: kIsWeb
                   ? Center(
                       child: ClipRect(
                           child: SizedBox(
@@ -62,34 +61,28 @@ class _SquadViewState extends ConsumerState<SquadView> {
                               child: getTabBars(
                                   pitchHeight, pitchWidth, lineLength))))
                   : getTabBars(pitchHeight, pitchWidth, lineLength)),
-        ),
         // ],
-      ),
-    );
+      );
   }
 
-  TabBarView getTabBars(
+  Stack getTabBars(
       double pitchHeight, double pitchWidth, double lineLength) {
-    return TabBarView(
-      children: [
-        SingleChildScrollView(
-          child: Stack(
-            children: [
-              PitchBackground(
-                pitchHeight: pitchHeight,
-              ),
-              SizedBox(
-                  height: pitchHeight,
-                  width: pitchWidth,
-                  // color: Colors.black,
-                  child: CustomPaint(
-                    painter: LinePainter(pitchLength: lineLength),
-                  )),
-              SquadPitch(squad: widget.players)
-            ],
-          ),
-        ),
-      ],
-    );
+    return
+        Stack(
+          children: [
+            PitchBackground(
+              pitchHeight: pitchHeight,
+              matchView: false,
+            ),
+            SizedBox(
+                height: pitchHeight/6,
+                width: pitchWidth,
+                // color: Colors.black,
+                child: CustomPaint(
+                  painter: LinePainter(pitchLength: lineLength),
+                )),
+            SquadPitch(squad: widget.players)
+          ],
+        );
   }
 }

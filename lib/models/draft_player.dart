@@ -88,6 +88,7 @@ class DraftPlayer {
   Map<int, String>? playerStatus;
   Map<int, int>? draftTeamId;
   List<PlMatchStats>? matches;
+  List<String>? gameweekFixtures;
 
   DraftPlayer(
       {this.playerId,
@@ -96,7 +97,8 @@ class DraftPlayer {
       this.teamId,
       this.playerCode,
       this.playerStatus,
-      this.draftTeamId});
+      this.draftTeamId,
+      this.gameweekFixtures});
 
   void updateMatches(List<PlMatchStats> _matches) {
     matches = _matches;
@@ -124,6 +126,7 @@ class DraftPlayer {
         playerCode: json["code"],
         teamId: json['team'],
         draftTeamId: {},
-        playerStatus: {});
+        playerStatus: {},
+        gameweekFixtures: []);
   }
 }

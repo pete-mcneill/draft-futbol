@@ -38,6 +38,7 @@ class _ClassicPitchState extends State<ClassicPitch> {
                     children: [
                       PitchBackground(
                         pitchHeight: pitchHeight,
+                        matchView: true,
                       ),
                       SizedBox(
                           height: pitchHeight,

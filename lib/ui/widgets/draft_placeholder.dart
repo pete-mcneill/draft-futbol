@@ -1,28 +1,65 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/models/draft_leagues.dart';
+import 'package:draft_futbol/models/draft_team.dart';
 import 'package:draft_futbol/providers/providers.dart';
 import 'package:draft_futbol/ui/widgets/app_store_links.dart';
 import 'package:draft_futbol/ui/widgets/coffee.dart';
 import 'package:draft_futbol/ui/widgets/squad_view/squad_view.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/draft_player.dart';
 
-class DraftPlaceholder extends ConsumerWidget {
-  DraftLeague leagueData;
 
-  DraftPlaceholder({Key? key, required this.leagueData}) : super(key: key);
+class DraftPlaceholder extends ConsumerStatefulWidget {
+  DraftLeague leagueData;
+  DraftPlaceholder({Key? key, required DraftLeague this.leagueData}) : super(key: key);
+
+   @override
+  _DraftPlaceholderState createState() => _DraftPlaceholderState();
+}
+
+class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+    late final Future<Map<int, List<DraftPlayer>>> futureSquads =
+    getSquads();
+
+    Future<Map<int, List<DraftPlayer>>> getSquads() async {
+    Map<int, List<DraftPlayer>> squads = {};
+    Map<int, DraftPlayer> players =
+        ref.read(fplGwDataProvider.select((value) => value.players))!;
+    Map<int, Map<int, DraftTeam>>? teams = ref.read(fplGwDataProvider).teams;
+    for (var league in teams!.entries) {
+      var leaguePlayers = players.values
+          .where((DraftPlayer player) =>
+              player.draftTeamId!.containsKey(league.key))
+          .toList();
+      for (var teamEntry in league.value.entries) {
+        DraftTeam team = teamEntry.value;
+        var teamSquad = leaguePlayers
+            .where((DraftPlayer player) =>
+                player.draftTeamId![league.key] == team.entryId)
+            .toList();
+        squads[team.entryId!] = teamSquad;
+      }
+    }
+    return squads;
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     Map<int, DraftPlayer> players =
         ref.read(fplGwDataProvider.select((value) => value.players!));
-    String leagueStatus = leagueData.draftStatus;
+    String leagueStatus = widget.leagueData.draftStatus;
     if (leagueStatus == "pre") {
       return SingleChildScrollView(
         child: Column(children: [
-          ...appStoreLinks(),
+          if(kIsWeb)...appStoreLinks(),
           buyaCoffeebutton(context),
           const Center(
             child: AutoSizeText(
@@ -44,11 +81,11 @@ class DraftPlaceholder extends ConsumerWidget {
           ref.read(fplGwDataProvider.select((value) => value.players!));
       return SingleChildScrollView(
         child: Column(children: [
-          ...appStoreLinks(),
+          if(kIsWeb)...appStoreLinks(),
           buyaCoffeebutton(context),
           Center(
             child: AutoSizeText(
-              leagueData.draftStatus == 'pre'
+              widget.leagueData.draftStatus == 'pre'
                   ? 'Draft has not been completed'
                   : 'Season has not started yet',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -70,6 +107,43 @@ class DraftPlaceholder extends ConsumerWidget {
       );
     }
   }
+  void _scrollToSelectedContent({GlobalKey? expansionTileKey}) {
+    final keyContext = expansionTileKey!.currentContext;
+    if (keyContext != null) {
+      Future.delayed(const Duration(milliseconds: 200)).then((value) {
+        Scrollable.ensureVisible(keyContext,
+            duration: const Duration(milliseconds: 200));
+      });
+    }
+  }
+
+  Widget expansionItem(
+      {int? index, String? teamName, List<DraftPlayer>? players}) {
+    final GlobalKey expansionTileKey = GlobalKey();
+    return Material(
+      elevation: 4,
+      child: Container(
+        color: Theme.of(context).cardColor,
+        child: ExpansionTile(
+          key: expansionTileKey,
+          onExpansionChanged: (value) {
+            if (value) {
+              _scrollToSelectedContent(expansionTileKey: expansionTileKey);
+            }
+          },
+          title: Text(teamName!),
+          children: <Widget>[
+            SquadView(
+              players: players!,
+              teamName: teamName,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  
 
   Widget generatePlaceholder(BuildContext context, WidgetRef ref,
       Map<int, DraftPlayer> players, bool draftComplete) {
@@ -85,63 +159,53 @@ class DraftPlaceholder extends ConsumerWidget {
         const SizedBox(
           height: 10,
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: leagueData.teams.length,
-          itemBuilder: (context, index) {
-            var team = leagueData.teams[index];
-            return Column(
-              children: [
-                draftComplete
-                    ? GestureDetector(
-                        onTap: () async {
-                          List<DraftPlayer> squad =
-                              getSquad(team['entry_id'], players);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SquadView(
+        FutureBuilder<Map<int, List<DraftPlayer>>>(
+                future: futureSquads,
+                builder: (BuildContext context,
+                    AsyncSnapshot<Map<int, List<DraftPlayer>>> snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text("Error");
+                  }
+
+                  if (snapshot.hasData) {
+                    try {
+                      return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              for (dynamic team in widget.leagueData.teams)
+                                Column(
+                                  children: [
+                                    expansionItem(
+                                        index: team['entry_id'],
                                         teamName: team['name'],
-                                        players: squad,
-                                      )));
-                        },
-                        child: SizedBox(
-                            height: 50,
-                            child: Card(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(0.0)),
-                                margin: const EdgeInsets.all(0),
-                                elevation: 10,
-                                child: Center(child: Text(team['name'])))),
-                      )
-                    : SizedBox(
-                        height: 50,
-                        child: Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(0.0)),
-                            margin: const EdgeInsets.all(0),
-                            elevation: 10,
-                            child: Center(child: Text(team['name'])))),
-                const SizedBox(
-                  height: 5,
-                )
-              ],
-            );
-          },
-        )
+                                        players: snapshot.data![team['entry_id']]!),
+                                    const SizedBox(
+                                      height: 5,
+                                    )
+                                  ],
+                                ),
+                            ],
+                          ),
+                        
+                      );
+                    } catch (error) {
+                      return const Text("Error");
+                    }
+                  } else {
+                    return const Text("loading");
+                  }
+                },
+              )
       ],
     );
   }
-
-  List<DraftPlayer> getSquad(int teamId, Map<int, DraftPlayer> players) {
-    var testing = players.values
-        .where((DraftPlayer player) =>
-            player.draftTeamId!.containsKey(leagueData.leagueId))
-        .toList();
-    var teamSquad = testing
-        .where((DraftPlayer player) =>
-            player.draftTeamId![leagueData.leagueId] == teamId)
-        .toList();
-    return teamSquad;
-  }
 }
+
+
+

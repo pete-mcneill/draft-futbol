@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 
 class PitchBackground extends StatelessWidget {
   final double pitchHeight;
-  const PitchBackground({Key? key, required this.pitchHeight})
+  final bool matchView;
+  const PitchBackground({Key? key, required this.pitchHeight, required this.matchView})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double subsBench = pitchHeight - ((pitchHeight / 10) * 7);
     return SizedBox(
-      height: pitchHeight,
+      // height: pitchHeight,
       child: Column(children: [
         Container(
           width: MediaQuery.of(context).size.width,
@@ -46,7 +47,7 @@ class PitchBackground extends StatelessWidget {
           height: pitchHeight / 10,
           color: const Color(0xFF05AE56),
         ),
-        Container(
+        if(matchView) Container(
           width: MediaQuery.of(context).size.width,
           height: subsBench,
           decoration: BoxDecoration(

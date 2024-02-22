@@ -83,6 +83,7 @@ class _PitchState extends ConsumerState<Pitch> {
             children: [
               PitchBackground(
                 pitchHeight: pitchHeight,
+                matchView: true,
               ),
               SizedBox(
                   height: pitchHeight,
@@ -100,6 +101,7 @@ class _PitchState extends ConsumerState<Pitch> {
             children: [
               PitchBackground(
                 pitchHeight: pitchHeight,
+                matchView: true
               ),
               SizedBox(
                   height: pitchHeight,

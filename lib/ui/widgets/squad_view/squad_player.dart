@@ -18,45 +18,6 @@ class SquadPlayer extends ConsumerStatefulWidget {
 class _SquadPlayerState extends ConsumerState<SquadPlayer> {
   late Map<String, PlMatch> matches;
 
-  // List<Widget> getPlayerFixtures() {
-  //   List<Widget> fixtures = [];
-  //   ref.read(plM)
-  //   for (PlMatchStats _match in widget.player.matches!) {
-  //     PlMatch _plMatch = matches[_match.matchId]!;
-  //     if (!_plMatch.started!) {
-  //       if (_plMatch.homeTeamId == widget.player.teamId) {
-  //         fixtures.add(
-  //           AutoSizeText.rich(
-  //             TextSpan(text: "${_plMatch.awayShortName}(H)"),
-  //             textAlign: TextAlign.center,
-  //             style: const TextStyle(
-  //                 fontSize: 10,
-  //                 // color: Theme.of(context).accentColor,
-  //                 fontWeight: FontWeight.bold),
-  //             minFontSize: 7,
-  //             maxLines: 1,
-  //             maxFontSize: 10,
-  //           ),
-  //         );
-  //       } else {
-  //         fixtures.add(
-  //           AutoSizeText.rich(
-  //             TextSpan(text: "${_plMatch.homeShortName}(A)"),
-  //             textAlign: TextAlign.center,
-  //             style: const TextStyle(
-  //                 fontSize: 10,
-  //                 // color: Theme.of(context).accentColor,
-  //                 fontWeight: FontWeight.bold),
-  //             minFontSize: 7,
-  //             maxLines: 1,
-  //             maxFontSize: 10,
-  //           ),
-  //         );
-  //       }
-  //     }
-  //   }
-  //   return fixtures;
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -140,27 +101,22 @@ class _SquadPlayerState extends ConsumerState<SquadPlayer> {
                               maxLines: 2,
                               maxFontSize: 11,
                             ),
-                            // Column(children: [
-                            //   Column(children: getPlayerFixtures()),
-                            // ]),
-                            // if (matchesStarted)
-                            //   Row(
-                            //       mainAxisAlignment: MainAxisAlignment.center,
-                            //       children: [
-                            //         AutoSizeText.rich(
-                            //           TextSpan(
-                            //               text: calculatePlayerScore()
-                            //                   .toString()),
-                            //           textAlign: TextAlign.center,
-                            //           style: const TextStyle(
-                            //               fontSize: 14,
-                            //               // color: Theme.of(context).accentColor,
-                            //               fontWeight: FontWeight.bold),
-                            //           minFontSize: 7,
-                            //           maxLines: 1,
-                            //           maxFontSize: 11,
-                            //         ),
-                            //       ]),
+                            Column(children: [
+                              for (var fixture
+                                  in widget.player.gameweekFixtures!)
+                                AutoSizeText.rich(
+                                  TextSpan(text: fixture.toString()),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      fontSize: 10,
+                                      // color: Theme.of(context).accentColor,
+                                      fontWeight: FontWeight.bold),
+                                  minFontSize: 7,
+                                  maxLines: 1,
+                                  maxFontSize: 10,
+                                ),
+                            ]),
+                  
                           ],
                         ),
                       ),

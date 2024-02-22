@@ -224,6 +224,26 @@ class Api {
     }
   }
 
+  Future<List?> getPremierLeagueFixtures(gameweek) async {
+    try {
+      if (kIsWeb) {
+        return await proxyViaFirebase(
+            "/api/event/$gameweek/fixtures");
+      } else {
+        final response = await http.get((Uri.parse(
+            Commons.baseUrl + "/api/event/$gameweek/fixtures")));
+        if (response.statusCode == 200) {
+          return Commons.returnResponse(response);
+        } else {
+          return null;
+        }
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
   Future<dynamic> proxyViaFirebase(path) async {
     try {
       final result =

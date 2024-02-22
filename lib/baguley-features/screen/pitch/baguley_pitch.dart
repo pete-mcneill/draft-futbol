@@ -41,6 +41,7 @@ class _BaguleypitchState extends State<Baguleypitch> {
                   children: [
                     PitchBackground(
                       pitchHeight: pitchHeight,
+                      matchView: true
                     ),
                     SizedBox(
                         height: pitchHeight,
@@ -58,6 +59,7 @@ class _BaguleypitchState extends State<Baguleypitch> {
                   children: [
                     PitchBackground(
                       pitchHeight: pitchHeight,
+                      matchView: true,
                     ),
                     SizedBox(
                         height: pitchHeight,
