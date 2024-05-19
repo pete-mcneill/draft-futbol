@@ -108,6 +108,8 @@ class _TradeState extends ConsumerState<Trade> {
   }
 
   Container generateTrade(playerTrade.Trade trade) {
+    DraftTeam offeringTeam = teams!.entries.firstWhere((team) => team.value.entryId == trade.offeringTeam).value;
+    DraftTeam receivingTeam = teams!.entries.firstWhere((team) => team.value.entryId == trade.receivingTeam).value;
     return Container(
       // height: 50,
       child: Card(
@@ -120,7 +122,7 @@ class _TradeState extends ConsumerState<Trade> {
               // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Expanded(
-                    child: Text("${teams![trade.offeringTeam]!.teamName}",
+                    child: Text("${offeringTeam.teamName}",
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold))),
@@ -140,7 +142,7 @@ class _TradeState extends ConsumerState<Trade> {
                   ),
                 ),
                 Expanded(
-                    child: Text("${teams![trade.receivingTeam]!.teamName}",
+                    child: Text("${receivingTeam.teamName}",
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontSize: 14, fontWeight: FontWeight.bold)))

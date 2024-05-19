@@ -19,7 +19,9 @@ final getFplData = FutureProvider.autoDispose
     _leagueIds[leagueId] = {"name": league.leagueName, "season": "23/24"};
   }
   ref.read(utilsProvider.notifier).setLeagueIds(_leagueIds);
-  ref.read(utilsProvider.notifier).updateActiveLeague(leagueIds[0]);
+  // if(ref.read(utilsProvider).activeLeagueId == null) {
+  //   ref.read(utilsProvider.notifier).updateActiveLeague(leagueIds[0]);
+  // }
   return data;
 });
 
@@ -53,6 +55,8 @@ final allTransactions = FutureProvider((ref) async {
       // var trades = await _api.getLeagueTrades(leagueId);
       // ref.read(transactionsProvider.notifier).addAllTrades(trades['transactions'], leagueId);
     }
+    Map<int, Map<int, List<Transaction>>> transactions = ref.read(transactionsProvider).transactions;
+    return transactions;
   } catch (Exception) {
     print(Exception);
   }

@@ -63,7 +63,7 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
       ),
       darkTheme: FlexThemeData.dark(
         colors: const FlexSchemeColor(
-          primary: Color(0xff385564),
+          primary: Color.fromARGB(255, 96, 149, 175),
           primaryContainer: Color(0xff2a9d8f),
           secondary: Color(0xfff57859),
           secondaryContainer: Color(0xfff57859),

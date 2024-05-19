@@ -178,8 +178,14 @@ class _ClassicLeagueStandingsState
   Widget getLeagueStanding(LeagueStanding standing) {
     DraftTeam? team = teams[standing.teamId];
     Color rowColor = Theme.of(context).cardColor;
+    FontWeight weight = FontWeight.normal;
     if (standing.rank == 1) {
-      rowColor = Colors.green;
+      rowColor = Colors.green.shade900;
+      weight = FontWeight.bold;
+    }
+    if (standing.rank == staticStandings.length) {
+      rowColor = Colors.red.shade900;
+      weight = FontWeight.bold;
     }
     return SizedBox(
       height: 50,
@@ -201,14 +207,14 @@ class _ClassicLeagueStandingsState
                   flex: 1,
                   child: Text(
                     standing.rank.toString(),
-                    style: const TextStyle(fontSize: 14),
+                    style:  TextStyle(fontSize: 14, fontWeight: weight),
                     textAlign: TextAlign.left,
                   )),
               Expanded(
                   flex: 4,
                   child: Text(
                     team!.teamName!,
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14, fontWeight: weight),
                     textAlign: TextAlign.left,
                   )),
               Expanded(
@@ -217,14 +223,14 @@ class _ClassicLeagueStandingsState
                     liveBps
                         ? standing.bpsScore.toString()
                         : standing.gwScore.toString(),
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14, fontWeight: weight),
                     textAlign: TextAlign.center,
                   )),
               Expanded(
                   flex: 2,
                   child: Text(
                     standing.leaguePoints.toString(),
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(fontSize: 14, fontWeight: weight),
                     textAlign: TextAlign.center,
                   ))
             ],
@@ -314,7 +320,10 @@ class _ClassicLeagueStandingsState
   Container remainingPlayers(LeagueStanding standing) {
     Color rowColor = Theme.of(context).cardColor;
     if (standing.rank == 1) {
-      rowColor = Colors.green;
+      rowColor = Colors.green.shade900;
+    }
+    if (standing.rank == staticStandings.length) {
+      rowColor = Colors.red.shade900;
     }
     DraftTeam? team = teams[standing.teamId]!;
     final String remainingMatches = team.remainingPlayersMatches.toString();

@@ -20,50 +20,44 @@ class Transactions extends ConsumerStatefulWidget {
 }
 
 class _TransactionsState extends ConsumerState<Transactions> {
-  List<Transaction> visibleWaivers = [];
-  List<Transaction> visiableTrades = [];
-  List<Transaction> visibleFreeAgents = [];
+  Map<int, DraftTeam> teams = {};
+  Map<int, DraftPlayer> players = {};
+  List<Transaction> waivers = [];
+  List<Transaction> freeAgents = [];
+  List<dynamic> teamsFiltered = [];
+  List<dynamic> transactionsFiltered = [];
+
+
   List<DropdownMenuItem<String>> menuOptions = [];
   List<DropdownMenuItem<String>> gwOptions = [];
-  List<Object?> _draftTeams = [];
-  final List<Object?> _waiverResults = [];
+  final List<String?> transactionFilters = ["a", "r"];
+   List<int?> _draftTeams = [];
   Map<int, dynamic>? leagueIds;
-  bool waiversFiltered = false;
-  int? currentGW;
+  bool waiverFiltersActive = false;
+  bool faFiltersActive = false;
+  Gameweek? currentGW;
+  int? currentGameweek;
   int? dropdownValue;
 
-  var waiverResults = [
+  var transactionResult = [
     MultiSelectItem("a", "Accepted"),
     MultiSelectItem("r", "Rejected")
   ];
 
   @override
   Widget build(BuildContext context) {
-    leagueIds = ref.watch(utilsProvider).leagueIds!;
+    leagueIds = ref.read(utilsProvider).leagueIds!;
     currentGW = ref.watch(
-        fplGwDataProvider.select((value) => value.gameweek!.currentGameweek));
-    setPossibleGameweeks();
-    leagueIds!.forEach((key, value) {
-      menuOptions.add(DropdownMenuItem(
-          value: key.toString(),
-          child: Center(
-            child: Text(
-              value['name'],
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          )));
-    });
+        fplGwDataProvider.select((value) => value.gameweek!));
+    currentGameweek = (currentGW!.waiversProcessed
+                ? (currentGW!.currentGameweek + 1)
+                : currentGW!.currentGameweek);
+    players = ref.read(fplGwDataProvider).players!;
     dropdownValue = ref.watch(
         utilsProvider.select((connection) => connection.activeLeagueId!));
-    Map<int, DraftTeam> teams =
-        ref.read(fplGwDataProvider).teams![dropdownValue]!;
-
-    final _draftTeamFilters = teams.entries
-        .map((key) => MultiSelectItem(key.key, key.value.teamName!))
+    teams = ref.read(fplGwDataProvider).teams![dropdownValue]!;
+    final teamsDropdownItems = teams.entries
+        .map((key) => MultiSelectItem(key.value.entryId!, key.value.teamName!))
         .toList();
 
     AsyncValue config = ref.watch(allTransactions);
@@ -73,43 +67,26 @@ class _TransactionsState extends ConsumerState<Transactions> {
           loading: () => const Loading(),
           error: (err, stack) => Text('Error: $err'),
           data: (config) {
-            Map<int, Map<int, List<Transaction>>> transactions =
-                ref.read(transactionsProvider).transactions;
-            var activeLeague = ref.watch(utilsProvider
-                .select((connection) => connection.activeLeagueId!));
-
-            Map<int, DraftPlayer> players =
-                ref.read(fplGwDataProvider).players!;
-            Gameweek gameweek =
-                ref.watch(fplGwDataProvider.select((value) => value.gameweek!));
-            int currentGameweek = (gameweek.waiversProcessed
-                ? (gameweek.currentGameweek + 1)
-                : gameweek.currentGameweek);
-            if (!waiversFiltered) {
-              _draftTeams = teams.keys.toList();
-              visibleWaivers = [];
-              visibleFreeAgents = [];
-              try {
-                for (Transaction transaction
-                    in transactions[activeLeague]![currentGameweek]!) {
-                  if (transaction.type == "w") {
-                    visibleWaivers.add(transaction);
-                  } else if (transaction.type == "f") {
-                    visibleFreeAgents.add(transaction);
-                  }
-                }
-              } catch (e) {
-                return Scaffold(
-                    appBar: DraftAppBar(
-                      leading: true,
-                      settings: false,
-                    ),
-                    body: const Center(child: Text("No Transactions made this GW")));
-              }
+            
+            if(!waiverFiltersActive){
+              _draftTeams =  teams.entries.map((team) => team.value.entryId).toList();
+              filterTransactions("w", _draftTeams, teams, transactionFilters);
             }
 
-            visibleWaivers.sort((a, b) =>
-                int.parse(a.priority).compareTo(int.parse(b.priority)));
+            if(!faFiltersActive){
+              _draftTeams =  teams.entries.map((team) => team.value.entryId).toList();
+              filterTransactions("f", _draftTeams, teams, transactionFilters);
+            }
+            
+
+            if(waivers.isEmpty && freeAgents.isEmpty) {
+              return Scaffold(
+                appBar: DraftAppBar(
+                  leading: true,
+                  settings: false,
+                ),
+                body: const Center(child: Text("No Transactions made this GW")));
+            }
 
             return Scaffold(
               appBar: DraftAppBar(
@@ -117,57 +94,68 @@ class _TransactionsState extends ConsumerState<Transactions> {
                 settings: false,
               ),
               body: DefaultTabController(
+                
                   length: 2, // length of tabsDraft not complete
                   initialIndex: 0,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          child: const TabBar(
-                            tabs: [
-                              Tab(text: 'Waivers'),
-                              Tab(text: 'Free Agents'),
-                              // Tab(text: 'Trades')
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: TabBarView(children: <Widget>[
-                            RefreshIndicator(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer,
-                              onRefresh: () async {
-                                ref.refresh(allTransactions);
-                              },
-                              child: waiversTab(
-                                  _draftTeamFilters,
-                                  transactions,
-                                  activeLeague,
-                                  currentGameweek,
-                                  teams,
-                                  players),
-                            ),
-                            RefreshIndicator(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer,
-                              onRefresh: () async {
-                                ref.refresh(allTransactions);
-                              },
-                              child: freeAgentsTab(
-                                _draftTeamFilters,
-                                players,
-                                teams,
-                                transactions,
-                                activeLeague,
-                                currentGameweek,
+                  child: Builder(
+                    builder: (context) {
+                      final TabController controller = DefaultTabController.of(context);
+                      controller.addListener(() {
+                        if (!controller.indexIsChanging) {
+                          if(controller.index == 0){
+                            filterTransactions(
+                              "w", 
+                              teams.entries.map((team) => team.value.entryId).toList(), 
+                              teams, 
+                               ["a", "r"]);
+                          }
+                          if(controller.index == 1){
+                            filterTransactions("f", 
+                            teams.entries.map((team) => team.value.entryId).toList(), 
+                            teams, 
+                             ["a", "r"]);
+                          }
+                          print("Make Change here");
+                        }
+                      });
+                      return Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: const TabBar(
+                                tabs: [
+                                  Tab(text: 'Waivers'),
+                                  Tab(text: 'Free Agents'),
+                                  // Tab(text: 'Trades')
+                                ],
                               ),
                             ),
-                            // const Center(child: Text("Coming soon..."))
-                          ]),
-                        )
-                      ])),
+                            Expanded(
+                              child: TabBarView(children: <Widget>[
+                                RefreshIndicator(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer,
+                                  onRefresh: () async {
+                                    ref.refresh(allTransactions);
+                                  },
+                                  child: getTab(teamsDropdownItems, waivers, "w"),
+                                ),
+                                RefreshIndicator(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer,
+                                  onRefresh: () async {
+                                    ref.refresh(allTransactions);
+                                  },
+                                  child: getTab(teamsDropdownItems, freeAgents, "f"),
+                                ),
+                                // const Center(child: Text("Coming soon..."))
+                              ]),
+                            )
+                          ]);
+                    }
+                  )),
 
               // Show next GW Fixtures
               // Option to navigate between each GW
@@ -183,99 +171,143 @@ class _TransactionsState extends ConsumerState<Transactions> {
     super.dispose();
   }
 
-  void filterWaiversAndFreeAgents(
-      List<Object?> values,
-      Map<String, Map<String, List<Transaction>>> transactions,
-      String activeLeague,
-      String currentGameweek,
-      Map<int, DraftTeam> teams) {
-    List<Object?> _teams = values;
-    List<Transaction> _visibleWaivers = [];
-    List<Transaction> _visibleFreeAgents = [];
-    for (Transaction _transaction
-        in transactions[activeLeague]![currentGameweek]!) {
-      if (values.isEmpty && _transaction.type == "w") {
-        _visibleWaivers.add(_transaction);
-        _transaction.visible = true;
-        _teams = teams.keys.toList();
-      } else if (values.contains(int.parse(_transaction.teamId)) &&
-          _transaction.type == "w") {
-        _visibleWaivers.add(_transaction);
-        _transaction.visible = true;
-      } else if (values.contains(int.parse(_transaction.teamId)) &&
-          _transaction.type == "f") {
-        _visibleFreeAgents.add(_transaction);
-        _transaction.visible = true;
-      } else {
-        _transaction.visible = false;
+  List<Transaction> getTransactionByType(String transactionType, List<Transaction> transactions) {
+    List<Transaction> _transactions = [];
+    for (Transaction transaction in transactions) {
+      if (transaction.type == transactionType) {
+        _transactions.add(transaction);
       }
     }
-
-    setState(() {
-      visibleWaivers = _visibleWaivers;
-      visibleFreeAgents = _visibleFreeAgents;
-      waiversFiltered = true;
-      _draftTeams = _teams;
-    });
+    return _transactions;
   }
 
-  SingleChildScrollView freeAgentsTab(
-    List<MultiSelectItem<int>> _draftTeamFilters,
-    Map<int, DraftPlayer> players,
-    Map<int, DraftTeam> teams,
-    Map<int, Map<int, List<Transaction>>> transactions,
-    int activeLeague,
-    int currentGameweek,
-  ) {
+  List<Transaction> filterTransactions(
+      String transactionType,
+      List<dynamic> teamsFilter,
+      Map<int, DraftTeam> teams,
+      List<dynamic> transactionFilter) {
+    
+      Map<int, Map<int, List<Transaction>>> allTransactions = ref.read(transactionsProvider).transactions;
+      int activeLeague = ref.read(utilsProvider).activeLeagueId!;
+      List<Transaction> transactions = getTransactionByType(transactionType, allTransactions[activeLeague]![currentGameweek]!);
+      List<Transaction> filteredTransactions = [];
+      List<String> _transactionsTransform = [];
+      if(transactionFilter.contains("a")){
+        _transactionsTransform.add("a");
+      }
+      if(transactionFilter.contains("r")){
+        _transactionsTransform.add("do");
+        _transactionsTransform.add("di");
+      }
+      for(Transaction _transaction in transactions) {
+        if(teamsFilter.any((item) => item == int.parse(_transaction.teamId)) && _transactionsTransform.any((item) => item == _transaction.result)){
+          filteredTransactions.add(_transaction);
+        }
+      }
+      if(transactionType == "w"){
+        filteredTransactions.sort((a, b) =>
+          int.parse(a.priority).compareTo(int.parse(b.priority)));
+      }
+      if(transactionType == "w"){
+        setState(() {
+          waivers = filteredTransactions;
+          teamsFiltered = teamsFilter;
+          transactionsFiltered = transactionFilter;
+          waiverFiltersActive = true;
+        });
+      }
+      if(transactionType == "f"){
+        setState(() {
+          freeAgents = filteredTransactions;
+          teamsFiltered = teamsFilter;
+          transactionsFiltered = transactionFilter;
+          faFiltersActive = true;
+        });
+      }
+      return filteredTransactions;
+  }
+
+  SingleChildScrollView getTab(List<MultiSelectItem<int>> teamDropdownItems, List<Transaction> transactions, String transactionType) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
+      child: Column(children:
+      [
           const SizedBox(
             height: 15,
           ),
-          const Row(
+           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
+              const Expanded(
+                flex: 2,
                 child: Center(
                     child: Text("Player In",
                         style: TextStyle(fontWeight: FontWeight.bold))),
               ),
-              Expanded(
+              const Expanded(
+                flex: 2,
                 child: Center(
                     child: Text("Player Out",
                         style: TextStyle(fontWeight: FontWeight.bold))),
               ),
-              Text("Draft Teams",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              // MultiSelectBottomSheetField(
-              //   initialChildSize: 0.5,
-              //   title: const Text("Draft Teams"),
-              //   buttonText: const Text("Draft Teams"),
-              //   chipDisplay:
-              //       MultiSelectChipDisplay.none(),
-              //   items: _draftTeamFilters,
-              //   listType: MultiSelectListType.LIST,
-              //   onConfirm: (values) {
-              //     // _selectedAnimals = values;
-              //   },
-              // ),
-              // Expanded(
-              //   child: Center(child: Text("Team", style: TextStyle(fontWeight: FontWeight.bold))),
-              // ),
               Expanded(
+                flex: 3,
                 child: Center(
-                    child: Text("Result",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              )
-            ],
-          ),
+                  child: MultiSelectBottomSheetField(
+                    selectedColor: Theme.of(context).colorScheme.secondaryContainer,
+                    selectedItemsTextStyle: const TextStyle(color: Colors.white),
+                    itemsTextStyle: const TextStyle(color: Colors.white),
+                    initialChildSize: 0.5,
+                    title: Center(child: Text("Teams")),
+                    buttonText: Text("Team",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                        ),
+                        
+                    searchable: true,
+                    chipDisplay:
+                        MultiSelectChipDisplay.none(),
+                    items: teamDropdownItems,
+                    initialValue: _draftTeams,
+                    listType: MultiSelectListType.LIST,
+                    onConfirm: (values) {
+                      filterTransactions(transactionType, values, teams, transactionsFiltered);
+                    },
+                  ),
+                ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                      child: 
+                      // Text("Result",
+                      //     style: TextStyle(fontWeight: FontWeight.bold))
+                      MultiSelectBottomSheetField(
+                        selectedColor: Theme.of(context).colorScheme.secondaryContainer,
+                        selectedItemsTextStyle: const TextStyle(color: Colors.white),
+                        itemsTextStyle: const TextStyle(color: Colors.white),
+                        initialChildSize: 0.5,
+                        title: const Text("Result"),
+                        buttonText: const Text("Result"),
+                        chipDisplay:
+                            MultiSelectChipDisplay.none(),
+                        items: transactionResult,
+                        initialValue: transactionFilters,
+                        listType: MultiSelectListType.LIST,
+                        onConfirm: (values) {
+                          filterTransactions(transactionType, teamsFiltered,  teams, values);
+                        },
+                      ),
+                      ),
+                ),
+            ]
+           ),
           ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: visibleFreeAgents.length,
+            itemCount: transactions.length,
             itemBuilder: (context, i) {
-              Transaction _transaction = visibleFreeAgents[i];
+              Transaction _transaction = transactions[i];
               DraftPlayer playerIn =
                   players[int.parse(_transaction.playerInId)]!;
               DraftPlayer playerOut =
@@ -286,7 +318,6 @@ class _TransactionsState extends ConsumerState<Transactions> {
                   _team = team;
                 }
               }
-              if (_transaction.type == "f") {
                 return Column(
                   children: [
                     const Divider(
@@ -300,12 +331,10 @@ class _TransactionsState extends ConsumerState<Transactions> {
                     ),
                   ],
                 );
-              }
-              return const SizedBox.shrink();
             },
           ),
-        ],
-      ),
+      ]
+    ),
     );
   }
 
@@ -314,177 +343,20 @@ class _TransactionsState extends ConsumerState<Transactions> {
     super.initState();
   }
 
-  void setPossibleGameweeks() {
-    for (var i = 1; i <= currentGW!; i++) {
-      gwOptions.add(DropdownMenuItem(
-          value: i.toString(),
-          child: Center(
-            child: Text(
-              i.toString(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          )));
-    }
-  }
-
-  SingleChildScrollView waiversTab(
-      List<MultiSelectItem<int>> _draftTeamFilters,
-      Map<int, Map<int, List<Transaction>>> transactions,
-      int activeLeague,
-      int currentGameweek,
-      Map<int, DraftTeam> teams,
-      Map<int, DraftPlayer> players) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 15,
-          ),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Center(
-                    child: Text("Player In",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ),
-              Expanded(
-                flex: 2,
-                child: Center(
-                    child: Text("Player Out",
-                        style: TextStyle(fontWeight: FontWeight.bold))),
-              ),
-              Expanded(
-                flex: 3,
-                child: Center(
-                    child: Text("Draft Teams",
-                        style: TextStyle(fontWeight: FontWeight.bold))
-
-                      // MultiSelectBottomSheetField(
-                      //   initialChildSize: 0.5,
-                      //   title: const Text("Draft Teams"),
-                      //   buttonText: const Text("Draft Teams",
-                      //       style: TextStyle(
-                      //           fontWeight: FontWeight.bold)),
-                      //   searchable: true,
-                      //   chipDisplay:
-                      //       MultiSelectChipDisplay.none(),
-                      //   items: _draftTeamFilters,
-                      //   initialValue: _draftTeams,
-                      //   listType: MultiSelectListType.CHIP,
-                      //   onConfirm: (values) {
-                      //     filterWaiversAndFreeAgents(
-                      //         values,
-                      //         transactions,
-                      //         activeLeague,
-                      //         currentGameweek,
-                      //         teams);
-                      //   },
-                      // ),
-                      ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Center(
-                      child: Text("Result",
-                          style: TextStyle(fontWeight: FontWeight.bold))
-                      // MultiSelectBottomSheetField(
-                      //   initialChildSize: 0.5,
-                      //   title: const Text("Result"),
-                      //   buttonText: const Text("Result"),
-                      //   chipDisplay:
-                      //       MultiSelectChipDisplay.none(),
-                      //   items: waiverResults,
-                      //   initialValue: _waiverResults,
-                      //   listType: MultiSelectListType.CHIP,
-                      //   onConfirm: (values) {
-                      //     print(values);
-
-                      //     if ((values.contains("a") && values.contains("r")) || values.isEmpty) {
-                      //       for (Transaction _transaction
-                      //           in transactions[
-                      //                   activeLeague]![
-                      //               currentGameweek]!) {
-                      //         _transaction.visible = true;
-                      //       }
-                      //     } else if (values.contains("a")) {
-                      //       for (Transaction _transaction
-                      //           in transactions[
-                      //                   activeLeague]![
-                      //               currentGameweek]!) {
-                      //         if (_transaction.result ==
-                      //             "a") {
-                      //           _transaction.visible = true;
-                      //         } else {
-                      //           _transaction.visible = false;
-                      //         }
-                      //       }
-                      //     } else if (values.contains("r")) {
-                      //       for (Transaction _transaction
-                      //           in transactions[
-                      //                   activeLeague]![
-                      //               currentGameweek]!) {
-                      //         if (_transaction.result !=
-                      //             "a") {
-                      //           _transaction.visible = true;
-                      //         } else {
-                      //           _transaction.visible = false;
-                      //         }
-                      //       }
-                      //     }
-                      //     setState(() {
-
-                      //     });
-                      //   },
-                      // ),
-                      ),
-                ),
-              ],
-            ),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: visibleWaivers.length,
-              itemBuilder: (context, i) {
-                List<Transaction> _transactions = [];
-                Transaction _transaction = visibleWaivers[i];
-                DraftPlayer playerIn =
-                    players[int.parse(_transaction.playerInId)]!;
-                DraftPlayer playerOut =
-                    players[int.parse(_transaction.playerOutId)]!;
-                DraftTeam? _team;
-                for (DraftTeam team in teams.values) {
-                  if (team.entryId.toString() ==
-                      _transaction.teamId.toString()) {
-                    _team = team;
-                  }
-                }
-                if (_transaction.visible && _transaction.type == "w") {
-                  _transactions.add(_transaction);
-                }
-
-              return Column(
-                children: [
-                  const Divider(
-                    thickness: 2,
-                  ),
-                  Waiver(
-                    transaction: _transaction,
-                    playerIn: playerIn,
-                    playerOut: playerOut,
-                    team: _team,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  // void setPossibleGameweeks() {
+  //   for (var i = 1; i <= currentGW!; i++) {
+  //     gwOptions.add(DropdownMenuItem(
+  //         value: i.toString(),
+  //         child: Center(
+  //           child: Text(
+  //             i.toString(),
+  //             style: const TextStyle(
+  //               fontSize: 14,
+  //               fontWeight: FontWeight.bold,
+  //               color: Colors.white,
+  //             ),
+  //           ),
+  //         )));
+  //   }
+  // }
 }

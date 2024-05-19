@@ -305,6 +305,7 @@ class LeagueStanding {
   int? rank;
   int? gwScore;
   int? bpsScore;
+  int? lastRank;
 
   LeagueStanding(
       {this.teamId,
@@ -317,7 +318,8 @@ class LeagueStanding {
       this.leaguePoints,
       this.rank,
       this.gwScore,
-      this.bpsScore});
+      this.bpsScore,
+      this.lastRank});
 
   factory LeagueStanding.fromFirestoreJson(
       var json, Map<String, dynamic>? team) {
@@ -347,6 +349,7 @@ class LeagueStanding {
         leaguePoints: json['total'] ?? 0,
         rank: json['rank'] ?? 0,
         gwScore: team.points ?? 0,
-        bpsScore: team.bonusPoints ?? 0);
+        bpsScore: team.bonusPoints ?? 0,
+        lastRank: json['last_rank'] ?? 0);
   }
 }

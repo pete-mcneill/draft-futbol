@@ -124,7 +124,7 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
     return Material(
       elevation: 4,
       child: Container(
-        color: Theme.of(context).cardColor,
+        // color: Theme.of(context).cardColor,
         child: ExpansionTile(
           key: expansionTileKey,
           onExpansionChanged: (value) {

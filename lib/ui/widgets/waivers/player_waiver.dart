@@ -35,7 +35,6 @@ class _WaiverState extends ConsumerState<Waiver> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.transaction!.visible) {
       return Container(
         // width: MediaQuery.of(context).size.width
         // constraints: BoxConstraints(minWidth: 11, maxWidth: 110, minHeight: 36),
@@ -116,8 +115,5 @@ class _WaiverState extends ConsumerState<Waiver> {
           ],
         ),
       );
-    } else {
-      return const SizedBox();
-    }
   }
 }

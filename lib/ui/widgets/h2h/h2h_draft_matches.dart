@@ -51,7 +51,6 @@ class _H2hDraftMatchesState extends ConsumerState<H2hDraftMatches> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    print("Pitch Change");
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -66,9 +65,9 @@ class _H2hDraftMatchesState extends ConsumerState<H2hDraftMatches> {
                     awayTeam: awayTeam,
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                )
+                // const SizedBox(
+                //   height: 5,
+                // )
               ],
             );
           }),

@@ -70,6 +70,7 @@ class Transaction {
         gameweek: transactionData['event'],
         priority: transactionData['index'].toString(),
         result: transactionData['result'],
-        type: transactionData['kind']);
+        type: transactionData['kind'],
+        visible: true);
   }
 }
