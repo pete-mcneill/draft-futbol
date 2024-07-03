@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:draft_futbol/baguley-features/screen/season_history.dart';
 import 'package:draft_futbol/baguley-features/widgets/season_overview.dart';
-import 'package:draft_futbol/ui/widgets/app_bar/draft_app_bar.dart';
+import 'package:draft_futbol/src/common_widgets/draft_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class BaguleyHome extends StatefulWidget {

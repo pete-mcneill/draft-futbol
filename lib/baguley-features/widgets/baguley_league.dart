@@ -1,7 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/league_standing.dart';
+import '../../src/features/league_standings/domain/league_standing.dart';
 import '../services/league_service.dart';
 
 class BaguleyLeague extends StatefulWidget {
@@ -123,7 +123,7 @@ class _BaguleyLeagueState extends State<BaguleyLeague> {
         children: [
           DropdownButtonHideUnderline(
             child: DropdownButton2(
-              iconEnabledColor: Theme.of(context).secondaryHeaderColor,
+              // iconEnabledColor: Theme.of(context).secondaryHeaderColor,
               isExpanded: false,
               items: menuOptions,
               onChanged: (value) async {
@@ -135,8 +135,8 @@ class _BaguleyLeagueState extends State<BaguleyLeague> {
                 });
               },
               value: dropdownValue,
-              dropdownDecoration: BoxDecoration(
-                  color: Theme.of(context).appBarTheme.backgroundColor),
+              // dropdownDecoration: BoxDecoration(
+              //     color: Theme.of(context).appBarTheme.backgroundColor),
             ),
           ),
           Container(

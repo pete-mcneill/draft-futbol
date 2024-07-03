@@ -1,4 +1,4 @@
-import 'package:draft_futbol/models/players/match.dart';
+import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 
 class BaguleyDraftPlayer {
   String? playerId;

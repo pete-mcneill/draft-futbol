@@ -6,8 +6,8 @@ import 'package:draft_futbol/baguley-features/models/baguley_draft_team.dart';
 import 'package:draft_futbol/baguley-features/models/fixture.dart';
 import 'package:draft_futbol/baguley-features/screen/pitch/baguley_pitch.dart';
 import 'package:flutter/material.dart';
-import 'package:draft_futbol/models/players/match.dart';
-import '../../ui/widgets/app_bar/draft_app_bar.dart';
+import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
+import '../../src/common_widgets/draft_app_bar.dart';
 
 class BaguleyResults extends StatefulWidget {
   String seasonId;

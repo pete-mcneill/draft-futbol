@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/baguley-features/models/baguley_draft_player.dart';
-import 'package:draft_futbol/models/players/match.dart';
-import 'package:draft_futbol/models/players/stat.dart';
+import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
+import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

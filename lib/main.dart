@@ -1,26 +1,24 @@
 import 'dart:io';
 
-import 'package:draft_futbol/ui/screens/initialise_home_screen.dart';
-import 'package:draft_futbol/ui/web/web_home.dart';
-import 'package:draft_futbol/ui/web/web_landing.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
+import 'package:draft_futbol/src/initialise_home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-
-import 'firebase_options.dart';
-import 'models/sub.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'src/features/substitutes/domain/sub.dart';
 
 void main() async {
-  print("main");
-  List<String> webLeagueIds = [];
+  // List<String> webLeagueIds = [];
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  usePathUrlStrategy();
+
+  final dataStore = HiveDataStore();
+  await dataStore.init();
+
   if (kIsWeb) {
   } else {
     Directory? appDocumentDirectory = await getApplicationDocumentsDirectory();
@@ -34,54 +32,14 @@ void main() async {
     }
     await Hive.openBox('settings');
   }
-
-  if (kIsWeb) {
-    final GoRouter webRouter = GoRouter(
-      routes: [
-        GoRoute(
-          path: "/",
-          builder: (context, state) {
-            Map<String, String> queryParams = state.queryParameters;
-            List<int> ids = [];
-            queryParams.forEach((key, value) {
-              if (key == "ids") {
-                try {
-                  List _ids = value.split(",");
-                  for (var element in _ids) {
-                    ids.add(int.parse(element));
-                  }
-                } catch (error) {
-                  print(error);
-                  ids.add(int.parse(value));
-                }
-              }
-            });
-            if (ids.isEmpty) {
-              return const WebLanding();
-            } else {
-              // container.read(utilsProvider.notifier).setLeagueIdsV2(ids);
-              return WebHome(
-                leagueIds: ids,
-              );
-            }
-          },
-        )
-      ],
-    );
     runApp(ProviderScope(
-        child: MaterialApp.router(
-            routerConfig: webRouter,
-            debugShowCheckedModeBanner: false,
-            title: "Draft Futbol"
-            // ProviderTest(),
-            )));
-  } else {
-    runApp(const ProviderScope(
-        child: MaterialApp(
+      overrides: [
+        dataStoreProvider.overrideWithValue(dataStore),
+      ],
+        child: const MaterialApp(
       debugShowCheckedModeBanner: false,
       // home: Loading(),
       home: InitialiseHomeScreen(),
       // ProviderTest(),
     )));
-  }
 }

@@ -1,12 +1,11 @@
 import 'package:draft_futbol/baguley-features/widgets/baguley_league.dart';
-import 'package:draft_futbol/models/DraftTeam.dart';
-import 'package:draft_futbol/models/fixture.dart';
-import 'package:draft_futbol/models/league_standing.dart';
+import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
+import 'package:draft_futbol/src/features/league_standings/domain/league_standing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/draft_team.dart';
-import '../../ui/widgets/app_bar/draft_app_bar.dart';
+import '../../src/features/live_data/domain/draft_domains/draft_team.dart';
+import '../../src/common_widgets/draft_app_bar.dart';
 import '../services/league_service.dart';
 
 class BaguleyLeagueStandings extends ConsumerStatefulWidget {

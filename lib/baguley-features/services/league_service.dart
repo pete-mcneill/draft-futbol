@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../models/league_standing.dart';
+import '../../src/features/league_standings/domain/league_standing.dart';
 
 Future<List<LeagueStanding>> getStandings(
     int? gameweek, String seasonId) async {

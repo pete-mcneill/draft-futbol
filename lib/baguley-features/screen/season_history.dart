@@ -2,7 +2,7 @@ import 'package:draft_futbol/baguley-features/screen/baguley_historic_fixtures.d
 import 'package:draft_futbol/baguley-features/screen/baguley_league_standings.dart';
 import 'package:flutter/material.dart';
 
-import '../../ui/widgets/app_bar/draft_app_bar.dart';
+import '../../src/common_widgets/draft_app_bar.dart';
 import '../widgets/season_overview.dart';
 
 class SeasonHistoryScreen extends StatefulWidget {
