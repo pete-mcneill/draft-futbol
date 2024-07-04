@@ -28,11 +28,5 @@
 	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
-	<key>GOOGLE_APP_ID</key>
-	<string>1:639248146824:ios:27187ad30bb3ae502c1a3d</string>
-	<key>DATABASE_URL</key>
-	<string>https://draft-futbol.firebaseio.com</string>
-	<key>ADMOB_APP_ID</key>
-	<string>ca-app-pub-2641665141645205~8515064470</string>
 </dict>
 </plist>
