@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ShameCorridor extends StatefulWidget {
-  ShameCorridor({Key? key}) : super(key: key);
+  const ShameCorridor({Key? key}) : super(key: key);
 
   @override
   State<ShameCorridor> createState() => _ShameCorridorState();
@@ -24,7 +24,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
             Radius.circular(8.0) //                 <--- border radius here
             ),
       ),
-      child: Column(children:[
+      child: const Column(children:[
         Row(children: [
           Text("Shame Corridor", style: TextStyle(fontWeight: FontWeight.w100, fontSize: 10))
         ],),
@@ -33,7 +33,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
             Column(children: [
               Text("Loser1"),
               Row(children: [
-                   const Icon(
+                   Icon(
                     Icons.one_k,
                     color: Colors.pink,
                     size: 16.0,
@@ -42,7 +42,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
                   Text("x1")
               ],),
               Row(children: [
-                   const Icon(
+                   Icon(
                     Icons.heart_broken,
                     color: Colors.pink,
                     size: 16.0,
@@ -56,7 +56,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
             Column(children: [
               Text("Loser2"),
               Row(children: [
-                   const Icon(
+                   Icon(
                     Icons.one_k,
                     color: Colors.pink,
                     size: 16.0,
@@ -65,7 +65,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
                   Text("x1")
               ],),
               Row(children: [
-                   const Icon(
+                   Icon(
                     Icons.heart_broken,
                     color: Colors.pink,
                     size: 16.0,
@@ -79,7 +79,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
                         Column(children: [
               Text("Loser3"),
               Row(children: [
-                   const Icon(
+                   Icon(
                     Icons.one_k,
                     color: Colors.pink,
                     size: 16.0,
@@ -88,7 +88,7 @@ class _ShameCorridorState extends State<ShameCorridor> {
                   Text("x1")
               ],),
               Row(children: [
-                   const Icon(
+                   Icon(
                     Icons.heart_broken,
                     color: Colors.pink,
                     size: 16.0,

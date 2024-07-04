@@ -1,6 +1,5 @@
 import 'package:draft_futbol/baguley-features/models/baguley_draft_player.dart';
 
-import '../../models/draft_player.dart';
 
 class BaguleyDraftTeam {
   final int? entryId;

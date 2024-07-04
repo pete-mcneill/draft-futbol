@@ -1,9 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/baguley-features/models/baguley_draft_team.dart';
-import 'package:draft_futbol/baguley-features/models/fixture.dart';
-import 'package:draft_futbol/models/DraftTeam.dart';
-import 'package:draft_futbol/models/fixture.dart';
-import 'package:draft_futbol/providers/providers.dart';
+import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +24,7 @@ class BaguleyPitchHeader extends ConsumerStatefulWidget
 class _BaguleyPitchHeaderState extends ConsumerState<BaguleyPitchHeader> {
   @override
   Widget build(BuildContext context) {
-    bool liveBonus = ref.watch(utilsProvider).liveBps!;
+    bool liveBonus = ref.watch(appSettingsRepositoryProvider.select((value) => value.bonusPointsEnabled));
 
     return AppBar(
       bottom: TabBar(

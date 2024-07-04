@@ -45,30 +45,30 @@ class _BaguleySeasonOverviewState extends State<BaguleySeasonOverview> {
                 child: Card(
                   elevation: 8.0,
                   margin:
-                      new EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
+                      const EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
                   child: ListTile(
                       tileColor: Theme.of(context).cardColor,
                       title: Text(
                           widget.season,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       // ),
-                      subtitle: Text("Tap for more info", style: TextStyle(color: Colors.white)),
+                      subtitle: const Text("Tap for more info", style: TextStyle(color: Colors.white)),
                           ),
                 ),
               ),
               Card(
                 elevation: 8.0,
                 margin:
-                    new EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
                 child: Container(
                     padding: const EdgeInsets.all(5.0),
                     decoration:
                         BoxDecoration(color: Theme.of(context).cardColor,),
                     child: Column(
                       children: [
-                        Text("Baguley"),
+                        const Text("Baguley"),
                         Image.asset(
                           "assets/images/baguleyTrophy.png",
                           height: 75,
@@ -80,14 +80,14 @@ class _BaguleySeasonOverviewState extends State<BaguleySeasonOverview> {
               if(widget.samGranger != null) Card(
                 elevation: 8.0,
                 margin:
-                    new EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
                 child: Container(
                     padding: const EdgeInsets.all(5.0),
                     decoration:
                         BoxDecoration(color: Theme.of(context).cardColor,),
                     child: Column(
                       children: [
-                        Text("Sam Granger"),
+                        const Text("Sam Granger"),
                         Image.asset(
                           "assets/images/samGranger.png",
                           height: 75,
@@ -99,14 +99,14 @@ class _BaguleySeasonOverviewState extends State<BaguleySeasonOverview> {
               Card(
                 elevation: 8.0,
                 margin:
-                    new EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 6.0),
                 child: Container(
                     padding: const EdgeInsets.all(5.0),
                     decoration:
                         BoxDecoration(color: Theme.of(context).cardColor,),
                     child: Column(
                       children: [
-                        Text("Chair Leg"),
+                        const Text("Chair Leg"),
                         Image.asset(
                           "assets/images/chairLeg.png",
                           height: 75,

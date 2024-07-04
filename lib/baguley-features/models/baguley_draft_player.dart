@@ -1,4 +1,4 @@
-import 'package:draft_futbol/models/players/match.dart';
+import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 
 class BaguleyDraftPlayer {
   String? playerId;
@@ -9,7 +9,7 @@ class BaguleyDraftPlayer {
   String? playerCode;
   Map<String, String>? playerStatus;
   Map<String, String>? draftTeamId;
-  List<Match>? matches;
+  List<PlMatchStats>? matches;
 
   BaguleyDraftPlayer(
       {this.playerId,
@@ -21,7 +21,7 @@ class BaguleyDraftPlayer {
       this.playerStatus,
       this.draftTeamId});
 
-  void updateMatches(List<Match> _matches) {
+  void updateMatches(List<PlMatchStats> _matches) {
     matches = _matches;
   }
 

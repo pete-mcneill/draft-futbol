@@ -1,0 +1,171 @@
+{
+    "trades": [
+        {
+            "event": 2,
+            "id": 109864,
+            "offered_entry": 2218,
+            "offer_time": "2023-08-14T22:23:46.673990Z",
+            "received_entry": 1800,
+            "response_time": "2023-08-15T16:46:35.580941Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 504,
+                    "element_out": 397
+                },
+                {
+                    "element_in": 117,
+                    "element_out": 293
+                }
+            ]
+        },
+        {
+            "event": 2,
+            "id": 137926,
+            "offered_entry": 1800,
+            "offer_time": "2023-08-16T20:56:17.321885Z",
+            "received_entry": 1691,
+            "response_time": "2023-08-16T20:58:30.565948Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 349,
+                    "element_out": 397
+                }
+            ]
+        },
+        {
+            "event": 2,
+            "id": 140600,
+            "offered_entry": 2218,
+            "offer_time": "2023-08-17T09:35:03.934938Z",
+            "received_entry": 1800,
+            "response_time": "2023-08-17T10:31:05.822505Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 216,
+                    "element_out": 501
+                },
+                {
+                    "element_in": 344,
+                    "element_out": 210
+                }
+            ]
+        },
+        {
+            "event": 3,
+            "id": 195673,
+            "offered_entry": 2366,
+            "offer_time": "2023-08-23T15:17:22.600782Z",
+            "received_entry": 1800,
+            "response_time": "2023-08-23T18:18:12.724194Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 353,
+                    "element_out": 603
+                },
+                {
+                    "element_in": 326,
+                    "element_out": 343
+                }
+            ]
+        },
+        {
+            "event": 4,
+            "id": 221232,
+            "offered_entry": 1691,
+            "offer_time": "2023-08-27T17:39:31.375573Z",
+            "received_entry": 3272,
+            "response_time": "2023-08-27T18:10:19.206280Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 309,
+                    "element_out": 6
+                },
+                {
+                    "element_in": 8,
+                    "element_out": 60
+                }
+            ]
+        },
+        {
+            "event": 4,
+            "id": 237606,
+            "offered_entry": 157373,
+            "offer_time": "2023-08-28T19:43:55.973676Z",
+            "received_entry": 1800,
+            "response_time": "2023-08-28T19:57:48.904161Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 349,
+                    "element_out": 140
+                },
+                {
+                    "element_in": 567,
+                    "element_out": 599
+                },
+                {
+                    "element_in": 293,
+                    "element_out": 287
+                }
+            ]
+        },
+        {
+            "event": 5,
+            "id": 292865,
+            "offered_entry": 157373,
+            "offer_time": "2023-09-04T17:44:22.612790Z",
+            "received_entry": 1691,
+            "response_time": "2023-09-04T17:47:46.914183Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 143,
+                    "element_out": 19
+                },
+                {
+                    "element_in": 309,
+                    "element_out": 513
+                }
+            ]
+        },
+        {
+            "event": 21,
+            "id": 714272,
+            "offered_entry": 1691,
+            "offer_time": "2024-01-04T14:08:40.796885Z",
+            "received_entry": 2366,
+            "response_time": "2024-01-08T11:31:02.308415Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 567,
+                    "element_out": 349
+                },
+                {
+                    "element_in": 117,
+                    "element_out": 558
+                }
+            ]
+        },
+        {
+            "event": 30,
+            "id": 867965,
+            "offered_entry": 1691,
+            "offer_time": "2024-03-17T14:47:22.954761Z",
+            "received_entry": 2218,
+            "response_time": "2024-03-21T08:46:56.400776Z",
+            "state": "p",
+            "tradeitem_set": [
+                {
+                    "element_in": 616,
+                    "element_out": 117
+                }
+            ]
+        }
+    ]
+}
