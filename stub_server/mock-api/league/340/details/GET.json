@@ -1,0 +1,314 @@
+{
+    "league": {
+        "admin_entry": 793,
+        "closed": true,
+        "draft_dt": "2023-07-29T11:15:00Z",
+        "draft_pick_time_limit": 60,
+        "draft_status": "post",
+        "draft_tz_show": "Europe/London",
+        "id": 340,
+        "ko_rounds": 0,
+        "make_code_public": false,
+        "max_entries": 16,
+        "min_entries": 12,
+        "name": "The Bucky",
+        "scoring": "c",
+        "start_event": 1,
+        "stop_event": 38,
+        "trades": "a",
+        "transaction_mode": "finished",
+        "variety": "x"
+    },
+    "league_entries": [
+        {
+            "entry_id": 793,
+            "entry_name": "Schlupp On My Balls",
+            "id": 793,
+            "joined_time": "2023-07-05T16:55:01.669157Z",
+            "player_first_name": "Alfie",
+            "player_last_name": "Small",
+            "short_name": "AS",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 986,
+            "entry_name": "I’m Yelling Timber",
+            "id": 986,
+            "joined_time": "2023-07-05T17:00:40.980673Z",
+            "player_first_name": "Daniel",
+            "player_last_name": "Stevens",
+            "short_name": "DS",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 1421,
+            "entry_name": "Poch 2 Glory",
+            "id": 1421,
+            "joined_time": "2023-07-05T17:15:29.188108Z",
+            "player_first_name": "Bart",
+            "player_last_name": "Stasiow",
+            "short_name": "BS",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 3622,
+            "entry_name": "Paquetá Crisps",
+            "id": 3622,
+            "joined_time": "2023-07-05T18:37:12.762485Z",
+            "player_first_name": "Connor",
+            "player_last_name": "coleman",
+            "short_name": "Cc",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 5329,
+            "entry_name": "Boys in Dahoud",
+            "id": 5329,
+            "joined_time": "2023-07-05T19:46:43.942805Z",
+            "player_first_name": "Cal",
+            "player_last_name": "Ward",
+            "short_name": "CW",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 11563,
+            "entry_name": "I'll Mount Myra",
+            "id": 11563,
+            "joined_time": "2023-07-06T07:25:42.993742Z",
+            "player_first_name": "Jordan",
+            "player_last_name": "Boulton",
+            "short_name": "JB",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 16467,
+            "entry_name": "Nicoll in a pickle",
+            "id": 16467,
+            "joined_time": "2023-07-06T15:13:38.947612Z",
+            "player_first_name": "Jack",
+            "player_last_name": "Nicoll",
+            "short_name": "JN",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 19000,
+            "entry_name": "Top spot only",
+            "id": 19000,
+            "joined_time": "2023-07-06T18:50:34.186204Z",
+            "player_first_name": "Marcus",
+            "player_last_name": "Britnell",
+            "short_name": "MB",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 21080,
+            "entry_name": "Im Sorry Nic Jackson",
+            "id": 21080,
+            "joined_time": "2023-07-06T21:25:44.778614Z",
+            "player_first_name": "Nathan",
+            "player_last_name": "Boulton",
+            "short_name": "NB",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 35224,
+            "entry_name": "Beaten By Dre again",
+            "id": 35224,
+            "joined_time": "2023-07-08T14:07:58.201059Z",
+            "player_first_name": "Andre",
+            "player_last_name": "Marcao",
+            "short_name": "AM",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 49922,
+            "entry_name": "McGinn N Tonic",
+            "id": 49922,
+            "joined_time": "2023-07-10T20:01:47.734881Z",
+            "player_first_name": "Alfie",
+            "player_last_name": "Britnell",
+            "short_name": "AB",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 59609,
+            "entry_name": "Partey Ramsdaley",
+            "id": 59609,
+            "joined_time": "2023-07-12T11:00:00.712378Z",
+            "player_first_name": "Jaydyn",
+            "player_last_name": "Lott",
+            "short_name": "JL",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 85355,
+            "entry_name": "A Song of Ice & Dier",
+            "id": 85355,
+            "joined_time": "2023-07-17T15:27:33.812461Z",
+            "player_first_name": "Milo",
+            "player_last_name": "Clay",
+            "short_name": "MC",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 86631,
+            "entry_name": "Saka Spuds",
+            "id": 86631,
+            "joined_time": "2023-07-17T19:41:19.696323Z",
+            "player_first_name": "David",
+            "player_last_name": "Reynolds",
+            "short_name": "DR",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 89114,
+            "entry_name": "ELZDtheDON",
+            "id": 89114,
+            "joined_time": "2023-07-18T10:28:05.218928Z",
+            "player_first_name": "Elliott",
+            "player_last_name": "Day",
+            "short_name": "ED",
+            "waiver_pick": null
+        },
+        {
+            "entry_id": 124795,
+            "entry_name": "Fife4Forfar5",
+            "id": 124795,
+            "joined_time": "2023-07-24T18:10:42.794796Z",
+            "player_first_name": "Neil",
+            "player_last_name": "Boulton",
+            "short_name": "NB1",
+            "waiver_pick": null
+        }
+    ],
+    "standings": [
+        {
+            "event_total": 58,
+            "last_rank": 4,
+            "league_entry": 11563,
+            "rank": 1,
+            "rank_sort": 1,
+            "total": 1503
+        },
+        {
+            "event_total": 41,
+            "last_rank": 1,
+            "league_entry": 49922,
+            "rank": 2,
+            "rank_sort": 2,
+            "total": 1499
+        },
+        {
+            "event_total": 50,
+            "last_rank": 3,
+            "league_entry": 59609,
+            "rank": 3,
+            "rank_sort": 3,
+            "total": 1498
+        },
+        {
+            "event_total": 57,
+            "last_rank": 5,
+            "league_entry": 16467,
+            "rank": 4,
+            "rank_sort": 4,
+            "total": 1493
+        },
+        {
+            "event_total": 35,
+            "last_rank": 2,
+            "league_entry": 986,
+            "rank": 5,
+            "rank_sort": 5,
+            "total": 1486
+        },
+        {
+            "event_total": 26,
+            "last_rank": 5,
+            "league_entry": 19000,
+            "rank": 6,
+            "rank_sort": 6,
+            "total": 1462
+        },
+        {
+            "event_total": 43,
+            "last_rank": 7,
+            "league_entry": 89114,
+            "rank": 7,
+            "rank_sort": 7,
+            "total": 1416
+        },
+        {
+            "event_total": 21,
+            "last_rank": 8,
+            "league_entry": 35224,
+            "rank": 8,
+            "rank_sort": 8,
+            "total": 1333
+        },
+        {
+            "event_total": 44,
+            "last_rank": 9,
+            "league_entry": 3622,
+            "rank": 9,
+            "rank_sort": 9,
+            "total": 1326
+        },
+        {
+            "event_total": 46,
+            "last_rank": 10,
+            "league_entry": 1421,
+            "rank": 10,
+            "rank_sort": 10,
+            "total": 1308
+        },
+        {
+            "event_total": 24,
+            "last_rank": 11,
+            "league_entry": 793,
+            "rank": 11,
+            "rank_sort": 11,
+            "total": 1282
+        },
+        {
+            "event_total": 53,
+            "last_rank": 13,
+            "league_entry": 85355,
+            "rank": 12,
+            "rank_sort": 12,
+            "total": 1275
+        },
+        {
+            "event_total": 21,
+            "last_rank": 12,
+            "league_entry": 21080,
+            "rank": 13,
+            "rank_sort": 13,
+            "total": 1268
+        },
+        {
+            "event_total": 39,
+            "last_rank": 14,
+            "league_entry": 86631,
+            "rank": 14,
+            "rank_sort": 14,
+            "total": 1224
+        },
+        {
+            "event_total": 19,
+            "last_rank": 15,
+            "league_entry": 5329,
+            "rank": 15,
+            "rank_sort": 15,
+            "total": 1196
+        },
+        {
+            "event_total": 36,
+            "last_rank": 16,
+            "league_entry": 124795,
+            "rank": 16,
+            "rank_sort": 16,
+            "total": 1122
+        }
+    ]
+}

@@ -7,7 +7,7 @@ part of 'draft_app_bar_controller.dart';
 // **************************************************************************
 
 String _$draftAppBarControllerHash() =>
-    r'f4f5e88430f4676d888ea59c7d293fd81b141ffb';
+    r'8ea4bed2e66da2b986c8101af35d3b4903fab590';
 
 /// See also [DraftAppBarController].
 @ProviderFor(DraftAppBarController)

@@ -164,7 +164,7 @@ class DraftRepository {
         LeagueStanding _standing = LeagueStanding.fromJson(standing, _team);
         standings.add(_standing);
       }
-      leagueStandings[league.leagueId]!.staticStandings = standings;
+      leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: standings, liveBpsStandings: value.liveBpsStandings, liveStandings: value.liveStandings), ifAbsent: () => LeagueStandings(staticStandings: standings));
     } catch (error) {
       print(error);
     }

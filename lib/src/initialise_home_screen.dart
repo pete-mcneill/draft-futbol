@@ -1,5 +1,6 @@
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/features/local_storage/domain/local_league_metadata.dart';
+import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/home_page.dart';
 import 'package:draft_futbol/src/features/onboarding/presentation/on_boarding_screen.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -75,7 +76,8 @@ class InitializeProvidersState extends ConsumerState<InitialiseHomeScreen> {
           elevatedButtonSchemeColor: SchemeColor.onPrimaryContainer,
           navigationBarSelectedLabelSchemeColor: SchemeColor.secondary,
           navigationBarIndicatorSchemeColor: SchemeColor.secondaryContainer,
-          navigationBarIndicatorOpacity: 1.00,
+          navigationBarSelectedIconSchemeColor: SchemeColor.secondary,
+          // navigationBarIndicatorOpacity: 1.00,
           navigationBarElevation: 10.0,
           tabBarItemSchemeColor: SchemeColor.secondaryContainer,
           tabBarIndicatorSchemeColor: SchemeColor.secondaryContainer,

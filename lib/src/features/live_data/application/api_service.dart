@@ -1,4 +1,3 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -247,13 +246,14 @@ class Api {
 
   Future<dynamic> proxyViaFirebase(path) async {
     try {
-      final result =
-          await FirebaseFunctions.instance.httpsCallable('fplProxyv2').call(
-        {
-          "path": path,
-        },
-      );
-      return result.data;
+      return {};
+      // final result =
+      //     await FirebaseFunctions.instance.httpsCallable('fplProxyv2').call(
+      //   {
+      //     "path": path,
+      //   },
+      // );
+      // return result.data;
     } catch (e) {
       print(e);
     }
