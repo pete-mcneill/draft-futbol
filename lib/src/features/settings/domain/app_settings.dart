@@ -3,7 +3,7 @@ import 'dart:convert';
 
 /// Model class representing the shopping cart contents.
 class AppSettings {
-  AppSettings( {this.bonusPointsEnabled = false, this.activeLeagueId = 145});
+  AppSettings( {this.bonusPointsEnabled = false, this.activeLeagueId = 0});
 
   /// All the items in the shopping cart, where:
   /// - key: product ID

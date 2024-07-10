@@ -13,12 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HeadToHeadScreen extends ConsumerWidget {
-  const HeadToHeadScreen({Key? key}) : super(key: key);
+  final int leagueId;
+  const HeadToHeadScreen(
+      {Key? key, 
+       required this.leagueId}) 
+  : super(key: key);
+
+  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(headToHeadScreenControllerProvider);
-    final fixtures = ref.read(headToHeadScreenControllerProvider.notifier).getGameweekFixtures();
+    final fixtures = ref.read(headToHeadScreenControllerProvider.notifier).getGameweekFixtures(leagueId);
   
     // bool bps = ref.watch(appSettingsRepositoryProvider).liveBonusPoints;
     return ListView(

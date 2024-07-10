@@ -12,7 +12,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class LeagueStandings extends ConsumerStatefulWidget {
-  const LeagueStandings({Key? key}) : super(key: key);
+  final int leagueId;
+  const LeagueStandings({Key? key, required this.leagueId}) : super(key: key);
 
   @override
   _LeagueStandingsState createState() => _LeagueStandingsState();
@@ -27,7 +28,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
   List<LeagueStanding> staticStandings = [];
   List<LeagueStanding> liveStandings = [];
   List<LeagueStanding> liveBpsStandings = [];
-  int? activeLeague;
+  // int? widget.leagueId;
 
   Map<int, dynamic> customLeagues = {
     145: {
@@ -74,17 +75,17 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
         
     Gameweek? gameweek = ref.watch(liveDataRepositoryProvider).gameweek;
 
-    activeLeague = ref.watch(appSettingsRepositoryProvider).activeLeagueId;
+    // widget.leagueId = ref.watch(appSettingsRepositoryProvider).widget.leagueIdId;
 
     final liveData = ref.watch(liveDataRepositoryProvider);
-    staticStandings = ref.watch(draftRepositoryProvider).leagueStandings[activeLeague]!.staticStandings!;
+    staticStandings = ref.watch(draftRepositoryProvider).leagueStandings[widget.leagueId]!.staticStandings!;
 
     if (!gameweek!.gameweekFinished) {
       liveStandings = staticStandings;
       liveBpsStandings = staticStandings;
     } else {
-      liveStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[activeLeague]!.liveStandings!;
-      liveBpsStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[activeLeague]!.liveBpsStandings!;
+      liveStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveStandings!;
+      liveBpsStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveBpsStandings!;
     }
     teams = ref.watch(draftRepositoryProvider).teams;
 
@@ -272,14 +273,11 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
       rowColor = Colors.red.shade900;
     }
 
-    if(customLeagues[activeLeague]?[standing.rank!]?["rowColour"] != null){
-      rowColor = customLeagues[activeLeague]?[standing.rank!]?["rowColour"];
+    if(customLeagues[widget.leagueId]?[standing.rank!]?["rowColour"] != null){
+      rowColor = customLeagues[widget.leagueId]?[standing.rank!]?["rowColour"];
     }
 
-    FaIcon icon = FaIcon(
-      FontAwesomeIcons.solidCircle,
-      color: Colors.grey,
-    );
+    FaIcon? icon;
     
     if (standing.rank! > standing.lastRank!) {
       Color iconColour = Colors.redAccent;
@@ -291,8 +289,8 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
     }
     if(standing.rank! < standing.lastRank!) {
        Color iconColour = standing.rank == 1 ? Colors.black : Colors.green;
-      // if(customLeagues[activeLeague]?[standing.rank!]?["iconColour"] != null){
-      //   iconColour = customLeagues[activeLeague]?[standing.rank!]?["iconColour"];
+      // if(customLeagues[widget.leagueId]?[standing.rank!]?["iconColour"] != null){
+      //   iconColour = customLeagues[widget.leagueId]?[standing.rank!]?["iconColour"];
       // }
       icon = FaIcon(
         FontAwesomeIcons.arrowUp,
@@ -310,20 +308,26 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
         child: Row(
           children: [
             Expanded(flex: 1, child: getTeamRank(standing.rank!)),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: IconButton(
-                    // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
-                    icon: icon,
-                    onPressed: () {}),
+            if (icon != null )
+              Expanded(
+                flex: 1,
+                child: Center(
+                  child: IconButton(
+                      // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
+                      icon: icon,
+                      onPressed: () {}),
+                ),
+              )
+            else
+              Expanded(
+                flex: 1,
+                child: const SizedBox(),
               ),
-            ),
             Expanded(
                 flex: 4,
                 child: Text(
                   team!.teamName!,
-                  style: TextStyle(fontSize: 14, fontWeight: customLeagues[activeLeague]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
+                  style: TextStyle(fontSize: 14, fontWeight: customLeagues[widget.leagueId]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
                   textAlign: TextAlign.left,
                 )),
             Expanded(
@@ -335,7 +339,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)
-                      : TextStyle(fontSize: 14, fontWeight: customLeagues[activeLeague]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
+                      : TextStyle(fontSize: 14, fontWeight: customLeagues[widget.leagueId]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
                   textAlign: TextAlign.center,
                 )),
             Expanded(
@@ -347,7 +351,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)
-                      : TextStyle(fontSize: 14, fontWeight: customLeagues[activeLeague]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
+                      : TextStyle(fontSize: 14, fontWeight: customLeagues[widget.leagueId]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
                   textAlign: TextAlign.center,
                 ))
           ],

@@ -61,7 +61,7 @@ class _DraftBottomBarState extends State<DraftBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    _selectedIndex = widget.currentIndex;
+    // _selectedIndex = widget.currentIndex;
     return NavigationBar(
       // backgroundColor: const Color(0xFF1a1c23),
       // selectedFontSize: 18,
@@ -72,7 +72,7 @@ class _DraftBottomBarState extends State<DraftBottomBar> {
       //     color: Theme.of(context).navigationBarTheme.backgroundColor),
       // selectedItemColor: Theme.of(context).navigationBarTheme.indicatorColor,
       // elevation: 50,
-      destinations: widget.leagueType == 'h' ? h2hOptions : classicOptions,
+      destinations: h2hOptions,
       selectedIndex: _selectedIndex,
       onDestinationSelected: _onItemTapped,
     );

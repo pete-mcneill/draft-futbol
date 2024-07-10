@@ -1,4 +1,5 @@
 import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
+import 'package:draft_futbol/src/features/head_to_head/presentation/non_head_to_head_placeholder.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/draft_app_bar/presentation/draft_app_bar.dart';
 import 'package:draft_futbol/src/features/head_to_head/presentation/head_to_head_screen.dart';
@@ -6,6 +7,7 @@ import 'package:draft_futbol/src/features/league_standings/presentation/league_s
 import 'package:draft_futbol/src/features/live_data/application/live_service.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
+import 'package:draft_futbol/src/features/local_storage/domain/local_league_metadata.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/presentation/premier_league_matches_screen.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/features/league_standings/presentation/classic_league_standings.dart';
@@ -25,17 +27,18 @@ const int maxFailedLoadAttempts = 3;
 class HomePage extends ConsumerStatefulWidget {
   final List squads = [];
 
-  HomePage({Key? key})
-      : super(key: key);
+  HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomePageState extends ConsumerState<HomePage>
+    with TickerProviderStateMixin {
   late final Future _draft_data;
-
+  late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Map<int, DraftLeague> leagues = {};
   Gameweek? gameweek;
   List<Fixture>? fixtures;
   Map<int, DraftTeam>? teams;
@@ -45,34 +48,55 @@ class _HomePageState extends ConsumerState<HomePage> {
   int? activeLeague;
 
   // ignore: prefer_final_fields
-  List<Widget> h2hOptions = <Widget>[
-    const HeadToHeadScreen(),
-    const LeagueStandings(),
-    const PlMatchesScreen(),
-    const More()
-  ];
+  List<Widget> getLeagueWidgets() {
+    return <Widget>[
+      TabBarView(
+        controller: _tabController,
+        children: getH2hWidgets(),
+      ),
+      TabBarView(
+        controller: _tabController,
+        children: getLeagueStandingsWidgets(),
+      ),
+      const PlMatchesScreen(),
+      const More()
+    ];
+  }
 
-  List<Widget> classicOptions = <Widget>[
-    const ClassicLeagueStandings(),
-    const PlMatchesScreen(),
-    const More()
-  ];
+  List<Widget> getH2hWidgets() {
+    return <Widget>[
+      for (DraftLeague league in leagues.values)
+        if(league.scoring == 'h')
+          HeadToHeadScreen(leagueId: league.leagueId)
+        else
+          const HeadToHeadPlaceholderScreen()
+    ];
+  }
+
+  List<LeagueStandings> getLeagueStandingsWidgets() {
+    return <LeagueStandings>[
+      for (DraftLeague league in leagues.values)
+        LeagueStandings(leagueId: league.leagueId)
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final liveDataRepository = ref.watch(liveServiceProvider);
-     final draftRepository = ref.watch(draftRepositoryProvider);
+    final draftRepository = ref.watch(draftRepositoryProvider);
+    leagues = draftRepository.leagues;
     return FutureBuilder<void>(
         future: _draft_data,
         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            activeLeague = ref.watch(appSettingsRepositoryProvider).activeLeagueId;
+            activeLeague =
+                ref.read(appSettingsRepositoryProvider).activeLeagueId;
             DraftLeague leagueData = draftRepository.leagues[activeLeague]!;
-            if (leagueData.scoring == 'c' && navBarIndex > 2) {
-              updateIndex(2);
-            }
+            // if (leagueData.scoring == 'c' && navBarIndex > 2) {
+            //   updateIndex(2);
+            // }
             gameweek = liveDataRepository.liveDataRepository.gameweek;
             String draftStatus = leagueData.draftStatus;
             if (draftStatus == "pre" || gameweek!.currentGameweek == 0) {
@@ -80,7 +104,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             } else {
               showBottomNav = true;
               if (leagueData.scoring == "h") {
-                fixtures = draftRepository.head2HeadFixtures[activeLeague]![gameweek!.currentGameweek];
+                fixtures = draftRepository.head2HeadFixtures[activeLeague]![
+                    gameweek!.currentGameweek];
               }
             }
             // teams = draftRepository.teams![activeLeague];
@@ -88,6 +113,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                 key: _scaffoldKey,
                 appBar: DraftAppBarV1(
                   settings: true,
+                  tabController: _tabController,
+                  bottomIndex: navBarIndex,
                 ),
                 // drawer: const DraftDrawer(),
                 bottomNavigationBar: showBottomNav
@@ -102,49 +129,54 @@ class _HomePageState extends ConsumerState<HomePage> {
                   style: Theme.of(context).textTheme.displayMedium!,
                   textAlign: TextAlign.center,
                   child: Container(
-                    // color: Theme.of(context).scaffoldBackgroundColor,
-                    // margin:
-                    //     const EdgeInsets.only(top: 20.0, left: 10.0, right: 10.0),
-                    // alignment: FractionalOffset.center,
-                    child: draftStatus == "pre" ||
-                            gameweek!.currentGameweek == 0
-                        ? DraftPlaceholder(
-                            leagueData: leagueData,
-                          )
-                        : RefreshIndicator(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer,
-                            child: leagueData.scoring == 'h'
-                                ? h2hOptions[navBarIndex]
-                                : classicOptions[navBarIndex],
-                            onRefresh: () async {
-                              // var updatedData = await ref
-                              //     .refresh(getFplData(widget.leagueIds).future);
-                            },
-                          ),
+                    child:
+                        draftStatus == "pre" || gameweek!.currentGameweek == 0
+                            ? DraftPlaceholder(
+                                leagueData: leagueData,
+                              )
+                            : RefreshIndicator(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
+                                child: getLeagueWidgets()[navBarIndex],
+                                onRefresh: () async {
+                                  // var updatedData = await ref
+                                  //     .refresh(getFplData(widget.leagueIds).future);
+                                },
+                              ),
                   ),
                 )));
           }
-        }
-        );
+        });
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     super.dispose();
+  }
+
+  TabController getTabController(int tabLength) {
+    return TabController(length: navBarIndex != 2 ? tabLength : 1, vsync: this);
   }
 
   @override
   void initState() {
     super.initState();
+    
     final liveDataRepository = ref.read(liveServiceProvider);
     // TODO Check if default league ID is set, move to settings service
     final appSettingsRep = ref.read(appSettingsRepositoryProvider);
-    if(appSettingsRep.activeLeagueId == null) {
+    
+    if (appSettingsRep.activeLeagueId == null) {
       // appSettingsRep.setActiveLeagueId(145);
     }
-    final List<int> leagueIds = ref.read(dataStoreProvider).getLeagues().map((league) => league.id).toList();
+    final List<int> leagueIds = ref
+        .read(dataStoreProvider)
+        .getLeagues()
+        .map((league) => league.id)
+        .toList();
+    _tabController = getTabController(leagueIds.length);
     _draft_data = liveDataRepository.getDraftData(leagueIds);
   }
 

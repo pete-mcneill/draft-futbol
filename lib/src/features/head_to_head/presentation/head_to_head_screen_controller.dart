@@ -27,11 +27,10 @@ class HeadToHeadScreenController extends _$HeadToHeadScreenController {
 
   // AppSettingsRepository get settingsRepository => ref.watch(appSettingsRepositoryProvider);
 
-  List<Fixture> getGameweekFixtures() {
+  List<Fixture> getGameweekFixtures(int leagueId) {
     // Todo Uplift Active League to new Settings Service
-    String activeLeagueId = ref.watch(appSettingsRepositoryProvider).activeLeagueId.toString();
     Gameweek gameweek = liveRepository.gameweek!;
-    return draftRepository.head2HeadFixtures[int.parse(activeLeagueId)]![gameweek.currentGameweek]!;
+    return draftRepository.head2HeadFixtures[leagueId]![gameweek.currentGameweek]!;
   }
 
   String activeLeagueId() {

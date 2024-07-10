@@ -1,5 +1,7 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:badges/badges.dart';
+import 'package:draft_futbol/src/features/league_standings/application/league_standings_controller.dart';
+import 'package:draft_futbol/src/features/league_standings/presentation/league_standings_controller.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
@@ -19,48 +21,36 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../live_data/domain/draft_domains/draft_team.dart';
 
-class ClassicLeagueStandings extends ConsumerStatefulWidget {
-  const ClassicLeagueStandings({Key? key}) : super(key: key);
+class ClassicLeagueStandings extends ConsumerWidget {
+  ClassicLeagueStandings({Key? key, required this.leagueId}) : super(key: key);
 
-  @override
-  _ClassicLeagueStandingsState createState() => _ClassicLeagueStandingsState();
-}
-
-class _ClassicLeagueStandingsState
-    extends ConsumerState<ClassicLeagueStandings> {
-  var standings;
+  int leagueId;
   Map<int, DraftTeam> teams = {};
   List<Fixture> fixtures = [];
-  var leagueData;
   bool liveBps = false;
   int view = 1;
-  int? currentGameweek;
   List<LeagueStanding> staticStandings = [];
   List<LeagueStanding> liveStandings = [];
   List<LeagueStanding> liveBpsStandings = [];
-  int? activeLeague;
+  Color? rowColor;
+  Color? secondaryColor;
+  Map<int, DraftPlayer> players = {};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
-    Gameweek? gameweek = ref.watch(liveDataRepositoryProvider.select((value) => value.gameweek));
-    activeLeague = ref.watch(appSettingsRepositoryProvider.select((value) => value.activeLeagueId));
-
-    staticStandings = ref.watch(draftRepositoryProvider).leagueStandings[activeLeague]!.staticStandings!;
-
-    if (gameweek!.gameweekFinished) {
-      liveStandings = staticStandings;
-      liveBpsStandings = staticStandings;
-    } else {
-      liveStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[activeLeague]!.liveStandings!;
-      liveBpsStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[activeLeague]!.liveBpsStandings!;
-    }
-
+    Gameweek? gameweek = ref.watch(leagueStandingsScreenControllerProvider.notifier).gameweek;
+    players = ref.watch(premierLeagueDataRepositoryProvider.select((value) => value.players));
+    DraftRepository repo = ref.watch(draftRepositoryProvider);
+    staticStandings = ref.watch(draftRepositoryProvider).leagueStandings[leagueId]!.staticStandings!;
+    liveStandings = ref.watch(leagueStandingsScreenControllerProvider.notifier).getLiveLeagueStandings(leagueId!);  
+    liveBpsStandings = ref.watch(leagueStandingsScreenControllerProvider.notifier).getBonusLeagueStandings(leagueId!);  
+    // TODO Screen Controllers are not correct but work for now...
     teams = ref.watch(draftRepositoryProvider).teams;
+    String lastGw = ( gameweek.currentGameweek - 1).toString();
 
-    currentGameweek = gameweek.currentGameweek;
-    String lastGw = (currentGameweek! - 1).toString();
-    liveBps = ref.watch(appSettingsRepositoryProvider.select((value) => value.bonusPointsEnabled));
+    rowColor = Theme.of(context).cardColor;
+    secondaryColor = Theme.of(context).colorScheme.secondaryContainer;
 
     return SingleChildScrollView(
       child: Column(
@@ -86,8 +76,6 @@ class _ClassicLeagueStandingsState
               labels: ["GW $lastGw", 'Live'],
               onToggle: (index) => updateView(index),
             ),
-          // if (!gameweek.gameweekFinished)
-          //   FilterH2HMatches(options: getFilterOptions()),
           Container(
             color: Theme.of(context).cardColor,
             child: const Row(
@@ -156,27 +144,8 @@ class _ClassicLeagueStandingsState
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  // List<ChipOptions> getFilterOptions() {
-  //   List<ChipOptions> options = [
-  //     // if (!gameweek!.gameweekFinished)
-  //     ChipOptions(
-  //         label: "Live Bonus Points",
-  //         selected: liveBps,
-  //         onSelected: (bool selected) {
-  //           ref.read(utilsProvider.notifier).updateLiveBps(selected);
-  //         }),
-  //   ];
-  //   return options;
-  // }
-
   Widget getLeagueStanding(LeagueStanding standing) {
     DraftTeam? team = teams[standing.teamId];
-    Color rowColor = Theme.of(context).cardColor;
     FontWeight weight = FontWeight.normal;
     if (standing.rank == 1) {
       rowColor = Colors.green.shade900;
@@ -195,10 +164,10 @@ class _ClassicLeagueStandingsState
         elevation: 10,
         child: GestureDetector(
           onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ClassicPitch(team: team)));
+            // Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //         builder: (context) => ClassicPitch(team: team)));
           },
           child: Row(
             children: [
@@ -240,12 +209,10 @@ class _ClassicLeagueStandingsState
   }
 
   Widget iconsSummary(LeagueStanding standing) {
-    Color rowColor = Theme.of(context).cardColor;
     if (standing.rank == 1) {
       rowColor = Colors.green;
     }
-    Map<int, DraftPlayer> players =
-        ref.watch(premierLeagueDataRepositoryProvider.select((value) => value.players));
+
     DraftTeam? team = teams[standing.teamId]!;
     int goals = 0;
     int assists = 0;
@@ -277,7 +244,7 @@ class _ClassicLeagueStandingsState
           if (goals > 0) ...[
             FaIcon(
               FontAwesomeIcons.futbol,
-              color: Theme.of(context).colorScheme.secondary,
+              color: secondaryColor,
             ),
             if (goals > 1)
               Text(goals > 1 ? "x" + goals.toString() : "" + goals.toString(),
@@ -286,7 +253,7 @@ class _ClassicLeagueStandingsState
           if (assists > 0) ...[
             FaIcon(
               FontAwesomeIcons.adn,
-              color: Theme.of(context).colorScheme.secondary,
+              color: secondaryColor,
             ),
             if (assists > 1)
               Text(
@@ -298,7 +265,7 @@ class _ClassicLeagueStandingsState
           if (cleanSheets > 0) ...[
             FaIcon(
               FontAwesomeIcons.shieldHalved,
-              color: Theme.of(context).colorScheme.secondary,
+              color: secondaryColor,
             ),
             if (cleanSheets > 1)
               Text("x" + cleanSheets.toString(),
@@ -311,13 +278,7 @@ class _ClassicLeagueStandingsState
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Container remainingPlayers(LeagueStanding standing) {
-    Color rowColor = Theme.of(context).cardColor;
     if (standing.rank == 1) {
       rowColor = Colors.green.shade900;
     }
@@ -345,8 +306,7 @@ class _ClassicLeagueStandingsState
                 badges.Badge(
                     toAnimate: false,
                     shape: BadgeShape.square,
-                    badgeColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
+                    badgeColor:secondaryColor!,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
@@ -363,8 +323,7 @@ class _ClassicLeagueStandingsState
                 badges.Badge(
                     toAnimate: false,
                     shape: BadgeShape.square,
-                    badgeColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
+                    badgeColor: secondaryColor!,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
@@ -381,8 +340,7 @@ class _ClassicLeagueStandingsState
                 badges.Badge(
                     toAnimate: false,
                     shape: BadgeShape.square,
-                    badgeColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
+                    badgeColor: secondaryColor!,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
@@ -408,8 +366,9 @@ class _ClassicLeagueStandingsState
   }
 
   updateView(index) {
-    setState(() {
-      view = index!;
-    });
+    view = index;
+    // setState(() {
+    //   view = index!;
+    // });
   }
 }

@@ -16,9 +16,10 @@ class BonusPointsController extends _$BonusPointsController {
 
   get _appSettingsService => ref.read(appSettingsRepositoryProvider);
 
-  Future<void> toggleLiveBonusPoints(bool status) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _appSettingsService.toggleLiveBonusPoints());
+  bool get liveBonusPointsState => ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
+
+  Future<void> toggleLiveBonusPoints() async {
+    ref.read(appSettingsRepositoryProvider.notifier).toggleLiveBonusPoints();
   }
 
   Future<void> updateActiveLeague(String id) async {

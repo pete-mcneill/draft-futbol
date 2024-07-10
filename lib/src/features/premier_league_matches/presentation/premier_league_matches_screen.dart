@@ -45,7 +45,6 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         elevation: 10,
         child: Column(children: [
-          BonusPointsButton(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [...getTeam(match)],

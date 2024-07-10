@@ -7,7 +7,7 @@ part of 'bonus_points_controller.dart';
 // **************************************************************************
 
 String _$bonusPointsControllerHash() =>
-    r'09b2695d02c52d0ca7fc01c635bf586cdee0be70';
+    r'efc342ecd87c0ed43650a9961d4f586201210a7a';
 
 /// See also [BonusPointsController].
 @ProviderFor(BonusPointsController)

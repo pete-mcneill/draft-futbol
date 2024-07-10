@@ -7,7 +7,7 @@ part of 'settings_repository.dart';
 // **************************************************************************
 
 String _$appSettingsRepositoryHash() =>
-    r'096d9bd98235b3d454b63f90725ac2d410500f41';
+    r'564f07fb4ff2e683cc5ee665418a18f074c6cd30';
 
 /// API for reading, watching and writing local cart data (guest user)
 ///
