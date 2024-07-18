@@ -1,11 +1,14 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:badges/badges.dart';
 import 'package:draft_futbol/src/features/league_standings/application/league_standings_controller.dart';
+import 'package:draft_futbol/src/features/league_standings/domain/league_standings_domain.dart';
 import 'package:draft_futbol/src/features/league_standings/presentation/league_standings_controller.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/league_standings/domain/league_standing.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
@@ -21,10 +24,16 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../live_data/domain/draft_domains/draft_team.dart';
 
-class ClassicLeagueStandings extends ConsumerWidget {
-  ClassicLeagueStandings({Key? key, required this.leagueId}) : super(key: key);
+class ClassicLeagueStandings extends ConsumerStatefulWidget {
+  final int leagueId;
+  const ClassicLeagueStandings({Key? key, required this.leagueId}) : super(key: key);
 
-  int leagueId;
+  @override
+  _ClassicLeagueStandingsState createState() => _ClassicLeagueStandingsState();
+}
+
+
+class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings> {
   Map<int, DraftTeam> teams = {};
   List<Fixture> fixtures = [];
   bool liveBps = false;
@@ -37,16 +46,17 @@ class ClassicLeagueStandings extends ConsumerWidget {
   Map<int, DraftPlayer> players = {};
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
+    liveBps = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
     Gameweek? gameweek = ref.watch(leagueStandingsScreenControllerProvider.notifier).gameweek;
-    players = ref.watch(premierLeagueDataRepositoryProvider.select((value) => value.players));
+    players = ref.watch(premierLeagueControllerProvider.select((value) => value.players));
     DraftRepository repo = ref.watch(draftRepositoryProvider);
-    staticStandings = ref.watch(draftRepositoryProvider).leagueStandings[leagueId]!.staticStandings!;
-    liveStandings = ref.watch(leagueStandingsScreenControllerProvider.notifier).getLiveLeagueStandings(leagueId!);  
-    liveBpsStandings = ref.watch(leagueStandingsScreenControllerProvider.notifier).getBonusLeagueStandings(leagueId!);  
+    staticStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.staticStandings!;
+    liveStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.liveStandings!; 
+    liveBpsStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.liveBpsStandings!; 
     // TODO Screen Controllers are not correct but work for now...
-    teams = ref.watch(draftRepositoryProvider).teams;
+    teams = ref.watch(draftDataControllerProvider).teams;
     String lastGw = ( gameweek.currentGameweek - 1).toString();
 
     rowColor = Theme.of(context).cardColor;
@@ -117,7 +127,7 @@ class ClassicLeagueStandings extends ConsumerWidget {
           ),
           if (view == 0)
             for (LeagueStanding standing in staticStandings) ...[
-              getLeagueStanding(standing),
+              getLeagueStanding(standing, context),
               if (!gameweek.gameweekFinished) remainingPlayers(standing),
               const SizedBox(
                 height: 5,
@@ -125,7 +135,7 @@ class ClassicLeagueStandings extends ConsumerWidget {
             ]
           else if (view == 1 && !liveBps)
             for (LeagueStanding standing in liveStandings) ...[
-              getLeagueStanding(standing),
+              getLeagueStanding(standing, context),
               if (!gameweek.gameweekFinished) remainingPlayers(standing),
               const SizedBox(
                 height: 5,
@@ -133,7 +143,7 @@ class ClassicLeagueStandings extends ConsumerWidget {
             ]
           else if (view == 1 && liveBps)
             for (LeagueStanding standing in liveBpsStandings) ...[
-              getLeagueStanding(standing),
+              getLeagueStanding(standing, context),
               if (!gameweek.gameweekFinished) remainingPlayers(standing),
               const SizedBox(
                 height: 5,
@@ -144,30 +154,32 @@ class ClassicLeagueStandings extends ConsumerWidget {
     );
   }
 
-  Widget getLeagueStanding(LeagueStanding standing) {
+  Widget getLeagueStanding(LeagueStanding standing, BuildContext context) {
     DraftTeam? team = teams[standing.teamId];
     FontWeight weight = FontWeight.normal;
+    Color customRowColor = rowColor!;
     if (standing.rank == 1) {
-      rowColor = Colors.green.shade900;
+      customRowColor = Colors.green.shade900;
       weight = FontWeight.bold;
     }
     if (standing.rank == staticStandings.length) {
-      rowColor = Colors.red.shade900;
+      customRowColor = Colors.red.shade900;
       weight = FontWeight.bold;
     }
+    
     return SizedBox(
       height: 50,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
         margin: const EdgeInsets.all(0),
-        color: rowColor,
+        color: customRowColor,
         elevation: 10,
         child: GestureDetector(
           onTap: () {
-            // Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //         builder: (context) => ClassicPitch(team: team)));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ClassicPitch(team: team)));
           },
           child: Row(
             children: [
@@ -279,11 +291,12 @@ class ClassicLeagueStandings extends ConsumerWidget {
   }
 
   Container remainingPlayers(LeagueStanding standing) {
+    Color customRowColor = rowColor!;
     if (standing.rank == 1) {
-      rowColor = Colors.green.shade900;
+      customRowColor = Colors.green.shade900;
     }
     if (standing.rank == staticStandings.length) {
-      rowColor = Colors.red.shade900;
+      customRowColor = Colors.red.shade900;
     }
     DraftTeam? team = teams[standing.teamId]!;
     final String remainingMatches = team.remainingPlayersMatches.toString();
@@ -294,7 +307,7 @@ class ClassicLeagueStandings extends ConsumerWidget {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
         margin: const EdgeInsets.all(0),
-        color: rowColor,
+        color: customRowColor,
         elevation: 10,
         child: Column(
           children: [
@@ -365,10 +378,14 @@ class ClassicLeagueStandings extends ConsumerWidget {
     );
   }
 
+    @override
+  void initState() {
+    super.initState();
+  }
+
   updateView(index) {
-    view = index;
-    // setState(() {
-    //   view = index!;
-    // });
+    setState(() {
+      view = index!;
+    });
   }
 }

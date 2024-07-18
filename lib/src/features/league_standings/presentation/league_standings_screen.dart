@@ -4,6 +4,8 @@ import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/league_standings/domain/league_standing.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/common_widgets/coffee.dart';
 import 'package:flutter/material.dart';
@@ -73,51 +75,49 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
     // TODO: Move to Controller Logic
     liveBps = ref.watch(appSettingsRepositoryProvider.select((value) => value.bonusPointsEnabled));
         
-    Gameweek? gameweek = ref.watch(liveDataRepositoryProvider).gameweek;
+    Gameweek? gameweek = ref.watch(liveDataControllerProvider).gameweek;
 
-    // widget.leagueId = ref.watch(appSettingsRepositoryProvider).widget.leagueIdId;
+    // widget.leagueId = ref.watch(appSett
+    staticStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.staticStandings!;
 
-    final liveData = ref.watch(liveDataRepositoryProvider);
-    staticStandings = ref.watch(draftRepositoryProvider).leagueStandings[widget.leagueId]!.staticStandings!;
-
-    if (!gameweek!.gameweekFinished) {
+    if (gameweek!.gameweekFinished) {
       liveStandings = staticStandings;
       liveBpsStandings = staticStandings;
     } else {
-      liveStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveStandings!;
-      liveBpsStandings = ref.watch(draftRepositoryProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveBpsStandings!;
+      liveStandings = ref.watch(draftDataControllerProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveStandings!;
+      liveBpsStandings = ref.watch(draftDataControllerProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveBpsStandings!;
     }
-    teams = ref.watch(draftRepositoryProvider).teams;
+    teams = ref.watch(draftDataControllerProvider).teams;
 
     String lastGw = (gameweek.currentGameweek - 1).toString();
     liveBps = ref.watch(appSettingsRepositoryProvider.select((value) => value.bonusPointsEnabled));
 
 
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return ListView(
+      children: [
           buyaCoffeebutton(context),
           if (!gameweek.gameweekFinished)
-            ToggleSwitch(
-              customWidths: const [120.0, 90.0, 120.0],
-              minHeight: 30.0,
-              activeFgColor: Colors.black,
-              activeBgColors: [
-                [Theme.of(context).buttonTheme.colorScheme!.secondary],
-                [Theme.of(context).buttonTheme.colorScheme!.secondary],
-                [Theme.of(context).buttonTheme.colorScheme!.secondary]
-              ],
-              inactiveBgColor: Theme.of(context).cardColor,
-              inactiveFgColor: Colors.white,
-              borderColor: [Theme.of(context).dividerColor],
-              borderWidth: 1.0,
-              // inactiveFgColor: Colors.white,
-              initialLabelIndex: view,
-              totalSwitches: 2,
-              labels: ["GW $lastGw", 'Live'],
-              onToggle: (index) => updateView(index),
+            Center(
+              child: ToggleSwitch(
+                customWidths: const [120.0, 90.0, 120.0],
+                minHeight: 30.0,
+                activeFgColor: Colors.black,
+                activeBgColors: [
+                  [Theme.of(context).buttonTheme.colorScheme!.secondary],
+                  [Theme.of(context).buttonTheme.colorScheme!.secondary],
+                  [Theme.of(context).buttonTheme.colorScheme!.secondary]
+                ],
+                inactiveBgColor: Theme.of(context).cardColor,
+                inactiveFgColor: Colors.white,
+                borderColor: [Theme.of(context).dividerColor],
+                borderWidth: 1.0,
+                // inactiveFgColor: Colors.white,
+                initialLabelIndex: view,
+                totalSwitches: 2,
+                labels: ["GW $lastGw", 'Live'],
+                onToggle: (index) => updateView(index),
+              ),
             ),
           Container(
             // color: Theme.of(context).cardColor,
@@ -160,6 +160,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
           ),
           if (view == 0)
             ListView.separated(
+              primary: false,
                 shrinkWrap: true,
                 itemBuilder: (context, index) =>
                     getLeagueStanding(staticStandings[index]),
@@ -170,6 +171,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                 itemCount: liveStandings.length)
           else if (view == 1 && !liveBps)
             ListView.separated(
+              primary: false,
                 shrinkWrap: true,
                 itemBuilder: (context, index) =>
                     getLeagueStanding(liveStandings[index]),
@@ -182,6 +184,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
           //   getLeagueStanding(standing)
           else if (view == 1 && liveBps)
             ListView.separated(
+              primary: false,
                 shrinkWrap: true,
                 itemBuilder: (context, index) =>
                     getLeagueStanding(liveBpsStandings[index]),
@@ -191,7 +194,6 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                     ), // here u can customize the space.
                 itemCount: liveStandings.length)
         ],
-      ),
     );
   }
 

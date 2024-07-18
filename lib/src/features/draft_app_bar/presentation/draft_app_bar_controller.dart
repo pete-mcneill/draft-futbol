@@ -1,3 +1,5 @@
+import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/features/local_storage/domain/local_league_metadata.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
@@ -17,6 +19,8 @@ class DraftAppBarController extends _$DraftAppBarController {
   
 
   List<LocalLeagueMetadata> get leaguesMetadata => ref.read(dataStoreProvider).getLeagues();
+
+  bool get gameweekFinished => ref.read(liveDataControllerProvider.select((value) => value.gameweek!.gameweekFinished));
 
   Future<void> updateBonusPointsSetting(bool status) async {
     state = const AsyncLoading();

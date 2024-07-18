@@ -5,6 +5,8 @@ import 'package:draft_futbol/src/common_widgets/app_store_links.dart';
 import 'package:draft_futbol/src/common_widgets/coffee.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/squads/presentation/squad_view/squad_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,12 +31,11 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
 
     late final Future<Map<int, List<DraftPlayer>>> futureSquads =
     getSquads();
+    Map<int, DraftPlayer> players = {};
 
     Future<Map<int, List<DraftPlayer>>> getSquads() async {
     Map<int, List<DraftPlayer>> squads = {};
-    Map<int, DraftPlayer> players =
-        ref.read(premierLeagueDataRepositoryProvider.select((value) => value.players))!;
-    Map<int, DraftTeam>? teams = ref.read(draftRepositoryProvider).teams;
+    Map<int, DraftTeam>? teams = ref.read(draftDataControllerProvider).teams;
     for (var league in teams.entries) {
       var leaguePlayers = players.values
           .where((DraftPlayer player) =>
@@ -54,8 +55,7 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
-    Map<int, DraftPlayer> players =
-        ref.read(premierLeagueDataRepositoryProvider.select((value) => value.players));
+    Map<int, DraftPlayer> players = ref.read(premierLeagueControllerProvider).players;
     String leagueStatus = widget.leagueData.draftStatus;
     if (leagueStatus == "pre") {
       return SingleChildScrollView(
@@ -78,8 +78,6 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
         ]),
       );
     } else {
-      Map<int, DraftPlayer> players =
-          ref.read(premierLeagueDataRepositoryProvider.select((value) => value.players));
       return SingleChildScrollView(
         child: Column(children: [
           if(kIsWeb)...appStoreLinks(),

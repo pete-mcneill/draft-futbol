@@ -1,6 +1,8 @@
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_team.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/transactions/domain/transactions.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
@@ -55,9 +57,9 @@ class _TransactionsState extends ConsumerState<Transactions> {
     currentGameweek = (currentGW!.waiversProcessed
                 ? (currentGW!.currentGameweek + 1)
                 : currentGW!.currentGameweek);
-    players = ref.read(premierLeagueDataRepositoryProvider).players;
+    players = ref.read(premierLeagueControllerProvider).players;
     dropdownValue = ref.watch(appSettingsRepositoryProvider).activeLeagueId;
-    teams = ref.read(draftRepositoryProvider).teams;
+    teams = ref.read(draftDataControllerProvider).teams;
     final teamsDropdownItems = teams.entries
         .map((key) => MultiSelectItem(key.value.entryId!, key.value.teamName!))
         .toList();

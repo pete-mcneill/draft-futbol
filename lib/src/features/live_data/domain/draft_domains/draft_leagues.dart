@@ -1,12 +1,13 @@
 class DraftLeague {
-  const DraftLeague(
+  DraftLeague(
       {required this.leagueId,
       required this.scoring,
       required this.leagueName,
       required this.draftStatus,
       required this.teams,
       required this.allH2hFixtures,
-      required this.rawStandings});
+      required this.rawStandings,
+      this.averageLeague = false});
 
   final int leagueId;
   final String scoring;
@@ -15,11 +16,16 @@ class DraftLeague {
   final List<dynamic> teams;
   final List<dynamic> allH2hFixtures;
   final dynamic rawStandings;
+  bool averageLeague = false;
 
   factory DraftLeague.fromJson(var leagueData) {
     List<dynamic> teams = [];
     List<dynamic> h2hFixtures = [];
+    bool averageLeague = false;
     for (var team in leagueData['league_entries']) {
+      if (team['short_name'] == 'AV') {
+        averageLeague = true;
+      }
       teams.add({
         "name": team['entry_name'] ??= "Average",
         "manager":
@@ -38,6 +44,7 @@ class DraftLeague {
         draftStatus: leagueData['league']['draft_status'],
         allH2hFixtures: h2hFixtures,
         teams: teams,
-        rawStandings: leagueData['standings']);
+        rawStandings: leagueData['standings'],
+        averageLeague: averageLeague);
   }
 }

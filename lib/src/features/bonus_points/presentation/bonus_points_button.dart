@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:draft_futbol/src/features/bonus_points/presentation/bonus_points_controller.dart';
+import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
+import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,12 +33,11 @@ class _BonusPointsToggleState extends ConsumerState<BonusPointsToggle> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    positive = ref.read(bonusPointsControllerProvider.notifier).liveBonusPointsState;
   }
 
   @override
   Widget build(BuildContext context) {
-    // positive = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
+    positive = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
     // bool test = ref.read(appSettingsRepositoryProvider).bonusPointsEnabled;
     // print(test);
 return AnimatedToggleSwitch<bool>.dual(

@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/bps.dart';
 import 'package:draft_futbol/src/features/bonus_points/presentation/bonus_points_button.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
@@ -25,9 +26,9 @@ class _PlMatchesScreenState extends ConsumerState<PlMatchesScreen> {
   Widget build(BuildContext context) {
     // elementNames = Provider.of<StaticDataProvider>(context, listen: true)
     //     .staticData!['element_stats'];
-    players = ref.watch(premierLeagueDataRepositoryProvider).players;
+    players = ref.watch(premierLeagueControllerProvider).players;
     Map<int, PlMatch> matches =
-        ref.watch(premierLeagueDataRepositoryProvider).matches;
+        ref.watch(premierLeagueControllerProvider).matches;
     return SingleChildScrollView(
       child: Column(
         children: [

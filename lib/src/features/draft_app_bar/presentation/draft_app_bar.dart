@@ -109,8 +109,9 @@ class DraftAppBarV1 extends ConsumerWidget implements PreferredSizeWidget {
           height: 30, width: 30),
       bottom: bottomTabBar ? createBottomBar(ref) : null,
       // getDropdownTitle(),
-      actions: const [
-        BonusPointsToggle(), 
+      actions: [
+        if(!appBarController.gameweekFinished)
+          const BonusPointsToggle(), 
       ],
     );
   }

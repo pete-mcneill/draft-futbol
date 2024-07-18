@@ -1,4 +1,6 @@
+import 'package:draft_futbol/src/features/bonus_points/presentation/bonus_points_button.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,8 +24,7 @@ class _PitchAppBarState extends ConsumerState<PitchAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    bool liveBonus = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
-    bool gameweekFinished = ref.watch(liveDataRepositoryProvider).gameweek!.gameweekFinished;
+    bool gameweekFinished = ref.watch(liveDataControllerProvider).gameweek!.gameweekFinished;
     return AppBar(
       centerTitle: true,
       // leadingWidth: 0,
@@ -32,13 +33,7 @@ class _PitchAppBarState extends ConsumerState<PitchAppBar> {
       elevation: 0,
       actions: [
         if (!gameweekFinished)
-          ChoiceChip(
-            label: const Text("Live Bonus Points"),
-            selected: liveBonus,
-            onSelected: (selected) {
-              ref.read(appSettingsRepositoryProvider.notifier).toggleLiveBonusPoints();
-            },
-          )
+          const BonusPointsToggle()
       ],
       title: Container(
         child: Image.asset("assets/images/1024_1024-icon.png",

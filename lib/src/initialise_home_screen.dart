@@ -1,7 +1,7 @@
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/features/local_storage/domain/local_league_metadata.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
-import 'package:draft_futbol/src/home_page.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_screen.dart';
 import 'package:draft_futbol/src/features/onboarding/presentation/on_boarding_screen.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';

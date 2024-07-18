@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,8 +34,8 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
   Widget build(BuildContext context) {
     bool liveBonus = ref.watch(appSettingsRepositoryProvider
         .select((value) => value.bonusPointsEnabled));
-    DraftTeam homeTeam = ref.read(draftRepositoryProvider).teams[widget.homeTeam.id]!;
-    DraftTeam awayTeam = ref.read(draftRepositoryProvider).teams[widget.awayTeam.id]!;
+    DraftTeam homeTeam = ref.read(draftDataControllerProvider).teams[widget.homeTeam.id]!;
+    DraftTeam awayTeam = ref.read(draftDataControllerProvider).teams[widget.awayTeam.id]!;
     return AppBar(
       automaticallyImplyLeading: false,
       bottom: widget.subModeEnabled

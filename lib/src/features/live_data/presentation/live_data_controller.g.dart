@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'bonus_points_controller.dart';
+part of 'live_data_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bonusPointsControllerHash() =>
-    r'6acf2bbbee5af29ceebd1fc176c23aaa37cfe6d3';
+String _$liveDataControllerHash() =>
+    r'a129e329d082179b39d733aeca72a0bf467c0467';
 
-/// See also [BonusPointsController].
-@ProviderFor(BonusPointsController)
-final bonusPointsControllerProvider =
-    AutoDisposeAsyncNotifierProvider<BonusPointsController, void>.internal(
-  BonusPointsController.new,
-  name: r'bonusPointsControllerProvider',
+/// See also [LiveDataController].
+@ProviderFor(LiveDataController)
+final liveDataControllerProvider =
+    NotifierProvider<LiveDataController, LiveData>.internal(
+  LiveDataController.new,
+  name: r'liveDataControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$bonusPointsControllerHash,
+      : _$liveDataControllerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$BonusPointsController = AutoDisposeAsyncNotifier<void>;
+typedef _$LiveDataController = Notifier<LiveData>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

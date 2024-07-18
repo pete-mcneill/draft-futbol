@@ -7,7 +7,7 @@ part of 'head_to_head_screen_controller.dart';
 // **************************************************************************
 
 String _$headToHeadScreenControllerHash() =>
-    r'cce0c9b76b463276fe87c31211c6677a7724fa61';
+    r'83f487309b0e029fb109c752e334537a815314d1';
 
 /// See also [HeadToHeadScreenController].
 @ProviderFor(HeadToHeadScreenController)

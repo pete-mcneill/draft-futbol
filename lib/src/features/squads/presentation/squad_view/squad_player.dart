@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_teams.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _SquadPlayerState extends ConsumerState<SquadPlayer> {
     // matches = ref.watch(plMatchesProvider).plMatches!;
     String playerImage;
     // Store team metadata
-    PlTeam team = ref.read(premierLeagueDataRepositoryProvider.select((value) => value.teams))[
+    PlTeam team = ref.read(premierLeagueControllerProvider.select((value) => value.teams))[
         widget.player.teamId]!;
     if (widget.player.position == "GK") {
       playerImage =

@@ -155,11 +155,11 @@ class _LoadDataOnStartProviderElement
   List<int> get ids => (origin as LoadDataOnStartProvider).ids;
 }
 
-String _$liveServiceHash() => r'caec5fa92208907aa20775a4eaeba1a754d99d98';
+String _$liveServiceHash() => r'98d5b1495625f376e17b54d854a8fc44ae0c6136';
 
 /// See also [liveService].
 @ProviderFor(liveService)
-final liveServiceProvider = AutoDisposeProvider<LiveService>.internal(
+final liveServiceProvider = Provider<LiveService>.internal(
   liveService,
   name: r'liveServiceProvider',
   debugGetCreateSourceHash:
@@ -168,6 +168,22 @@ final liveServiceProvider = AutoDisposeProvider<LiveService>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef LiveServiceRef = AutoDisposeProviderRef<LiveService>;
+typedef LiveServiceRef = ProviderRef<LiveService>;
+String _$gameweekInformationHash() =>
+    r'cf423dd20aabf7554d51258166117c9a717c1265';
+
+/// See also [gameweekInformation].
+@ProviderFor(gameweekInformation)
+final gameweekInformationProvider = Provider<Gameweek>.internal(
+  gameweekInformation,
+  name: r'gameweekInformationProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$gameweekInformationHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef GameweekInformationRef = ProviderRef<Gameweek>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

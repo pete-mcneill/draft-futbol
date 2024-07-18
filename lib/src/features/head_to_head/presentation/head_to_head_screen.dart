@@ -25,22 +25,23 @@ class HeadToHeadScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fixtures = ref.read(headToHeadScreenControllerProvider.notifier).getGameweekFixtures(leagueId);
   
-    // bool bps = ref.watch(appSettingsRepositoryProvider).liveBonusPoints;
+    bool bps = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
     return ListView(
+      shrinkWrap: true,
       children: <Widget>[
         // SizedBox(
         //   width: 100,
         //   height: 500,
         //   child: TabBarTest()),
-        // buyaCoffeebutton(context),
+        buyaCoffeebutton(context),
         ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: fixtures.length,
           itemBuilder: (BuildContext context, int index) {
             Fixture _fixture = fixtures![index];
-            DraftTeam homeTeam = ref.read(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.homeTeamId!);  
-            DraftTeam awayTeam =  ref.read(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.awayTeamId!);
+            DraftTeam homeTeam = ref.watch(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.homeTeamId!);  
+            DraftTeam awayTeam =  ref.watch(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.awayTeamId!);
             return Column(
               children: [
                 GestureDetector(

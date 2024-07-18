@@ -18,25 +18,27 @@ part 'premier_league_repository.g.dart';
 class PremierLeagueRepository {
   PremierLeagueRepository();
     /// Preload with the default list of products when the app starts
-  Map<int, DraftPlayer> players = {};
-  Map<int, PlTeam> teams = {};
-  Map<int, PlMatch> matches = {};
+  // Map<int, DraftPlayer> players = {};
+  // Map<int, PlTeam> teams = {};
+  // Map<int, PlMatch> matches = {};
 
   final _api = Api();
 
-  Future<void> getAllPremierLeaguePlayers(var playersData) async {
+  Map<int, DraftPlayer> getAllPremierLeaguePlayers(var playersData) {
     try {
+      Map<int, DraftPlayer> players = {};
       for (var player in playersData) {
         DraftPlayer _player = DraftPlayer.fromJson(player);
         players[_player.playerId!] = _player;
       }
+      return players;
     } catch (e) {
       throw e;
     }
   }
 
-  void setPlayerOwnershipState(
-      var elementStatus, int leagueId) {
+  Map<int, DraftPlayer> setPlayerOwnershipState(
+      var elementStatus, int leagueId, Map<int, DraftPlayer> players) {
     try {
       for (var _player in elementStatus) {
         try {
@@ -50,16 +52,20 @@ class PremierLeagueRepository {
           print(e);
         }
       }
+      return players;
     } catch (e) {
       print(e);
+      throw Error();
     }
   }
 
-  Future<void> createPremierLeagueTeams(var teamsData) async {
+  Future<Map<int, PlTeam>> createPremierLeagueTeams(var teamsData) async {
+    Map<int, PlTeam> teams = {};
     for (var team in teamsData) {
       PlTeam _team = PlTeam.fromJson(team);
       teams[_team.id!] = _team;
     }
+    return teams;
   }
 
   Future<void> getCurrentGameweek() async {
@@ -73,7 +79,7 @@ class PremierLeagueRepository {
     }
   }
 
-  void getLivePlayerData(var liveData) async {
+  Future<Map<int, DraftPlayer>> getLivePlayerData(var liveData, Map<int, DraftPlayer> players) async {
     try {
       liveData['elements'].forEach((k, v) {
         List<PlMatchStats> _matches = [];
@@ -83,8 +89,11 @@ class PremierLeagueRepository {
         }
         players[int.parse(k)]!.updateMatches(_matches);
       });
+      return players;
     } catch (e) {
+      print("Error getting live player data");
       print(e);
+      throw e;
     }
   }
 
@@ -158,6 +167,7 @@ class PremierLeagueRepository {
    Future<Map<int, PlMatch>> getLivePlFixtures(
       dynamic staticData, dynamic liveData) async {
     try {
+      Map<int, PlMatch> matches = {};
       for (var _match in liveData['fixtures']) {
         int homeTeam = 0;
         int awayTeam = 0;
@@ -215,12 +225,12 @@ class PremierLeagueRepository {
       }
       return matches;
     } on Exception {
-      return {};
+      throw Error();
     }
   }
 
-  void updateLiveBonusPoints(
-      Map<int, PlMatch> plMatches) {
+  Map<int, PlMatch> updateLiveBonusPoints(
+      Map<int, PlMatch> plMatches, Map<int, DraftPlayer> players) {
     try {
       players.forEach((id, DraftPlayer player) {
         if (player.matches != null) {
@@ -253,8 +263,10 @@ class PremierLeagueRepository {
           }
         }
       });
+      return plMatches;
     } catch (error) {
       print(error);
+      throw Error();
     }
   }
 

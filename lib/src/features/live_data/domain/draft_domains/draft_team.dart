@@ -29,15 +29,15 @@ class DraftTeam {
       required this.livePlayers,
       this.userSubsActive = false});
 
-  factory DraftTeam.fromJson(Map<String, dynamic> json, int leagueId) {
+  factory DraftTeam.fromJson(Map<String, dynamic> json, int leagueId, Map<String, dynamic> staticStandings) {
     return DraftTeam(
         leagueId: leagueId,
         entryId: json["entry_id"] ?? 0,
         id: json["id"],
         teamName: json["name"] ?? "Average",
         managerName: json["manager"] ?? "",
-        points: 0,
-        bonusPoints: 0,
+        points: staticStandings['event_total'] ?? staticStandings['total'],
+        bonusPoints: staticStandings['event_total'] ?? staticStandings['total'],
         remainingPlayersMatches: 0,
         completedPlayersMatches: 0,
         remainingSubsMatches: 0,

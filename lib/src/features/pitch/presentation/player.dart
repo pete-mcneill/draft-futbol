@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_teams.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
@@ -117,7 +118,7 @@ class _PlayerState extends ConsumerState<Player> {
       print("test");
     }
     Color bonusColour = Theme.of(context).canvasColor;
-    matches = ref.watch(premierLeagueDataRepositoryProvider).matches;
+    matches = ref.watch(premierLeagueControllerProvider).matches;
     bool bonus = false;
     liveBonus = ref.watch(appSettingsRepositoryProvider
         .select((value) => value.bonusPointsEnabled));
@@ -145,7 +146,7 @@ class _PlayerState extends ConsumerState<Player> {
     }
     String playerImage;
     // Store team metadata
-    PlTeam team = ref.read(premierLeagueDataRepositoryProvider).teams[widget.player.teamId]!;
+    PlTeam team = ref.read(premierLeagueControllerProvider).teams[widget.player.teamId]!;
     if (widget.player.position == "GK") {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-keeper.png';

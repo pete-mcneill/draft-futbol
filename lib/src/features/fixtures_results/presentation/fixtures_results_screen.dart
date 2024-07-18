@@ -4,6 +4,7 @@ import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_t
 import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/features/local_storage/domain/local_league_metadata.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
@@ -43,8 +44,8 @@ class DraftFixturesResults extends ConsumerWidget {
     dropdownValue = ref.watch(appSettingsRepositoryProvider.select((value) => value.activeLeagueId));
     DraftLeague activeLeague = ref.read(draftRepositoryProvider).leagues[dropdownValue]!;
     if (activeLeague.scoring == "h") {
-      teams = ref.read(draftRepositoryProvider).teams;
-      matches = ref.read(draftRepositoryProvider).head2HeadFixtures[dropdownValue]!;
+      teams = ref.read(draftDataControllerProvider).teams;
+      matches = ref.read(draftDataControllerProvider).head2HeadFixtures[dropdownValue]!;
       // ref.read(fixturesProvider).fixtures[dropdownValue]!;
       results = {
         for (final key in matches!.keys)
