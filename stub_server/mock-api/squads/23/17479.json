@@ -1,0 +1,122 @@
+{
+    "picks": [
+        {
+            "element": 291,
+            "position": 1,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 377,
+            "position": 2,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 511,
+            "position": 3,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 638,
+            "position": 4,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 501,
+            "position": 5,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 294,
+            "position": 6,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 688,
+            "position": 7,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 362,
+            "position": 8,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 774,
+            "position": 9,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 193,
+            "position": 10,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 60,
+            "position": 11,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 145,
+            "position": 12,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 341,
+            "position": 13,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 368,
+            "position": 14,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 132,
+            "position": 15,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        }
+    ],
+    "entry_history": {},
+    "subs": [
+        {
+            "element_in": 193,
+            "element_out": 341,
+            "event": 23
+        },
+        {
+            "element_in": 377,
+            "element_out": 368,
+            "event": 23
+        }
+    ]
+}

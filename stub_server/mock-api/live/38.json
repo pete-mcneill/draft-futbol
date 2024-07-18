@@ -37184,7 +37184,7 @@
             ],
             "code": 2367908,
             "finished": true,
-            "finished_provisional": true,
+            "finished_provisional": false,
             "kickoff_time": "2024-05-19T15:00:00Z",
             "minutes": 0,
             "provisional_start_time": false,

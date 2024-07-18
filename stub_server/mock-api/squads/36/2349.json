@@ -1,0 +1,111 @@
+{
+    "picks": [
+        {
+            "element": 113,
+            "position": 1,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 506,
+            "position": 2,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 342,
+            "position": 3,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 407,
+            "position": 4,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 19,
+            "position": 5,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 447,
+            "position": 6,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 599,
+            "position": 7,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 26,
+            "position": 8,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 211,
+            "position": 9,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 60,
+            "position": 10,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 415,
+            "position": 11,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 597,
+            "position": 12,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 216,
+            "position": 13,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 584,
+            "position": 14,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        },
+        {
+            "element": 563,
+            "position": 15,
+            "is_captain": false,
+            "is_vice_captain": false,
+            "multiplier": 1
+        }
+    ],
+    "entry_history": {},
+    "subs": []
+}
