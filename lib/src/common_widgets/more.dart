@@ -37,32 +37,6 @@ class _MoreState extends ConsumerState<More> {
             height: 50,
             child: GestureDetector(
               onTap: () {
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => const ShoppingCartScreen()));
-              },
-              child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0.0)),
-                  margin: const EdgeInsets.all(0),
-                  elevation: 4,
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(flex: 10, child: Text("TEst")),
-                        Expanded(
-                            flex: 2, child: Icon(CupertinoIcons.arrow_right))
-                      ],
-                    ),
-                  )),
-            ),
-          ),
-          SizedBox(
-            height: 50,
-            child: GestureDetector(
-              onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(

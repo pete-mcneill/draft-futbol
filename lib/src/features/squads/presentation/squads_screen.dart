@@ -1,14 +1,18 @@
 import 'package:draft_futbol/src/features/draft_app_bar/presentation/draft_app_bar.dart';
+import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_leagues.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_team.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
+import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_teams.dart';
 import 'package:draft_futbol/src/features/live_data/application/api_service.dart';
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
+import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/common_widgets/draft_app_bar.dart';
 import 'package:draft_futbol/src/common_widgets/loading.dart';
@@ -25,12 +29,13 @@ class SquadsScreen extends ConsumerStatefulWidget {
   _SquadsScreenState createState() => _SquadsScreenState();
 }
 
-class _SquadsScreenState extends ConsumerState<SquadsScreen> {
+class _SquadsScreenState extends ConsumerState<SquadsScreen> with TickerProviderStateMixin {
   Map<int, DraftTeam>? teams;
   Map<int, DraftPlayer>? players;
   int? activeLeague;
   bool isLoading = false;
   int? selectedGameweek = null;
+  late TabController _tabController;
   late final Future<Map<int, List<DraftPlayer>>> futureSquads =
       getSquads(selectedGameweek);
 
@@ -47,9 +52,25 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
     return teamSquad;
   }
 
+    TabController getTabController(int tabLength) {
+    return TabController(length: tabLength, vsync: this);
+  }
+
   @override
   void initState() {
     super.initState();
+    final List<int> leagueIds = ref
+        .read(dataStoreProvider)
+        .getLeagues()
+        .map((league) => league.id)
+        .toList();
+    _tabController = getTabController(leagueIds.length);
+  }
+
+    @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   List<String> getPlayersFixtures(int teamId, List premierLeagueFixtures) {
@@ -72,13 +93,14 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
   }
 
   Future<Map<int, List<DraftPlayer>>> getSquads(int? gameweek) async {
+    try {
     if (gameweek == null) {
-      if (ref.read(liveDataRepositoryProvider).gameweek!.gameweekFinished) {
-        gameweek = ref.read(liveDataRepositoryProvider).gameweek!
+      if (ref.read(liveDataControllerProvider).gameweek!.gameweekFinished) {
+        gameweek = ref.read(liveDataControllerProvider).gameweek!
                 .currentGameweek +
             1;
       } else {
-        gameweek = ref.read(liveDataRepositoryProvider).gameweek!
+        gameweek = ref.read(liveDataControllerProvider).gameweek!
             .currentGameweek;
       }
     }
@@ -87,25 +109,29 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
     Map<int, DraftPlayer> players = ref.read(premierLeagueControllerProvider).players;
     var premierLeagueFixtures = await Api().getPremierLeagueFixtures(gameweek);
      Map<int, DraftTeam>? teams = ref.read(draftDataControllerProvider).teams;
-    for (var league in teams!.entries) {
-      var leaguePlayers = players.values
+    for (MapEntry<int, DraftTeam> team in teams.entries) {
+      var squad = players.values
           .where((DraftPlayer player) =>
-              player.draftTeamId!.containsKey(league.key))
+              player.draftTeamId!.containsValue(team.value.entryId))
           .toList();
-      // for (var teamEntry in league.value) {
+      print("GOT LEAGUE PLAYERS");
+      // for (DraftTeam teamEntry in league.value) {
       //   DraftTeam team = teamEntry.value;
       //   var teamSquad = leaguePlayers
       //       .where((DraftPlayer player) =>
       //           player.draftTeamId![league.key] == team.entryId)
       //       .toList();
-      //   for (var player in teamSquad) {
-      //     player.gameweekFixtures =
-      //         getPlayersFixtures(player.teamId!, premierLeagueFixtures!);
-      //   }
-      //   squads[team.entryId!] = teamSquad;
+        for (var player in squad) {
+          player.gameweekFixtures =
+              getPlayersFixtures(player.teamId!, premierLeagueFixtures!);
+        }
+        squads[team.value.entryId!] = squad;
       // }
     }
-    return squads;
+     return squads;
+    } catch (error) {
+      throw Error();
+    }
   }
 
   void _scrollToSelectedContent({GlobalKey? expansionTileKey}) {
@@ -144,73 +170,8 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(
-          appBar: DraftAppBar(
-            leading: true,
-            settings: false,
-          ),
-          body: const Loading());
-    } else {
-      List<DropdownMenuItem<String>> menuOptions = [];
-      activeLeague = ref.watch(
-          appSettingsRepositoryProvider.select((connection) => connection.activeLeagueId));
-      teams = ref.read(draftDataControllerProvider).teams;
-      Gameweek currentGameweek =
-          ref.read(liveDataRepositoryProvider.select((value) => value.gameweek))!;
-      int currentGameweekInt = currentGameweek.currentGameweek;
-      if (currentGameweek.gameweekFinished) {
-        currentGameweekInt++;
-      }
-      selectedGameweek ??= currentGameweekInt;
-      for (var i = currentGameweekInt; i <= 38; i++) {
-        menuOptions.add(DropdownMenuItem(
-            value: i.toString(),
-            child: Center(
-              child: Text(
-                "GW $i",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            )));
-      };
-
-
-
-    return Scaffold(
-        appBar: DraftAppBarV1(
-          leading: true,
-          settings: false,
-        ),
-        body: SafeArea(
-          child: RefreshIndicator(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              onRefresh: () async {
-                setState(() {
-                  isLoading = true;
-                });
-                // await ref.refresh(fplGwDataProvider.notifier).refreshData(ref);
-                setState(() {
-                  isLoading = false;
-                });
-              },
-              child: FutureBuilder<Map<int, List<DraftPlayer>>>(
-                future: futureSquads,
-                builder: (BuildContext context,
-                    AsyncSnapshot<Map<int, List<DraftPlayer>>> snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("Error");
-                  }
-
-                  if (snapshot.hasData) {
-                    try {
-                      return Scaffold(
-                        body: SingleChildScrollView(
+  Widget getLeagueView(AsyncSnapshot<Map<int, List<DraftPlayer>>> snapshot, List<DraftTeam> leagueTeams, List<DropdownMenuItem<String>> menuOptions) {
+      return SingleChildScrollView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -240,7 +201,7 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
                                   ),
                                 ),
                               ),
-                              for (DraftTeam team in teams!.values)
+                              for (DraftTeam team in leagueTeams)
                                 Column(
                                   children: [
                                     expansionItem(
@@ -254,6 +215,93 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
                                 ),
                             ],
                           ),
+                        );
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+          appBar: DraftAppBarV1(
+            leading: true,
+            settings: false,
+            tabController: _tabController,
+          ),
+          body: const Loading());
+    } else {
+      List<DropdownMenuItem<String>> menuOptions = [];
+      activeLeague = ref.watch(
+          appSettingsRepositoryProvider.select((connection) => connection.activeLeagueId));
+      teams = ref.read(draftDataControllerProvider).teams;
+      List<DraftTeam> filteredTeams = teams!.values.where((DraftTeam team) => team.leagueId == activeLeague).toList();
+      Gameweek currentGameweek =
+          ref.read(liveDataControllerProvider.select((value) => value.gameweek))!;
+      int currentGameweekInt = currentGameweek.currentGameweek;
+      if (currentGameweek.gameweekFinished && currentGameweekInt < 38) {
+        currentGameweekInt++;
+      }
+      selectedGameweek ??= currentGameweekInt;
+      for (var i = currentGameweekInt; i <= 38; i++) {
+        menuOptions.add(DropdownMenuItem(
+            value: i.toString(),
+            child: Center(
+              child: Text(
+                "GW $i",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            )));
+      };
+
+    List<DraftLeague> leagues = ref.read(draftDataControllerProvider).leagues.values.toList();
+    
+
+
+
+    return Scaffold(
+        appBar: DraftAppBarV1(
+          leading: true,
+          settings: false,
+          tabController: _tabController,
+        ),
+        body: SafeArea(
+          child: RefreshIndicator(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              onRefresh: () async {
+                setState(() {
+                  isLoading = true;
+                });
+                // await ref.refresh(fplGwDataProvider.notifier).refreshData(ref);
+                setState(() {
+                  isLoading = false;
+                });
+              },
+              child: FutureBuilder<Map<int, List<DraftPlayer>>>(
+                future: futureSquads,
+                builder: (BuildContext context,
+                    AsyncSnapshot<Map<int, List<DraftPlayer>>> snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text("Error");
+                  }
+
+                  if (snapshot.hasData) {
+                    List<Widget> leagueViews = [];
+                    for(DraftLeague league in leagues){
+                      leagueViews.add(RefreshIndicator(
+                        child: getLeagueView(snapshot, teams!.values.where((DraftTeam team) => team.leagueId == league.leagueId).toList(), menuOptions),
+                        onRefresh: () async {
+                          // await refreshData();
+                        },
+                      ));
+                    }
+                    try {
+                      return Scaffold(
+                        body: TabBarView(
+                          controller: _tabController,
+                          children: leagueViews,
                         ),
                       );
                     } catch (error) {
