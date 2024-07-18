@@ -1,6 +1,8 @@
 import 'package:draft_futbol/baguley-features/widgets/reset_subs.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
@@ -246,10 +248,10 @@ class _SquadState extends ConsumerState<Squad> {
 
   @override
   Widget build(BuildContext context) {
-    bool gameweek = ref.read(liveDataRepositoryProvider).gameweek!.gameweekFinished;
-    players = ref.read(premierLeagueDataRepositoryProvider).players;
-    currentGameweek = ref.watch(liveDataRepositoryProvider).gameweek!.currentGameweek;
-    plMatches = ref.watch(premierLeagueDataRepositoryProvider).matches;
+    bool gameweek = ref.read(liveDataControllerProvider).gameweek!.gameweekFinished;
+    players = ref.read(premierLeagueControllerProvider).players;
+    currentGameweek = ref.watch(liveDataControllerProvider).gameweek!.currentGameweek;
+    plMatches = ref.watch(premierLeagueControllerProvider).matches;
     Map<String, List<DraftPlayer>> _squad = {
       "GK": [],
       "DEF": [],

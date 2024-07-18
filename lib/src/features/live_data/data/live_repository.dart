@@ -25,16 +25,18 @@ class LiveDataRepository {
   final _api = Api();
   
 
-  Future<void> getCurrentGameweek() async {
+  Future<Gameweek> getCurrentGameweek() async {
     try {
       var _gameweek = await _api.getCurrentGameweek();
       Gameweek currentGameweek = Gameweek.fromJson(_gameweek);
-      gameweek = currentGameweek;
+      return currentGameweek;
     } catch (e) {
       print(e);
       throw Error();
     }
   }
+
+  Gameweek get getGameweek => gameweek!;
 
   void createPremierLeagueTeams(var teams) {
     for (var team in teams) {

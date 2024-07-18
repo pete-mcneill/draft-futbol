@@ -1,3 +1,4 @@
+import 'package:draft_futbol/src/features/draft_app_bar/presentation/draft_app_bar.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_team.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
@@ -6,6 +7,8 @@ import 'package:draft_futbol/src/features/live_data/application/api_service.dart
 import 'package:draft_futbol/src/features/live_data/data/draft_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/common_widgets/draft_app_bar.dart';
 import 'package:draft_futbol/src/common_widgets/loading.dart';
@@ -52,7 +55,7 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
   List<String> getPlayersFixtures(int teamId, List premierLeagueFixtures) {
     List<String> fixtures = [];
     Map<int, PlTeam>? premierLeagueTeams =
-        ref.read(premierLeagueDataRepositoryProvider).teams;
+        ref.read(premierLeagueControllerProvider).teams;
     for (var fixture in premierLeagueFixtures) {
       if (fixture['team_a'] == teamId || fixture['team_h'] == teamId) {
         PlTeam oppositionTeam;
@@ -81,9 +84,9 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
     }
 
     Map<int, List<DraftPlayer>> squads = {};
-    Map<int, DraftPlayer> players = ref.read(premierLeagueDataRepositoryProvider).players;
+    Map<int, DraftPlayer> players = ref.read(premierLeagueControllerProvider).players;
     var premierLeagueFixtures = await Api().getPremierLeagueFixtures(gameweek);
-     Map<int, DraftTeam>? teams = ref.read(draftRepositoryProvider).teams;
+     Map<int, DraftTeam>? teams = ref.read(draftDataControllerProvider).teams;
     for (var league in teams!.entries) {
       var leaguePlayers = players.values
           .where((DraftPlayer player) =>
@@ -154,7 +157,7 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
       List<DropdownMenuItem<String>> menuOptions = [];
       activeLeague = ref.watch(
           appSettingsRepositoryProvider.select((connection) => connection.activeLeagueId));
-      teams = ref.read(draftRepositoryProvider).teams;
+      teams = ref.read(draftDataControllerProvider).teams;
       Gameweek currentGameweek =
           ref.read(liveDataRepositoryProvider.select((value) => value.gameweek))!;
       int currentGameweekInt = currentGameweek.currentGameweek;
@@ -180,7 +183,7 @@ class _SquadsScreenState extends ConsumerState<SquadsScreen> {
 
 
     return Scaffold(
-        appBar: DraftAppBar(
+        appBar: DraftAppBarV1(
           leading: true,
           settings: false,
         ),

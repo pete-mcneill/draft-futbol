@@ -7,7 +7,7 @@ part of 'league_standings_controller.dart';
 // **************************************************************************
 
 String _$leagueStandingsScreenControllerHash() =>
-    r'49d08982071b91901b1b8661f7407003028259c3';
+    r'09703b0485de60380e90643a64c8ed49db645998';
 
 /// See also [LeagueStandingsScreenController].
 @ProviderFor(LeagueStandingsScreenController)

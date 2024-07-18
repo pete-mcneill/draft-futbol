@@ -1,6 +1,7 @@
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/line_painter.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/pitch_background.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
@@ -43,7 +44,7 @@ class _SquadViewState extends ConsumerState<SquadView> {
   Widget build(BuildContext context) {
     currentGameweek = ref.read(liveDataRepositoryProvider.select((value) => value.gameweek));
     activeLeague = ref.watch(appSettingsRepositoryProvider).activeLeagueId;
-    players = ref.read(premierLeagueDataRepositoryProvider.select((value) => value.players));
+    players = ref.read(premierLeagueControllerProvider.select((value) => value.players));
     double pitchHeight =
         (MediaQuery.of(context).size.height - AppBar().preferredSize.height);
     double subsLength = (pitchHeight - (pitchHeight / 10) * 7);

@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'bonus_points_controller.dart';
+part of 'gameweek_repository.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bonusPointsControllerHash() =>
-    r'6acf2bbbee5af29ceebd1fc176c23aaa37cfe6d3';
+String _$gameweekRepositoryHash() =>
+    r'65bc9bd86377e517c6d418317dcaa2cf7358dbd6';
 
-/// See also [BonusPointsController].
-@ProviderFor(BonusPointsController)
-final bonusPointsControllerProvider =
-    AutoDisposeAsyncNotifierProvider<BonusPointsController, void>.internal(
-  BonusPointsController.new,
-  name: r'bonusPointsControllerProvider',
+/// See also [gameweekRepository].
+@ProviderFor(gameweekRepository)
+final gameweekRepositoryProvider = Provider<GameweekRepository>.internal(
+  gameweekRepository,
+  name: r'gameweekRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$bonusPointsControllerHash,
+      : _$gameweekRepositoryHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$BonusPointsController = AutoDisposeAsyncNotifier<void>;
+typedef GameweekRepositoryRef = ProviderRef<GameweekRepository>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

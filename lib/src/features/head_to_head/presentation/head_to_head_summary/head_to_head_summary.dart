@@ -3,6 +3,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_team.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
 import 'package:draft_futbol/src/features/head_to_head/presentation/head_to_head_screen.dart';
@@ -16,6 +17,7 @@ class HeadToHeadSummary extends ConsumerWidget {
   HeadToHeadSummary({Key? key, required this.homeTeam, required this.awayTeam}) : super(key: key);
   final DraftTeam homeTeam;
   final DraftTeam awayTeam;
+  bool liveBonus = false;
 
   List<Expanded> getTeamAndScores(
       DraftTeam team, String homeOrAway) {
@@ -29,8 +31,7 @@ class HeadToHeadSummary extends ConsumerWidget {
               height: 50,
               child: Center(
                 child: AutoSizeText(
-                   team.points.toString(),
-                  // liveBonus ? team.bonusPoints.toString() : team.points.toString(),
+                  liveBonus ? team.bonusPoints.toString() : team.points.toString(),
                   style: const TextStyle(fontFamily: 'Inter-Bold'),
                   minFontSize: 20,
                   maxLines: 1,
@@ -190,7 +191,7 @@ class HeadToHeadSummary extends ConsumerWidget {
                       fontSize: 10, fontWeight: FontWeight.bold))
             ],
           ),
-          const Text("Bonus Removed TEST",
+          const Text("Bonus Points",
               style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -252,6 +253,7 @@ class HeadToHeadSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(headToHeadScreenControllerProvider);
     final headToHeadScreenController = ref.watch(headToHeadScreenControllerProvider.notifier);
+    liveBonus = headToHeadScreenController.liveBonusPointsEnabled();
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
       shadowColor: Colors.transparent,
@@ -279,7 +281,7 @@ class HeadToHeadSummary extends ConsumerWidget {
                   ...getTeamAndScores(homeTeam, "home"),
                   if (headToHeadScreenController.gameweekFinished())
                     getMatchSummary(
-                        homeTeam, awayTeam, headToHeadScreenController.premierLeagueDataRepository.players)
+                        homeTeam, awayTeam, ref.read(premierLeagueControllerProvider).players)
                   else
                     getRemainingPlayers(homeTeam, awayTeam),
                   ...getTeamAndScores(awayTeam, "away")

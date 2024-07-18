@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 class DraftBottomBar extends StatefulWidget {
   final Function(int index) updateIndex;
   final int currentIndex;
-  final String leagueType;
   const DraftBottomBar(
       {Key? key,
       required this.updateIndex,
-      required this.leagueType,
       required this.currentIndex})
       : super(key: key);
 

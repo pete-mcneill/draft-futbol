@@ -16,6 +16,7 @@ class TempButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    bool enabled = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
     return ElevatedButton(
                     onPressed: () {
                       // ref.read(bonusPointsControllerProvider.notifier).updateActiveLeague("687");
@@ -23,7 +24,7 @@ class TempButton extends ConsumerWidget {
                       // ref.read(appSettingsRepositoryProvider).updateActiveLeagueId(Random().nextInt(100));
                       ref.read(appSettingsRepositoryProvider.notifier).setActiveLeagueId(Random().nextInt(100));
                     },
-                    child: const Text("Toggle BPS"),
+                    child: Text("BPS:" + enabled.toString()),
                   );
   }
 }

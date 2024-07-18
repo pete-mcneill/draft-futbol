@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'bonus_points_controller.dart';
+part of 'premier_league_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bonusPointsControllerHash() =>
-    r'6acf2bbbee5af29ceebd1fc176c23aaa37cfe6d3';
+String _$premierLeagueControllerHash() =>
+    r'dd55c8a6408a640d9c7f806ac3a3084b5daf286f';
 
-/// See also [BonusPointsController].
-@ProviderFor(BonusPointsController)
-final bonusPointsControllerProvider =
-    AutoDisposeAsyncNotifierProvider<BonusPointsController, void>.internal(
-  BonusPointsController.new,
-  name: r'bonusPointsControllerProvider',
+/// See also [PremierLeagueController].
+@ProviderFor(PremierLeagueController)
+final premierLeagueControllerProvider =
+    NotifierProvider<PremierLeagueController, PremierLeagueData>.internal(
+  PremierLeagueController.new,
+  name: r'premierLeagueControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$bonusPointsControllerHash,
+      : _$premierLeagueControllerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$BonusPointsController = AutoDisposeAsyncNotifier<void>;
+typedef _$PremierLeagueController = Notifier<PremierLeagueData>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
