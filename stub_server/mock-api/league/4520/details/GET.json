@@ -21,7 +21,7 @@
     },
     "league_entries": [
         {
-            "entry_id": 13845,
+            "entry_id": 13828,
             "entry_name": "Spreadsheet",
             "id": 13845,
             "joined_time": "2023-07-06T11:09:46.278505Z",
@@ -31,7 +31,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 19589,
+            "entry_id": 19565,
             "entry_name": "Peds",
             "id": 19589,
             "joined_time": "2023-07-06T19:34:51.649415Z",
@@ -41,7 +41,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 196128,
+            "entry_id": 195314,
             "entry_name": "The Wild Bunch",
             "id": 196128,
             "joined_time": "2023-08-01T18:00:17.010866Z",
@@ -51,7 +51,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 196152,
+            "entry_id": 195338,
             "entry_name": "Average",
             "id": 196152,
             "joined_time": "2023-08-01T18:02:20.975290Z",
@@ -61,7 +61,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 239194,
+            "entry_id": 238074,
             "entry_name": "Slade Runner",
             "id": 239194,
             "joined_time": "2023-08-04T06:11:26.126555Z",
@@ -71,7 +71,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 239200,
+            "entry_id": 238080,
             "entry_name": "Tommy and the Jets",
             "id": 239200,
             "joined_time": "2023-08-04T06:12:33.182713Z",
@@ -81,7 +81,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 244647,
+            "entry_id": 243504,
             "entry_name": "Daddy chill",
             "id": 244647,
             "joined_time": "2023-08-04T12:27:41.826307Z",
@@ -91,7 +91,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 244687,
+            "entry_id": 243544,
             "entry_name": "Teemu Lukki",
             "id": 244687,
             "joined_time": "2023-08-04T12:30:26.458357Z",
@@ -101,7 +101,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 245151,
+            "entry_id": 244006,
             "entry_name": "Dušan Bradić",
             "id": 245151,
             "joined_time": "2023-08-04T12:55:46.571466Z",
@@ -111,7 +111,7 @@
             "waiver_pick": null
         },
         {
-            "entry_id": 245171,
+            "entry_id": 244026,
             "entry_name": "🐐",
             "id": 245171,
             "joined_time": "2023-08-04T12:57:11.392191Z",
