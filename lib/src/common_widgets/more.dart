@@ -110,7 +110,7 @@ class _MoreState extends ConsumerState<More> {
                     child: Row(
                       children: [
                         Expanded(
-                            flex: 10, child: Text("Waivers & Free Agents")),
+                            flex: 10, child: Text("Waivers, Free Agents & Trades")),
                         Expanded(
                             flex: 2, child: Icon(CupertinoIcons.arrow_right))
                       ],
@@ -120,30 +120,6 @@ class _MoreState extends ConsumerState<More> {
           ),
           const SizedBox(
             height: 5,
-          ),
-          SizedBox(
-            height: 50,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Trade()));
-              },
-              child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0.0)),
-                  margin: const EdgeInsets.all(0),
-                  elevation: 4,
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(flex: 10, child: Text("Trades")),
-                        Expanded(
-                            flex: 2, child: Icon(CupertinoIcons.arrow_right))
-                      ],
-                    ),
-                  )),
-            ),
           ),
           const SizedBox(
             height: 5,
