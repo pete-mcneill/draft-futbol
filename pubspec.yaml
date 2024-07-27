@@ -87,6 +87,7 @@ flutter:
     - assets/images/logo2.png
     - assets/images/play_store.png
     - assets/images/app_store.png
+    - assets/images/substitution.png
     # - images/a_dot_ham.jpeg
   fonts:
     - family: Inter

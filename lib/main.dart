@@ -24,13 +24,8 @@ void main() async {
     Directory? appDocumentDirectory = await getApplicationDocumentsDirectory();
     Hive.init(appDocumentDirectory.path);
     Hive.registerAdapter(SubAdapter());
-    await Hive.openBox('gwSubs');
+    await Hive.openBox('subs');
     await Hive.openBox('league');
-    await Hive.openBox('discovery');
-    if (Hive.box('discovery').get('subDiscoveryInfo') == null) {
-      Hive.box('discovery').put("subDiscoveryInfo", false);
-    }
-    await Hive.openBox('settings');
   }
     runApp(ProviderScope(
       overrides: [

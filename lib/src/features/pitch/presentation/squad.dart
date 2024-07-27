@@ -9,6 +9,7 @@ import 'package:draft_futbol/src/features/live_data/data/live_repository.dart';
 import 'package:draft_futbol/src/features/live_data/data/premier_league_repository.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/player.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/player_popup.dart';
+import 'package:draft_futbol/src/features/substitutes/application/subs_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +17,7 @@ import 'package:hive/hive.dart';
 
 import '../../live_data/domain/draft_domains/draft_team.dart';
 import '../../substitutes/domain/sub.dart';
+
 
 class Squad extends ConsumerStatefulWidget {
   DraftTeam team;
@@ -32,6 +34,7 @@ class _SquadState extends ConsumerState<Squad> {
     "MID": {"valid": true, "ruleMin": 2},
     "FWD": {"valid": true, "ruleMin": 1},
   };
+
   bool _isLoading = false;
   int? currentGameweek;
   bool subModeEnabled = false;
@@ -62,7 +65,9 @@ class _SquadState extends ConsumerState<Squad> {
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () {
-                    // ref.read(utilsProvider.notifier).setSubModeEnabled(false);
+                    cancelSubs();
+                    ref.read(subsControllerProvider.notifier).removeSub(widget.team);
+                    ref.read(subsControllerProvider.notifier).disableSubsMode(widget.team.id!);
                     Navigator.of(context).pop(true);
                   },
                   child: const Text("YES"),
@@ -74,6 +79,21 @@ class _SquadState extends ConsumerState<Squad> {
     } else {
       return true;
     }
+  }
+
+
+  void cancelSubs() {
+    for(Sub sub in subs){
+      widget.team.squad![sub.subInId] = sub.subInPosition;
+      widget.team.squad![sub.subOutId] = sub.subOutPosition;
+    }
+    subs = [];
+    final sorted =  widget.team.squad!.entries.toList()..sort((a, b)=> a.value.compareTo(b.value));
+    final sortedSquad = {for (var entry in sorted) entry.key: entry.value};
+    setState(() {
+      widget.team.squad = sortedSquad;
+    });
+    
   }
 
   void _showPlayerPopup(DraftPlayer player) async {
@@ -123,54 +143,14 @@ class _SquadState extends ConsumerState<Squad> {
         _isLoading = true;
       });
       for (Sub _sub in subs) {
-        Hive.box('gwSubs').add(_sub);
+        ref.read(subsControllerProvider.notifier).addSub(_sub, widget.team);
       }
-
-      // await ref.read(fplGwDataProvider.notifier).refreshData(ref);
-      // ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players!);
-      // ref.refresh(refreshFutureLiveDataProvider);
-      // await ref.read(refreshFutureLiveDataProvider.future);
-      // ref
-      // .read(draftTeamsProvider.notifier)
-      // .updateTeamSquad(widget.team.squad, widget.team.id!);
-      // ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players!);
-      // String gameweek = ref.read(gameweekProvider)!.currentGameweek;
-      // Map<String, Map<String, List<Fixture>>> allFixtures = ref.read(fixturesProvider).fixtures;
-      // List<Fixture> gwLeagueFixtures = allFixtures[widget.team.leagueId.toString()]![gameweek]!;
-      // for(Fixture fixture in gwLeagueFixtures){
-      //   if(fixture.homeTeamId == widget.team.id || fixture.awayTeamId == widget.team.id){
-      //     ref.read(h2hStandingsProvider.notifier).refreshStandingsAfterSubs(fixture, widget.team);
-      //   }
-      // }
+      ref.read(subsControllerProvider.notifier).enableSubsToSave();
       setState(() {
         widget.team.userSubsActive = true;
         _isLoading = false;
       });
     }
-  }
-
-  Future<void> _resetSubs() async {
-    setState(() {
-      _isLoading = true;
-    });
-    Map<dynamic, dynamic> subs = Hive.box("gwSubs").toMap();
-    List<int> subsToRemove = [];
-    subs.forEach((key, value) {
-      if (value.teamId == widget.team.id) {
-        subsToRemove.add(key);
-      }
-    });
-    for (int key in subsToRemove) {
-      Hive.box('gwSubs').delete(key);
-    }
-    // await ref.read(fplGwDataProvider.notifier).refreshData(ref);
-    // ref
-    //     .read(draftTeamsProvider.notifier)
-    //     .updateTeamSquad(widget.team.squad, widget.team.id!);
-    // ref.read(draftTeamsProvider.notifier).updateLiveTeamScores(players);
-    // ref.refresh(refreshFutureLiveDataProvider);
-    // await ref.read(refreshFutureLiveDataProvider.future);
-    Navigator.of(context).pop(true);
   }
 
   GestureDetector generatePlayer(DraftPlayer player) {
@@ -206,9 +186,12 @@ class _SquadState extends ConsumerState<Squad> {
               DraftPlayer incomingSub = details.data;
               int playerPosition = widget.team.squad![player.playerId!]!;
               int subPosition = widget.team.squad![incomingSub.playerId!]!;
+              widget.team.squad![player.playerId!] = subPosition;
+              widget.team.squad![incomingSub.playerId!] = playerPosition;
+              final sorted =  widget.team.squad!.entries.toList()..sort((a, b)=> a.value.compareTo(b.value));
+              final sortedSquad = {for (var entry in sorted) entry.key: entry.value};
               setState(() {
-                widget.team.squad![player.playerId!] = subPosition;
-                widget.team.squad![incomingSub.playerId!] = playerPosition;
+                widget.team.squad = sortedSquad;
                 subsToSave = true;
               });
               Sub _sub = Sub(
@@ -218,7 +201,8 @@ class _SquadState extends ConsumerState<Squad> {
                   playerPosition,
                   subPosition,
                   widget.team.id!);
-              // subs.add(_sub);
+              subs.add(_sub);
+              _saveSubs();
               // ref.read(fplGwDataProvider.notifier).subScorePreview(
               //     widget.team.squad, widget.team.leagueId, widget.team.id!);
             } else {
@@ -227,13 +211,13 @@ class _SquadState extends ConsumerState<Squad> {
             }
           },
           builder: (context, candidateItems, rejectedItems) {
-            bool valid = false;
-            if (candidateItems.isNotEmpty) {}
+            bool substitue = checkForSubstituteIcon(player);
             return Player(
               player: player,
               subModeEnabled: subModeEnabled,
               subValid: subAllowed,
               subHighlighted: subHighlighted,
+              subIcon: substitue,
             );
           },
           onAccept: (item) {
@@ -246,19 +230,93 @@ class _SquadState extends ConsumerState<Squad> {
         ));
   }
 
+  bool checkForSubstituteIcon(DraftPlayer player) {
+    bool substitue = false;
+    for (var element in subs) {
+      if (element.subInId == player.playerId) {
+        substitue = true;
+      }
+      if (element.subOutId == player.playerId) {
+        substitue = true;
+      } 
+    }
+    final storedSubs = Hive.box('subs').toMap();
+    int currentGameweek = ref.read(liveDataControllerProvider).gameweek!.currentGameweek;
+    final teamSubs = storedSubs;
+    if (teamSubs[currentGameweek] != null) {
+      if (teamSubs[currentGameweek]![widget.team.id] != null) {
+        for (var value in teamSubs[currentGameweek]![widget.team.id]) {
+          if (value.subInId == player.playerId) {
+            substitue = true;
+          }
+          if (value.subOutId == player.playerId) {
+            substitue = true;
+          }
+        }
+      }
+    }
+    return substitue;
+  }
+
+  Widget generateSub(DraftPlayer player, Map<String, List<DraftPlayer>> _squad) {
+    bool substitue = checkForSubstituteIcon(player);  
+    if(subModeEnabled){
+      return LongPressDraggable<DraftPlayer>(
+                            data: player,
+                            dragAnchorStrategy: pointerDragAnchorStrategy,
+                            onDragStarted: () =>
+                                {_checkValidSubsForPositions(player, _squad)},
+                            onDragEnd: (details) => setState(() {
+                                  validSubPositions["GK"]["valid"] = true;
+                                  validSubPositions["DEF"]["valid"] = true;
+                                  validSubPositions["MID"]["valid"] = true;
+                                  validSubPositions["FWD"]["valid"] = true;
+                                }),
+                            feedback: DefaultTextStyle(
+                              style: Theme.of(context).textTheme.bodyMedium!,
+                              child: Player(
+                                  player: player,
+                                  subModeEnabled: false,
+                                  subValid: true,
+                                  subIcon: substitue,),
+                            ),
+                            child: GestureDetector(
+                                onTap: () => _showPlayerPopup(player),
+                                child: Player(
+                                    player: player,
+                                    subModeEnabled: subModeEnabled,
+                                    subValid: true,
+                                    subIcon: substitue)));
+    } else {
+      return GestureDetector(
+                            onTap: () => _showPlayerPopup(player),
+                            child: Player(
+                                player: player,
+                                subModeEnabled: subModeEnabled,
+                                subValid: true,
+                                subIcon: substitue));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool gameweek = ref.read(liveDataControllerProvider).gameweek!.gameweekFinished;
+    if (ref.watch(subsControllerProvider).cancelSubs) {
+      cancelSubs(); 
+    }
+    _isLoading = ref.watch(subsControllerProvider).subsInProgress;
+    subModeEnabled = ref.watch(subsControllerProvider).subsModeActive;
     players = ref.read(premierLeagueControllerProvider).players;
     currentGameweek = ref.watch(liveDataControllerProvider).gameweek!.currentGameweek;
     plMatches = ref.watch(premierLeagueControllerProvider).matches;
-    Map<String, List<DraftPlayer>> _squad = {
+
+     Map<String, List<DraftPlayer>> _squad = {
       "GK": [],
       "DEF": [],
       "MID": [],
       "FWD": [],
       "SUBS": []
     };
+
     try {
       widget.team.squad?.forEach((key, value) {
         DraftPlayer? _player = players![key];
@@ -334,115 +392,8 @@ class _SquadState extends ConsumerState<Squad> {
                     ? CrossAxisAlignment.start
                     : CrossAxisAlignment.center,
                 children: [
-                  if (!gameweek)
-                    Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width / 5),
-                      child: Column(
-                        // mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          TextButton(
-                              style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  backgroundColor:
-                                      Theme.of(context).canvasColor),
-                              onPressed: () async => {
-                                    if (!subModeEnabled &&
-                                        !(Hive.box('discovery')
-                                            .get('subDiscoveryInfo')))
-                                      {
-                                        // await SubsInfoDiscoveryPopUp
-                                        //     .showAlertDialog(context),
-                                      }
-                                    else
-                                      {
-                                        if (subModeEnabled)
-                                          {await _saveSubs(), saveSubs = false},
-                                        setState(() {
-                                          subModeEnabled = !subModeEnabled;
-                                        }),
-                                        if (subModeEnabled)
-                                          {
-                                            // ref
-                                            //     .read(utilsProvider.notifier)
-                                            //     .setSubModeEnabled(true)
-                                          }
-                                        else
-                                          {
-                                            // ref
-                                            //     .read(utilsProvider.notifier)
-                                            //     .setSubModeEnabled(false)
-                                          }
-                                      }
-                                  },
-                              child: Text(
-                                subModeEnabled ? "Save Subs" : "Make Subs",
-                                textAlign: TextAlign.center,
-                              )),
-                          if (widget.team.userSubsActive!)
-                            TextButton(
-                                style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    backgroundColor:
-                                        Theme.of(context).canvasColor),
-                                onPressed: () async {
-                                  // Map<int, Sub> _subs = SubsService()
-                                  //     .getSubsForTeam(widget.team.id!);
-                                  // await ResetSubsPopUp.showAlertDialog(
-                                  //     context, _subs, players!, widget.team);
-                                  // _subs = SubsService()
-                                  //     .getSubsForTeam(widget.team.id!);
-                                  // if (_subs.isEmpty) {
-                                  //   setState(() {
-                                  //     widget.team.userSubsActive = false;
-                                  //   });
-                                  // }
-                                },
-                                child: const Text(
-                                  "Reset Subs",
-                                  textAlign: TextAlign.center,
-                                )),
-                        ],
-                      ),
-                    ),
                   for (DraftPlayer player in _squad['SUBS']!)
-                    subModeEnabled
-                        ? LongPressDraggable<DraftPlayer>(
-                            data: player,
-                            dragAnchorStrategy: pointerDragAnchorStrategy,
-                            onDragStarted: () =>
-                                {_checkValidSubsForPositions(player, _squad)},
-                            onDragEnd: (details) => setState(() {
-                                  validSubPositions["GK"]["valid"] = true;
-                                  validSubPositions["DEF"]["valid"] = true;
-                                  validSubPositions["MID"]["valid"] = true;
-                                  validSubPositions["FWD"]["valid"] = true;
-                                }),
-                            feedback: DefaultTextStyle(
-                              style: Theme.of(context).textTheme.bodyMedium!,
-                              child: Player(
-                                  player: player,
-                                  subModeEnabled: false,
-                                  subValid: true),
-                            ),
-                            child: GestureDetector(
-                                onTap: () => _showPlayerPopup(player),
-                                child: Player(
-                                    player: player,
-                                    subModeEnabled: subModeEnabled,
-                                    subValid: true)))
-                        : GestureDetector(
-                            onTap: () => _showPlayerPopup(player),
-                            child: Player(
-                                player: player,
-                                subModeEnabled: subModeEnabled,
-                                subValid: true))
+                    generateSub(player, _squad)
                 ],
               ),
             ],
@@ -450,14 +401,13 @@ class _SquadState extends ConsumerState<Squad> {
         ),
       ),
       if (_isLoading)
-        SizedBox(
+        ...[SizedBox(
           height: MediaQuery.of(context).size.height,
           child: const Opacity(
-            opacity: 0.8,
+            opacity: 1,
             child: ModalBarrier(dismissible: false, color: Colors.black),
           ),
         ),
-      if (_isLoading)
         Center(
           child: SizedBox(
               height: MediaQuery.of(context).size.height,
@@ -468,6 +418,7 @@ class _SquadState extends ConsumerState<Squad> {
                 ],
               )),
         ),
+        ]
     ]);
   }
 }

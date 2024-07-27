@@ -14,12 +14,14 @@ class PitchHeader extends ConsumerStatefulWidget
   DraftTeam homeTeam;
   DraftTeam awayTeam;
   bool subModeEnabled;
+  TabController tabController;
   PitchHeader(
       {Key? key,
       required this.homeTeam,
       required this.awayTeam,
       required this.fixture,
-      required this.subModeEnabled})
+      required this.subModeEnabled,
+      required this.tabController})
       : super(key: key);
 
   @override
@@ -44,6 +46,7 @@ class _PitchHeaderState extends ConsumerState<PitchHeader> {
               child: Container(color: Colors.red),
             )
           : TabBar(
+              controller: widget.tabController,
               indicatorColor:
                   Theme.of(context).buttonTheme.colorScheme!.secondary,
               tabs: [

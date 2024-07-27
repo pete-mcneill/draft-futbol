@@ -6,6 +6,7 @@ import 'package:draft_futbol/src/features/bonus_points/presentation/tempButton.d
 import 'package:draft_futbol/src/features/head_to_head/presentation/head_to_head_screen_controller.dart';
 import 'package:draft_futbol/src/features/head_to_head/presentation/head_to_head_summary/head_to_head_summary.dart';
 import 'package:draft_futbol/src/features/head_to_head/presentation/tab_bar_test.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/pitch_screen.dart';
 import 'package:draft_futbol/src/common_widgets/coffee.dart';
@@ -24,8 +25,6 @@ class HeadToHeadScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fixtures = ref.read(headToHeadScreenControllerProvider.notifier).getGameweekFixtures(leagueId);
-  
-    bool bps = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
     return ListView(
       shrinkWrap: true,
       children: <Widget>[
@@ -40,6 +39,7 @@ class HeadToHeadScreen extends ConsumerWidget {
           itemCount: fixtures.length,
           itemBuilder: (BuildContext context, int index) {
             Fixture _fixture = fixtures![index];
+            final test = ref.watch(draftDataControllerProvider);
             DraftTeam homeTeam = ref.watch(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.homeTeamId!);  
             DraftTeam awayTeam =  ref.watch(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.awayTeamId!);
             return Column(

@@ -42,6 +42,7 @@ class LiveService {
   DraftDataController get draftDataController => ref.read(draftDataControllerProvider.notifier);
 
 
+
   Future<void> getLiveData(var staticData, Gameweek gameweek, Map<int, DraftPlayer> players) async {
     // Null Means Season has not started
     // Therefore no live Data yet
@@ -82,7 +83,7 @@ class LiveService {
         // Common League fetches
         //  Get all Squads
         Map<int, DraftTeam> teams = await draftRepository.getLeagueSquads(
-            league, gameweek.currentGameweek, leagueId, {}, Map.from(draftDataController.getTeams));
+            league, gameweek.currentGameweek, leagueId, Map.from(draftDataController.getTeams));
         draftDataController.updateTeams(teams);
             
         // Calculate Remaining players
@@ -147,6 +148,7 @@ class LiveService {
         }
       }
     }
+    print("Finished Draft Data");
     //     state.teams![leagueId] = _teams;
     //     // Update Team Scores
     //   }

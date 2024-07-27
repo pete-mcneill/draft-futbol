@@ -126,7 +126,67 @@ class _MoreState extends ConsumerState<More> {
           ),
           const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Text("Issues or Queries",
+            child: Text("Manage Leagues",
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          ),
+                    SizedBox(
+            height: 50,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Transactions()));
+              },
+              child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0.0)),
+                  margin: const EdgeInsets.all(0),
+                  elevation: 4,
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                            flex: 10, child: Text("Add League")),
+                        Expanded(
+                            flex: 2, child: Icon(CupertinoIcons.arrow_right))
+                      ],
+                    ),
+                  )),
+            ),
+          ),
+          SizedBox(
+            height: 50,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Transactions()));
+              },
+              child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0.0)),
+                  margin: const EdgeInsets.all(0),
+                  elevation: 4,
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                            flex: 10, child: Text("Remove League")),
+                        Expanded(
+                            flex: 2, child: Icon(CupertinoIcons.arrow_right))
+                      ],
+                    ),
+                  )),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text("Support",
                 textAlign: TextAlign.left,
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ),

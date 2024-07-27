@@ -16,12 +16,14 @@ class Player extends ConsumerStatefulWidget {
   bool subModeEnabled;
   bool subValid;
   bool? subHighlighted;
+  bool subIcon = false;
   Player(
       {Key? key,
       required this.player,
       required this.subModeEnabled,
       required this.subValid,
-      this.subHighlighted = false})
+      this.subHighlighted = false,
+      this.subIcon = false})
       : super(key: key);
 
   @override
@@ -146,7 +148,8 @@ class _PlayerState extends ConsumerState<Player> {
     }
     String playerImage;
     // Store team metadata
-    PlTeam team = ref.read(premierLeagueControllerProvider).teams[widget.player.teamId]!;
+    PlTeam team =
+        ref.read(premierLeagueControllerProvider).teams[widget.player.teamId]!;
     if (widget.player.position == "GK") {
       playerImage =
           'assets/images/kits/' + team.code.toString() + '-keeper.png';
@@ -175,7 +178,7 @@ class _PlayerState extends ConsumerState<Player> {
           maxHeight: MediaQuery.of(context).size.height / 6,
         ),
         child: SizedBox(
-          height: MediaQuery.of(context).size.height / 6,
+          height: MediaQuery.of(context).size.height / 7,
           child: ListView(
             padding: const EdgeInsets.only(top: 0),
             physics: const NeverScrollableScrollPhysics(),
@@ -191,11 +194,28 @@ class _PlayerState extends ConsumerState<Player> {
                 ),
                 child: Column(
                   children: [
-                    Image.asset(
-                      playerImage,
-                      height: (MediaQuery.of(context).size.height -
-                              AppBar().preferredSize.height) /
-                          15,
+                    Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            playerImage,
+                            height: (MediaQuery.of(context).size.height -
+                                    AppBar().preferredSize.height) /
+                                15,
+                          ),
+                        ),
+                        if(widget.subIcon)
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: Image(
+                              image: AssetImage('assets/images/substitution.png'),
+                              height: (MediaQuery.of(context).size.height -
+                                    AppBar().preferredSize.height) /
+                                60,
+                            ),
+                          ),
+                      ],
                     ),
                     Container(
                       constraints:

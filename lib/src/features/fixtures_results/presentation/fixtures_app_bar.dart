@@ -92,16 +92,6 @@ class FixturesAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
     return AppBar(
       centerTitle: true,
-      leading: IconButton(
-            icon: const Icon(
-              Icons.settings,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()));
-            },
-          ),
       automaticallyImplyLeading: leading,
       elevation: 3,
       title: Image.asset("assets/images/1024_1024-icon.png",
