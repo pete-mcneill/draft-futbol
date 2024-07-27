@@ -12,6 +12,8 @@ import 'package:draft_futbol/src/features/premier_league_matches/domain/match.da
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
 import 'package:draft_futbol/src/features/live_data/application/api_service.dart';
 import 'package:draft_futbol/src/features/league_standings/domain/league_standings_domain.dart';
+import 'package:draft_futbol/src/features/substitutes/domain/sub.dart';
+import 'package:hive/hive.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'draft_repository.g.dart';
@@ -20,7 +22,8 @@ part 'draft_repository.g.dart';
 class DraftRepository {
   DraftRepository();
   final _api = Api();
-    /// Preload with the default list of products when the app starts
+
+  /// Preload with the default list of products when the app starts
   Map<int, DraftLeague> leagues = {};
 
   Future<DraftLeague> createDraftLeague(int leagueId) async {
@@ -31,27 +34,37 @@ class DraftRepository {
   }
 
   Future<Map<int, DraftTeam>> getLeagueSquads(DraftLeague league, int gameweek,
-      int leagueId, Map<dynamic, dynamic> subs, Map<int, DraftTeam> teams) async {
+      int leagueId, Map<int, DraftTeam> teams) async {
     final _api = Api();
+
     try {
       for (var team in league.teams) {
-        Map<String, dynamic> rawStanding = league.rawStandings.firstWhere((standings) => standings['league_entry'] == team['id']);
+        Map<String, dynamic> rawStanding = league.rawStandings
+            .firstWhere((standings) => standings['league_entry'] == team['id']);
         DraftTeam _team = DraftTeam.fromJson(team, leagueId, rawStanding);
         if (_team.teamName != "Average") {
           var squad = await _api.getSquad(_team.entryId!, gameweek);
           for (var player in squad['picks']) {
             _team.squad![player['element']] = player['position'];
           }
-          if (subs.isNotEmpty) {
-            subs.forEach((key, value) {
-              if (value.teamId == _team.id) {
-                _team.squad![value.subInId] = value.subOutPosition;
-                _team.squad![value.subOutId] = value.subInPosition;
+          // Check for User Subs
+          List<dynamic> subs = [];
+          final allSubs = Hive.box('subs').toMap();
+          if (allSubs[gameweek] != null) {
+            if (allSubs[gameweek]![_team.id] != null) {
+              subs = allSubs[gameweek]![_team.id]!;
+              for (Sub sub in subs) {
+                _team.squad![sub.subInId] = sub.subOutPosition;
+                _team.squad![sub.subOutId] = sub.subInPosition;
                 _team.userSubsActive = true;
               }
-            });
+              final sorted =  _team.squad!.entries.toList()..sort((a, b)=> a.value.compareTo(b.value));
+              final sortedSquad = {for (var entry in sorted) entry.key: entry.value};
+              _team.squad = sortedSquad;
+            }
           }
         }
+
         teams[_team.id!] = _team;
       }
       return teams;
@@ -61,7 +74,8 @@ class DraftRepository {
     }
   }
 
-  Map<int, Map<int, List<Fixture>>> getAllH2HFixtures(DraftLeague league, Map<int, Map<int, List<Fixture>>> head2HeadFixtures) {
+  Map<int, Map<int, List<Fixture>>> getAllH2HFixtures(
+      DraftLeague league, Map<int, Map<int, List<Fixture>>> head2HeadFixtures) {
     try {
       Map<int, List<Fixture>> leagueFixtures = {};
       for (var match in league.allH2hFixtures) {
@@ -80,18 +94,23 @@ class DraftRepository {
     }
   }
 
-  Map<int, DraftTeam> setFinalTeamScores(DraftLeague league, Gameweek gameweek,  Map<int, Map<int, List<Fixture>>> head2HeadFixtures, Map<int, DraftTeam> teams) {
+  Map<int, DraftTeam> setFinalTeamScores(
+      DraftLeague league,
+      Gameweek gameweek,
+      Map<int, Map<int, List<Fixture>>> head2HeadFixtures,
+      Map<int, DraftTeam> teams) {
     try {
-      if(league.scoring == "h"){
-      List<Fixture> fixtures = head2HeadFixtures[league.leagueId]![gameweek.currentGameweek]!;
-      for(Fixture fixture in fixtures){
-        DraftTeam homeTeam = teams[fixture.homeTeamId]!;
-        DraftTeam awayTeam = teams[fixture.awayTeamId]!;
-        homeTeam.points = fixture.homeStaticPoints;
-        awayTeam.points = fixture.awayStaticPoints;
-      }
-      } else if(league.scoring == "c"){
-        for(var standing in league.rawStandings){
+      if (league.scoring == "h") {
+        List<Fixture> fixtures =
+            head2HeadFixtures[league.leagueId]![gameweek.currentGameweek]!;
+        for (Fixture fixture in fixtures) {
+          DraftTeam homeTeam = teams[fixture.homeTeamId]!;
+          DraftTeam awayTeam = teams[fixture.awayTeamId]!;
+          homeTeam.points = fixture.homeStaticPoints;
+          awayTeam.points = fixture.awayStaticPoints;
+        }
+      } else if (league.scoring == "c") {
+        for (var standing in league.rawStandings) {
           DraftTeam team = teams[standing['league_entry']]!;
           team.points = standing['event_total'];
         }
@@ -103,7 +122,8 @@ class DraftRepository {
     }
   }
 
-  Map<int, DraftTeam> setLiveTeamScores(DraftLeague league, Map<int, DraftPlayer> players,  Map<int, DraftTeam> teams) {
+  Map<int, DraftTeam> setLiveTeamScores(DraftLeague league,
+      Map<int, DraftPlayer> players, Map<int, DraftTeam> teams) {
     try {
       for (var _team in league.teams) {
         int score = 0;
@@ -122,28 +142,28 @@ class DraftRepository {
               }
             }
           }
-    });
-     teams[_team['id']]!.points = score;
-     teams[_team['id']]!.bonusPoints = liveBonusScore;
+        });
+        teams[_team['id']]!.points = score;
+        teams[_team['id']]!.bonusPoints = liveBonusScore;
       }
-    
     } catch (error) {
       print(error);
       throw Error();
     }
-    if(league.averageLeague){
-        teams = setH2HAverageScore(league, teams);
+    if (league.averageLeague) {
+      teams = setH2HAverageScore(league, teams);
     }
     return teams;
   }
 
-  Map<int, DraftTeam> setH2HAverageScore(DraftLeague league, Map<int, DraftTeam> teams){
+  Map<int, DraftTeam> setH2HAverageScore(
+      DraftLeague league, Map<int, DraftTeam> teams) {
     int leagueScore = 0;
     int leagueBonusScore = 0;
     int averageId = 0;
-    for(var _team in league.teams){
+    for (var _team in league.teams) {
       DraftTeam team = teams[_team['id']]!;
-      if(team.teamName != "Average"){
+      if (team.teamName != "Average") {
         leagueScore += teams[team.id]!.points!;
         leagueBonusScore += teams[team.id]!.bonusPoints!;
       } else {
@@ -152,14 +172,19 @@ class DraftRepository {
     }
     if (averageId != 0) {
       int averageScore = leagueScore ~/ (league.teams.length - 1).round();
-      int averageBonusScore = leagueBonusScore ~/ (league.teams.length - 1).round();
+      int averageBonusScore =
+          leagueBonusScore ~/ (league.teams.length - 1).round();
       teams[averageId]!.points = averageScore;
       teams[averageId]!.bonusPoints = averageBonusScore;
     }
     return teams;
   }
 
-  Map<int, LeagueStandings> getHead2HeadStandings(var latestFplStandings, DraftLeague league, Map<int, LeagueStandings> leagueStandings, Map<int, DraftTeam> teams) {
+  Map<int, LeagueStandings> getHead2HeadStandings(
+      var latestFplStandings,
+      DraftLeague league,
+      Map<int, LeagueStandings> leagueStandings,
+      Map<int, DraftTeam> teams) {
     List<LeagueStanding> standings = [];
     try {
       for (var standing in latestFplStandings) {
@@ -167,24 +192,13 @@ class DraftRepository {
         LeagueStanding _standing = LeagueStanding.fromJson(standing, _team);
         standings.add(_standing);
       }
-      leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: standings, liveBpsStandings: value.liveBpsStandings, liveStandings: value.liveStandings), ifAbsent: () => LeagueStandings(staticStandings: standings));
-      return leagueStandings;
-    } catch (error) {
-      print(error);
-      throw Error();
-    }
-  }
- 
-   Map<int, LeagueStandings> getStaticStandings(
-      List staticStandings, DraftLeague league,  Map<int, LeagueStandings> leagueStandings, Map<int, DraftTeam> teams) {
-    List<LeagueStanding> standings = [];
-    try {
-      for (var standing in staticStandings) {
-        DraftTeam _team = teams[standing['league_entry']]!;
-        LeagueStanding _standing = LeagueStanding.fromJson(standing, _team);
-        standings.add(_standing);
-      }
-      leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: standings, liveBpsStandings: value.liveBpsStandings, liveStandings: value.liveStandings), ifAbsent: () => LeagueStandings(staticStandings: standings));
+      leagueStandings.update(
+          league.leagueId,
+          (value) => LeagueStandings(
+              staticStandings: standings,
+              liveBpsStandings: value.liveBpsStandings,
+              liveStandings: value.liveStandings),
+          ifAbsent: () => LeagueStandings(staticStandings: standings));
       return leagueStandings;
     } catch (error) {
       print(error);
@@ -192,8 +206,37 @@ class DraftRepository {
     }
   }
 
-    Map<int, DraftTeam> calculateRemainingPlayers(Map<int, DraftPlayer> players,
-      Map<int, PlMatch> plMatches, DraftLeague league, Map<int, DraftTeam> teams) {
+  Map<int, LeagueStandings> getStaticStandings(
+      List staticStandings,
+      DraftLeague league,
+      Map<int, LeagueStandings> leagueStandings,
+      Map<int, DraftTeam> teams) {
+    List<LeagueStanding> standings = [];
+    try {
+      for (var standing in staticStandings) {
+        DraftTeam _team = teams[standing['league_entry']]!;
+        LeagueStanding _standing = LeagueStanding.fromJson(standing, _team);
+        standings.add(_standing);
+      }
+      leagueStandings.update(
+          league.leagueId,
+          (value) => LeagueStandings(
+              staticStandings: standings,
+              liveBpsStandings: value.liveBpsStandings,
+              liveStandings: value.liveStandings),
+          ifAbsent: () => LeagueStandings(staticStandings: standings));
+      return leagueStandings;
+    } catch (error) {
+      print(error);
+      throw Error();
+    }
+  }
+
+  Map<int, DraftTeam> calculateRemainingPlayers(
+      Map<int, DraftPlayer> players,
+      Map<int, PlMatch> plMatches,
+      DraftLeague league,
+      Map<int, DraftTeam> teams) {
     for (var _team in league.teams) {
       DraftTeam team = teams[_team['id']]!;
       if (team.teamName != "Average") {
@@ -305,10 +348,22 @@ class DraftRepository {
         int rank = i + 1;
         liveStandings[i].rank = rank;
       }
-      if(bonus){
-        leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: value.staticStandings, liveBpsStandings: liveStandings, liveStandings: value.liveStandings), ifAbsent: () => LeagueStandings(liveBpsStandings: liveStandings));
+      if (bonus) {
+        leagueStandings.update(
+            league.leagueId,
+            (value) => LeagueStandings(
+                staticStandings: value.staticStandings,
+                liveBpsStandings: liveStandings,
+                liveStandings: value.liveStandings),
+            ifAbsent: () => LeagueStandings(liveBpsStandings: liveStandings));
       } else {
-        leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: value.staticStandings, liveBpsStandings: value.liveBpsStandings, liveStandings: liveStandings), ifAbsent: () => LeagueStandings(liveStandings: liveStandings));
+        leagueStandings.update(
+            league.leagueId,
+            (value) => LeagueStandings(
+                staticStandings: value.staticStandings,
+                liveBpsStandings: value.liveBpsStandings,
+                liveStandings: liveStandings),
+            ifAbsent: () => LeagueStandings(liveStandings: liveStandings));
       }
       return leagueStandings;
     } catch (error) {
@@ -350,8 +405,8 @@ class DraftRepository {
         //   }
         // }
         standing['total'] += bonus ? team.bonusPoints : team.points;
-        LeagueStanding _standing = LeagueStanding.fromJson(
-            standing, teams[standing['league_entry']]!);
+        LeagueStanding _standing =
+            LeagueStanding.fromJson(standing, teams[standing['league_entry']]!);
         liveStandings.add(_standing);
       }
       liveStandings.sort((LeagueStanding a, LeagueStanding b) {
@@ -362,10 +417,22 @@ class DraftRepository {
         int rank = i + 1;
         liveStandings[i].rank = rank;
       }
-      if(bonus){
-        leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: value.staticStandings, liveBpsStandings: liveStandings, liveStandings: value.liveStandings), ifAbsent: () => LeagueStandings(liveBpsStandings: liveStandings));
+      if (bonus) {
+        leagueStandings.update(
+            league.leagueId,
+            (value) => LeagueStandings(
+                staticStandings: value.staticStandings,
+                liveBpsStandings: liveStandings,
+                liveStandings: value.liveStandings),
+            ifAbsent: () => LeagueStandings(liveBpsStandings: liveStandings));
       } else {
-        leagueStandings.update(league.leagueId, (value) => LeagueStandings(staticStandings: value.staticStandings, liveBpsStandings: value.liveBpsStandings, liveStandings: liveStandings), ifAbsent: () => LeagueStandings(liveStandings: liveStandings));
+        leagueStandings.update(
+            league.leagueId,
+            (value) => LeagueStandings(
+                staticStandings: value.staticStandings,
+                liveBpsStandings: value.liveBpsStandings,
+                liveStandings: liveStandings),
+            ifAbsent: () => LeagueStandings(liveStandings: liveStandings));
       }
 
       return leagueStandings;

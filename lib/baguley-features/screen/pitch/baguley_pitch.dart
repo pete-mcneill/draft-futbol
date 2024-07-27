@@ -2,7 +2,6 @@ import 'package:draft_futbol/baguley-features/models/baguley_draft_team.dart';
 import 'package:draft_futbol/baguley-features/screen/pitch/squad.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/line_painter.dart';
 import 'package:draft_futbol/src/features/pitch/presentation/pitch_background.dart';
-import 'package:draft_futbol/src/common_widgets/draft_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import 'baguley_pitch_header.dart';
@@ -25,9 +24,9 @@ class _BaguleypitchState extends State<Baguleypitch> {
     double subsLength = (pitchHeight - (pitchHeight / 10) * 7);
     double lineLength = pitchHeight - subsLength;
     return Scaffold(
-      appBar: DraftAppBar(
-        settings: false,
-      ),
+      // appBar: DraftAppBar(
+      //   settings: false,
+      // ),
       body: DefaultTabController(
         animationDuration: Duration.zero,
         length: 2,
