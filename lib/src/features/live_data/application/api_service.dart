@@ -7,8 +7,8 @@ class Api {
   String baseUrl = '';
 
   Api() {
-    // baseUrl = 'https://draft.premierleague.com';
-    baseUrl = 'http://localhost:9000';
+    baseUrl = 'https://draft.premierleague.com';
+    // baseUrl = 'http://localhost:9000';
   }
 
   Future<Map<String, dynamic>> checkLeagueExists(String leagueId) async {
@@ -227,11 +227,10 @@ class Api {
   Future<List?> getPremierLeagueFixtures(gameweek) async {
     try {
       if (kIsWeb) {
-        return await proxyViaFirebase(
-            "/api/event/$gameweek/fixtures");
+        return await proxyViaFirebase("/api/event/$gameweek/fixtures");
       } else {
-        final response = await http.get((Uri.parse(
-            Commons.baseUrl + "/api/event/$gameweek/fixtures")));
+        final response = await http.get(
+            (Uri.parse(Commons.baseUrl + "/api/event/$gameweek/fixtures")));
         if (response.statusCode == 200) {
           return Commons.returnResponse(response);
         } else {

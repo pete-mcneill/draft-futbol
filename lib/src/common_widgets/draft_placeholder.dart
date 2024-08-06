@@ -14,12 +14,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/live_data/domain/draft_domains/draft_player.dart';
 
-
 class DraftPlaceholder extends ConsumerStatefulWidget {
   DraftLeague leagueData;
-  DraftPlaceholder({Key? key, required DraftLeague this.leagueData}) : super(key: key);
+  DraftPlaceholder({Key? key, required DraftLeague this.leagueData})
+      : super(key: key);
 
-   @override
+  @override
   _DraftPlaceholderState createState() => _DraftPlaceholderState();
 }
 
@@ -29,11 +29,10 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
     super.initState();
   }
 
-    late final Future<Map<int, List<DraftPlayer>>> futureSquads =
-    getSquads();
-    Map<int, DraftPlayer> players = {};
+  late final Future<Map<int, List<DraftPlayer>>> futureSquads = getSquads();
+  Map<int, DraftPlayer> players = {};
 
-    Future<Map<int, List<DraftPlayer>>> getSquads() async {
+  Future<Map<int, List<DraftPlayer>>> getSquads() async {
     Map<int, List<DraftPlayer>> squads = {};
     Map<int, DraftTeam>? teams = ref.read(draftDataControllerProvider).teams;
     for (var league in teams.entries) {
@@ -55,57 +54,38 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
 
   @override
   Widget build(BuildContext context) {
-    Map<int, DraftPlayer> players = ref.read(premierLeagueControllerProvider).players;
+    Map<int, DraftPlayer> players =
+        ref.read(premierLeagueControllerProvider).players;
     String leagueStatus = widget.leagueData.draftStatus;
-    if (leagueStatus == "pre") {
-      return SingleChildScrollView(
-        child: Column(children: [
-          if(kIsWeb)...appStoreLinks(),
-          buyaCoffeebutton(context),
-          const Center(
-            child: AutoSizeText(
-              'Draft has not been completed',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              maxLines: 1,
-            ),
+    return SingleChildScrollView(
+      child: Column(children: [
+        if (kIsWeb) ...appStoreLinks(),
+        // buyaCoffeebutton(context),
+        const Center(
+          child: AutoSizeText(
+            'Season has not started yet',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            maxLines: 1,
           ),
-          const SizedBox(
-            height: 10,
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        const Center(
+          child: AutoSizeText(
+            'Once the season starts on the 16th August, \n live scores will appear and you will be able to add additonal leagues and cups',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            maxLines: 5,
           ),
-          Container(
-            child: generatePlaceholder(context, ref, players, false),
-          )
-        ]),
-      );
-    } else {
-      return SingleChildScrollView(
-        child: Column(children: [
-          if(kIsWeb)...appStoreLinks(),
-          buyaCoffeebutton(context),
-          Center(
-            child: AutoSizeText(
-              widget.leagueData.draftStatus == 'pre'
-                  ? 'Draft has not been completed'
-                  : 'Season has not started yet',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              maxLines: 1,
-            ),
-          ),
-          const Center(
-            child: AutoSizeText(
-              'Tap to view squads below',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              maxLines: 1,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          generatePlaceholder(context, ref, players, true)
-        ]),
-      );
-    }
+        ),
+        Container(
+          child: generatePlaceholder(
+              context, ref, players, false, widget.leagueData),
+        )
+      ]),
+    );
   }
+
   void _scrollToSelectedContent({GlobalKey? expansionTileKey}) {
     final keyContext = expansionTileKey!.currentContext;
     if (keyContext != null) {
@@ -142,10 +122,8 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
     );
   }
 
-  
-
   Widget generatePlaceholder(BuildContext context, WidgetRef ref,
-      Map<int, DraftPlayer> players, bool draftComplete) {
+      Map<int, DraftPlayer> players, bool draftComplete, DraftLeague league) {
     return Column(
       children: [
         const Center(
@@ -158,53 +136,60 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
         const SizedBox(
           height: 10,
         ),
-        FutureBuilder<Map<int, List<DraftPlayer>>>(
-                future: futureSquads,
-                builder: (BuildContext context,
-                    AsyncSnapshot<Map<int, List<DraftPlayer>>> snapshot) {
-                  if (snapshot.hasError) {
-                    return const Text("Error");
-                  }
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: league.teams.length,
+          itemBuilder: (context, index) {
+            Map<String, dynamic> team = league.teams[index];
 
-                  if (snapshot.hasData) {
-                    try {
-                      return SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              for (dynamic team in widget.leagueData.teams)
-                                Column(
-                                  children: [
-                                    expansionItem(
-                                        index: team['entry_id'],
-                                        teamName: team['name'],
-                                        players: snapshot.data![team['entry_id']]!),
-                                    const SizedBox(
-                                      height: 5,
-                                    )
-                                  ],
-                                ),
-                            ],
-                          ),
-                        
-                      );
-                    } catch (error) {
-                      return const Text("Error");
-                    }
-                  } else {
-                    return const Text("loading");
-                  }
-                },
-              )
+            return ListTile(
+              title: Center(child: Text(team['name'])),
+            );
+          },
+        ),
+        // FutureBuilder<Map<int, List<DraftPlayer>>>(
+        //   future: futureSquads,
+        //   builder: (BuildContext context,
+        //       AsyncSnapshot<Map<int, List<DraftPlayer>>> snapshot) {
+        //     if (snapshot.hasError) {
+        //       return const Text("Error");
+        //     }
+
+        //     if (snapshot.hasData) {
+        //       try {
+        //         return SingleChildScrollView(
+        //           physics: const AlwaysScrollableScrollPhysics(),
+        //           child: Column(
+        //             crossAxisAlignment: CrossAxisAlignment.stretch,
+        //             mainAxisAlignment: MainAxisAlignment.center,
+        //             children: [
+        //               const SizedBox(
+        //                 height: 10,
+        //               ),
+        //               for (dynamic team in widget.leagueData.teams)
+        //                 Column(
+        //                   children: [
+        //                     expansionItem(
+        //                         index: team['entry_id'],
+        //                         teamName: team['name'],
+        //                         players: snapshot.data![team['entry_id']]!),
+        //                     const SizedBox(
+        //                       height: 5,
+        //                     )
+        //                   ],
+        //                 ),
+        //             ],
+        //           ),
+        //         );
+        //       } catch (error) {
+        //         return const Text("Error");
+        //       }
+        //     } else {
+        //       return const Text("loading");
+        //     }
+        //   },
+        // )
       ],
     );
   }
 }
-
-
-

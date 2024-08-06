@@ -15,21 +15,17 @@ import '../../live_data/domain/draft_domains/draft_team.dart';
 import 'pitch_app_bar.dart';
 
 class Pitch extends ConsumerStatefulWidget {
-  Fixture fixture;
   DraftTeam homeTeam;
   DraftTeam awayTeam;
-  Pitch(
-      {Key? key,
-      required this.homeTeam,
-      required this.awayTeam,
-      required this.fixture})
+  Pitch({Key? key, required this.homeTeam, required this.awayTeam})
       : super(key: key);
 
   @override
   _PitchState createState() => _PitchState();
 }
 
-class _PitchState extends ConsumerState<Pitch> with SingleTickerProviderStateMixin {
+class _PitchState extends ConsumerState<Pitch>
+    with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
   DraftTeam? homeTeam;
@@ -39,7 +35,7 @@ class _PitchState extends ConsumerState<Pitch> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, length: 2);
-    if(widget.homeTeam.teamName == "Average"){
+    if (widget.homeTeam.teamName == "Average") {
       _tabController!.index = 1;
     }
   }
@@ -50,7 +46,6 @@ class _PitchState extends ConsumerState<Pitch> with SingleTickerProviderStateMix
     super.dispose();
   }
 
-  
   @override
   Widget build(BuildContext context) {
     homeTeam = ref.read(draftDataControllerProvider).teams[widget.homeTeam.id]!;
@@ -67,11 +62,11 @@ class _PitchState extends ConsumerState<Pitch> with SingleTickerProviderStateMix
       appBar: const PitchAppBar(),
       body: Scaffold(
           appBar: PitchHeader(
-              homeTeam: homeTeam!,
-              awayTeam: awayTeam!,
-              fixture: widget.fixture,
-              subModeEnabled: subModeEnabled,
-              tabController: _tabController!,),
+            homeTeam: homeTeam!,
+            awayTeam: awayTeam!,
+            subModeEnabled: subModeEnabled,
+            tabController: _tabController!,
+          ),
           body: kIsWeb
               ? Center(
                   child: ClipRect(
@@ -81,8 +76,7 @@ class _PitchState extends ConsumerState<Pitch> with SingleTickerProviderStateMix
                             pitchWidth, lineLength)),
                   ),
                 )
-              : pitchView(
-                  subModeEnabled, pitchHeight, pitchWidth, lineLength)),
+              : pitchView(subModeEnabled, pitchHeight, pitchWidth, lineLength)),
     );
   }
 
@@ -92,64 +86,65 @@ class _PitchState extends ConsumerState<Pitch> with SingleTickerProviderStateMix
       controller: _tabController,
       physics: subModeEnabled ? const NeverScrollableScrollPhysics() : null,
       children: [
-          SingleChildScrollView(
-            child: 
-            Column(
+        SingleChildScrollView(
+          child: Column(children: [
+            if (!ref
+                .watch(liveDataControllerProvider)
+                .gameweek!
+                .gameweekFinished)
+              SubBar(team: homeTeam!),
+            Stack(
               children: [
-                if(!ref.watch(liveDataControllerProvider).gameweek!.gameweekFinished)
-                SubBar(team: homeTeam!),
-                Stack(
-                children: [
-                  PitchBackground(
-                    pitchHeight: pitchHeight,
-                    matchView: true,
-                  ),
+                PitchBackground(
+                  pitchHeight: pitchHeight,
+                  matchView: true,
+                ),
+                SizedBox(
+                    height: pitchHeight,
+                    width: pitchWidth,
+                    // color: Colors.black,
+                    child: CustomPaint(
+                      painter: LinePainter(pitchLength: lineLength),
+                    )),
+                if (!ref.watch(subsControllerProvider).subsInProgress)
+                  Squad(team: homeTeam!)
+                else ...[
                   SizedBox(
-                      height: pitchHeight,
-                      width: pitchWidth,
-                      // color: Colors.black,
-                      child: CustomPaint(
-                        painter: LinePainter(pitchLength: lineLength),
-                      )),
-                  if(!ref.watch(subsControllerProvider).subsInProgress)
-                    Squad(team: homeTeam!)
-                  else
-                   ...[SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: const Opacity(
-                        opacity: 1,
-                        child: ModalBarrier(dismissible: false, color: Colors.black),
-                      ),
+                    height: MediaQuery.of(context).size.height,
+                    child: const Opacity(
+                      opacity: 1,
+                      child:
+                          ModalBarrier(dismissible: false, color: Colors.black),
                     ),
-                    Center(
-                      child: SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: Center(
-                            child: const Column(
-                              children: [
-                                Text("Saving Changes"),
-                                CircularProgressIndicator(),
-                              ],
-                            ),
-                          )),
-                    ),
-                    ],
+                  ),
+                  Center(
+                    child: SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: Center(
+                          child: const Column(
+                            children: [
+                              Text("Saving Changes"),
+                              CircularProgressIndicator(),
+                            ],
+                          ),
+                        )),
+                  ),
                 ],
-              ),
-              ]
+              ],
             ),
-          ),
+          ]),
+        ),
         SingleChildScrollView(
           child: Column(
             children: [
-              if(!ref.watch(liveDataControllerProvider).gameweek!.gameweekFinished)
+              if (!ref
+                  .watch(liveDataControllerProvider)
+                  .gameweek!
+                  .gameweekFinished)
                 SubBar(team: awayTeam!),
               Stack(
                 children: [
-                  PitchBackground(
-                    pitchHeight: pitchHeight,
-                    matchView: true
-                  ),
+                  PitchBackground(pitchHeight: pitchHeight, matchView: true),
                   SizedBox(
                       height: pitchHeight,
                       width: pitchWidth,

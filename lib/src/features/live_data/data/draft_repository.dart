@@ -58,8 +58,11 @@ class DraftRepository {
                 _team.squad![sub.subOutId] = sub.subInPosition;
                 _team.userSubsActive = true;
               }
-              final sorted =  _team.squad!.entries.toList()..sort((a, b)=> a.value.compareTo(b.value));
-              final sortedSquad = {for (var entry in sorted) entry.key: entry.value};
+              final sorted = _team.squad!.entries.toList()
+                ..sort((a, b) => a.value.compareTo(b.value));
+              final sortedSquad = {
+                for (var entry in sorted) entry.key: entry.value
+              };
               _team.squad = sortedSquad;
             }
           }
@@ -123,14 +126,14 @@ class DraftRepository {
   }
 
   Map<int, DraftTeam> setLiveTeamScores(DraftLeague league,
-      Map<int, DraftPlayer> players, Map<int, DraftTeam> teams) {
+      Map<int, DraftPlayer> players, Map<int, DraftTeam> teams, int gameweek) {
     try {
       for (var _team in league.teams) {
         int score = 0;
         int liveBonusScore = 0;
         teams[_team['id']]!.squad!.forEach((int playerId, int position) {
           DraftPlayer _player = players[playerId]!;
-          for (PlMatchStats match in _player.matches!) {
+          for (PlMatchStats match in _player.matches![gameweek]!) {
             if (position < 12) {
               for (Stat stat in match.stats!) {
                 if (stat.statName != "Live Bonus Points") {
@@ -236,7 +239,8 @@ class DraftRepository {
       Map<int, DraftPlayer> players,
       Map<int, PlMatch> plMatches,
       DraftLeague league,
-      Map<int, DraftTeam> teams) {
+      Map<int, DraftTeam> teams,
+      int gameweek) {
     for (var _team in league.teams) {
       DraftTeam team = teams[_team['id']]!;
       if (team.teamName != "Average") {
@@ -247,7 +251,7 @@ class DraftRepository {
         team.livePlayers = 0;
         team.squad!.forEach((int playerId, int position) {
           DraftPlayer _player = players[playerId]!;
-          for (PlMatchStats match in _player.matches!) {
+          for (PlMatchStats match in _player.matches![gameweek]!) {
             PlMatch plMatch = plMatches[match.matchId]!;
             if (position < 12) {
               if (plMatch.started! && !plMatch.finishedProvisional!) {

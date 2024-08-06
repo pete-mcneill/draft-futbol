@@ -2,7 +2,6 @@ import 'package:draft_futbol/src/utils/commons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-
 class Api {
   String baseUrl = '';
 
@@ -226,11 +225,10 @@ class Api {
   Future<List?> getPremierLeagueFixtures(gameweek) async {
     try {
       if (kIsWeb) {
-        return await proxyViaFirebase(
-            "/api/event/$gameweek/fixtures");
+        return await proxyViaFirebase("/api/event/$gameweek/fixtures");
       } else {
-        final response = await http.get((Uri.parse(
-            Commons.baseUrl + "/api/event/$gameweek/fixtures")));
+        final response = await http.get(
+            (Uri.parse(Commons.baseUrl + "/api/event/$gameweek/fixtures")));
         if (response.statusCode == 200) {
           return Commons.returnResponse(response);
         } else {

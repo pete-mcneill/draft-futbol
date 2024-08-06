@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:draft_futbol/src/features/cup/domain/cup.dart';
+import 'package:draft_futbol/src/features/cup/domain/cup_fixture.dart';
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/initialise_home_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -23,18 +25,22 @@ void main() async {
   } else {
     Directory? appDocumentDirectory = await getApplicationDocumentsDirectory();
     Hive.init(appDocumentDirectory.path);
+
     Hive.registerAdapter(SubAdapter());
+    Hive.registerAdapter(CupAdapter());
+    Hive.registerAdapter(CupFixtureAdapter());
     await Hive.openBox('subs');
     await Hive.openBox('league');
+    await Hive.openBox('cups');
   }
-    runApp(ProviderScope(
+  runApp(ProviderScope(
       overrides: [
         dataStoreProvider.overrideWithValue(dataStore),
       ],
-        child: const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      // home: Loading(),
-      home: InitialiseHomeScreen(),
-      // ProviderTest(),
-    )));
+      child: const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        // home: Loading(),
+        home: InitialiseHomeScreen(),
+        // ProviderTest(),
+      )));
 }

@@ -80,46 +80,6 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
               ),
             ),
             PageViewModel(
-              title: "Note from the developer!",
-              decoration: const PageDecoration(
-                  titleTextStyle: TextStyle(fontWeight: FontWeight.bold)),
-              bodyWidget: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium!.color,
-                      ),
-                      children: const <TextSpan>[
-                        TextSpan(
-                          text:
-                              "\n I develop this app in my spare time, primarily for my own draft league but wanted to share it with the community",
-                        ),
-                        TextSpan(
-                          text:
-                              "\n \n If you like or get good use of the app, any donations to keep it on the app store would be appreciated!",
-                        ),
-                        TextSpan(
-                          text: '\n \n Thanks for downloading!',
-                        ),
-                      ],
-                    ),
-                  ),
-                  buyaCoffeebutton(context),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const Image(
-                    image: AssetImage('assets/images/1024_1024-icon.png'),
-                    height: 100,
-                    width: 100,
-                  ),
-                ],
-              ),
-            ),
-            PageViewModel(
               title: "League Setup",
               decoration: PageDecoration(
                   pageColor: Theme.of(context).colorScheme.background,
@@ -267,13 +227,17 @@ class _OnBoardingScreenState extends ConsumerState<OnBoardingScreen> {
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        _api.getLeagueDetails(textFieldController.text).then((value){
-                          LocalLeagueMetadata metadata = LocalLeagueMetadata.create(value['league']);
+                        _api
+                            .getLeagueDetails(textFieldController.text)
+                            .then((value) {
+                          LocalLeagueMetadata metadata =
+                              LocalLeagueMetadata.create(value['league']);
                           localLeaguesMetadata.add(metadata);
-                          print("Local Leagues Metadata: $localLeaguesMetadata");
+                          print(
+                              "Local Leagues Metadata: $localLeaguesMetadata");
                           dataStore.saveLeague(metadata);
                         });
-                        
+
                         _api
                             .checkLeagueExists(textFieldController.text)
                             .then((value) => {

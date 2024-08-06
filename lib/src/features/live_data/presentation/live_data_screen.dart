@@ -1,4 +1,7 @@
 import 'package:draft_futbol/src/features/bonus_points/presentation/bonus_points_controller.dart';
+import 'package:draft_futbol/src/features/cup/domain/cup.dart';
+import 'package:draft_futbol/src/features/cup/presentation/cup_data_controller.dart';
+import 'package:draft_futbol/src/features/cup/presentation/cup_widget.dart';
 import 'package:draft_futbol/src/features/fixtures_results/domain/fixture.dart';
 import 'package:draft_futbol/src/features/head_to_head/presentation/non_head_to_head_placeholder.dart';
 import 'package:draft_futbol/src/features/live_data/data/gameweek_repository.dart/gameweek_repository.dart';
@@ -24,6 +27,7 @@ import 'package:draft_futbol/src/common_widgets/loading.dart';
 import 'package:draft_futbol/src/utils/async_value_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 
 import '../domain/draft_domains/draft_leagues.dart';
 import '../domain/draft_domains/draft_team.dart';
@@ -44,6 +48,7 @@ class _HomePageState extends ConsumerState<HomePage>
     with TickerProviderStateMixin {
   late final Future _draft_data;
   late TabController _tabController;
+  late TabController _cupTabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<int, DraftLeague> leagues = {};
   Gameweek? gameweek;
@@ -54,6 +59,7 @@ class _HomePageState extends ConsumerState<HomePage>
   bool showBottomNav = true;
   int? activeLeague;
   bool loading = false;
+  bool cupGameweek = false;
 
   // ignore: prefer_final_fields
   List<Widget> getLeagueWidgets() {
@@ -66,11 +72,31 @@ class _HomePageState extends ConsumerState<HomePage>
         controller: _tabController,
         children: getLeagueStandingsWidgets(),
       ),
-      RefreshIndicator(child: PlMatchesScreen(),onRefresh: () async {
-              await refreshData();
-            },) ,
+      if (cupGameweek) getCups(),
+      RefreshIndicator(
+        child: PlMatchesScreen(),
+        onRefresh: () async {
+          await refreshData();
+        },
+      ),
       const More()
     ];
+  }
+
+  Widget getCups() {
+    return TabBarView(controller: _cupTabController, children: [
+      for (Cup cup in ref
+          .read(cupDataControllerProvider.notifier)
+          .getCupsForCurrentGameweek())
+        RefreshIndicator(
+          child: CupWidget(
+            cup: cup,
+          ),
+          onRefresh: () async {
+            await refreshData();
+          },
+        )
+    ]);
   }
 
   List<Widget> getH2hWidgets() {
@@ -130,9 +156,9 @@ class _HomePageState extends ConsumerState<HomePage>
     //   premierLeagueControllerProvider.state,
     //   (_, state) => state.showAlertDialogOnError(context),
     // );
-    // Gameweek gameweekTEst = ref.watch(gameweekInformationProvider);
     final liveDataRepository = ref.watch(liveDataControllerProvider);
     final draftRepository = ref.watch(draftDataControllerProvider);
+    final cupController = ref.read(cupDataControllerProvider.notifier);
     leagues = draftRepository.leagues;
     return FutureBuilder<void>(
         future: _draft_data,
@@ -140,38 +166,47 @@ class _HomePageState extends ConsumerState<HomePage>
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            if (!loading) {
-              activeLeague =
-                  ref.read(appSettingsRepositoryProvider).activeLeagueId;
-              DraftLeague leagueData = draftRepository.leagues[activeLeague]!;
-              // if (leagueData.scoring == 'c' && navBarIndex > 2) {
-              //   updateIndex(2);
-              // }
-              gameweek = liveDataRepository.gameweek;
-              String draftStatus = leagueData.draftStatus;
-              if (draftStatus == "pre" || gameweek!.currentGameweek == 0) {
-                showBottomNav = false;
+            activeLeague =
+                ref.read(appSettingsRepositoryProvider).activeLeagueId;
+            DraftLeague leagueData = draftRepository.leagues[activeLeague]!;
+            gameweek = liveDataRepository.gameweek;
+            String draftStatus = leagueData.draftStatus;
+            if (draftStatus == "pre" || gameweek!.currentGameweek == 0) {
+              showBottomNav = false;
+              _cupTabController = getCupTabController(1);
+            } else {
+              showBottomNav = true;
+              cupGameweek = cupController.isCupGameweek();
+              if (cupGameweek) {
+                int cups = ref
+                    .read(cupDataControllerProvider.notifier)
+                    .getCupsForCurrentGameweek()
+                    .length;
+                _cupTabController = getCupTabController(cups);
               } else {
-                showBottomNav = true;
-                if (leagueData.scoring == "h") {
-                  fixtures = draftRepository.head2HeadFixtures[activeLeague]![
-                      gameweek!.currentGameweek];
-                }
+                _cupTabController = getCupTabController(1);
+              }
+
+              if (leagueData.scoring == "h") {
+                fixtures = draftRepository.head2HeadFixtures[activeLeague]![
+                    gameweek!.currentGameweek];
               }
             }
-            // teams = draftRepository.teams![activeLeague];
             return Scaffold(
                 key: _scaffoldKey,
                 appBar: DraftAppBarV1(
                   settings: true,
                   tabController: _tabController,
                   bottomIndex: navBarIndex,
+                  cupGameweek: cupGameweek,
+                  cupTabController: _cupTabController,
                 ),
                 // drawer: const DraftDrawer(),
                 bottomNavigationBar: showBottomNav
                     ? DraftBottomBar(
                         updateIndex: updateIndex,
                         currentIndex: navBarIndex,
+                        cupGameweek: cupGameweek,
                       )
                     : const SizedBox(),
                 body: SafeArea(
@@ -181,13 +216,12 @@ class _HomePageState extends ConsumerState<HomePage>
                   child: Container(
                     child: loading
                         ? const Loading()
-                        :
-                        // draftStatus == "pre" || gameweek!.currentGameweek == 0
-                        //     ? DraftPlaceholder(
-                        //         leagueData: leagueData,
-                        //       )
-                        //     :
-                        getLeagueWidgets()[navBarIndex],
+                        : leagueData.draftStatus == "pre" ||
+                                gameweek!.currentGameweek == 0
+                            ? DraftPlaceholder(
+                                leagueData: leagueData,
+                              )
+                            : getLeagueWidgets()[navBarIndex],
 
                     // RefreshIndicator(
                     //     color: Theme.of(context)
@@ -216,7 +250,11 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   TabController getTabController(int tabLength) {
-    return TabController(length: navBarIndex != 2 ? tabLength : 1, vsync: this);
+    return TabController(length: tabLength, vsync: this);
+  }
+
+  TabController getCupTabController(int length) {
+    return TabController(length: length, vsync: this);
   }
 
   @override

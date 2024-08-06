@@ -17,7 +17,8 @@ part 'premier_league_repository.g.dart';
 /// API for reading, watching and writing local cart data (guest user)
 class PremierLeagueRepository {
   PremierLeagueRepository();
-    /// Preload with the default list of products when the app starts
+
+  /// Preload with the default list of products when the app starts
   // Map<int, DraftPlayer> players = {};
   // Map<int, PlTeam> teams = {};
   // Map<int, PlMatch> matches = {};
@@ -79,7 +80,8 @@ class PremierLeagueRepository {
     }
   }
 
-  Future<Map<int, DraftPlayer>> getLivePlayerData(var liveData, Map<int, DraftPlayer> players) async {
+  Future<Map<int, DraftPlayer>> getLivePlayerData(
+      var liveData, Map<int, DraftPlayer> players, int gameweek) async {
     try {
       liveData['elements'].forEach((k, v) {
         List<PlMatchStats> _matches = [];
@@ -87,7 +89,7 @@ class PremierLeagueRepository {
           PlMatchStats _match = PlMatchStats.fromJson(liveMatch);
           _matches.add(_match);
         }
-        players[int.parse(k)]!.updateMatches(_matches);
+        players[int.parse(k)]!.updateMatches(_matches, gameweek);
       });
       return players;
     } catch (e) {
@@ -97,7 +99,7 @@ class PremierLeagueRepository {
     }
   }
 
-   Map<int, List<Bps>> calculateBPSPlayers(var stats) {
+  Map<int, List<Bps>> calculateBPSPlayers(var stats) {
     try {
       List combinedBPS;
       List<Bps> bpsPlayers = [];
@@ -164,7 +166,7 @@ class PremierLeagueRepository {
     return oneBP;
   }
 
-   Future<Map<int, PlMatch>> getLivePlFixtures(
+  Future<Map<int, PlMatch>> getLivePlFixtures(
       dynamic staticData, dynamic liveData) async {
     try {
       Map<int, PlMatch> matches = {};
@@ -229,12 +231,12 @@ class PremierLeagueRepository {
     }
   }
 
-  Map<int, PlMatch> updateLiveBonusPoints(
-      Map<int, PlMatch> plMatches, Map<int, DraftPlayer> players) {
+  Map<int, PlMatch> updateLiveBonusPoints(Map<int, PlMatch> plMatches,
+      Map<int, DraftPlayer> players, int gameweek) {
     try {
       players.forEach((id, DraftPlayer player) {
         if (player.matches != null) {
-          for (PlMatchStats match in player.matches!) {
+          for (PlMatchStats match in player.matches![gameweek]!) {
             PlMatch plMatch = plMatches[match.matchId]!;
             if (plMatch.started! && !plMatch.finished!) {
               Map<int, List<Bps>> bps = plMatch.bpsPlayers;
@@ -340,7 +342,8 @@ class PremierLeagueRepository {
 }
 
 @Riverpod(keepAlive: true)
-PremierLeagueRepository premierLeagueDataRepository(PremierLeagueDataRepositoryRef ref) {
+PremierLeagueRepository premierLeagueDataRepository(
+    PremierLeagueDataRepositoryRef ref) {
   // * Override this in the main method
   return PremierLeagueRepository();
 }
