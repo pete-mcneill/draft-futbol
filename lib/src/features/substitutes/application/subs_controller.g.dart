@@ -6,7 +6,7 @@ part of 'subs_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$subsControllerHash() => r'cb1e8f5897f4a19a56260617e39e7b8a448d1638';
+String _$subsControllerHash() => r'b3569eb9fd8afd441e1de083c62801e9b0ea7fb9';
 
 /// See also [SubsController].
 @ProviderFor(SubsController)
