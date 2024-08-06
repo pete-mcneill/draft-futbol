@@ -1,7 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
+import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_teams.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
@@ -36,10 +38,10 @@ class _PlayerState extends ConsumerState<Player> {
   bool liveBonus = false;
   late Map<int, PlMatch> matches;
 
-  int calculatePlayerScore() {
+  int calculatePlayerScore(int gameweek) {
     int playerScore = 0;
     bool matchesStarted = false;
-    for (PlMatchStats _match in widget.player.matches!) {
+    for (PlMatchStats _match in widget.player.matches![gameweek]!) {
       if (matches[_match.matchId]!.started!) {
         matchesStarted = true;
       }
@@ -56,28 +58,9 @@ class _PlayerState extends ConsumerState<Player> {
     return playerScore;
   }
 
-  List<Icon> getPlayerIcons() {
-    List<Icon> icons = [];
-    for (PlMatchStats _match in widget.player.matches!) {
-      for (Stat stat in _match.stats!) {
-        switch (stat.statName) {
-          case "Goals scored":
-            icons.add(
-              const Icon(
-                Icons.sports_soccer,
-                size: 15.0,
-              ),
-            );
-            break;
-        }
-      }
-    }
-    return icons;
-  }
-
-  List<Widget> getPlayerFixtures() {
+  List<Widget> getPlayerFixtures(int gameweek) {
     List<Widget> fixtures = [];
-    for (PlMatchStats _match in widget.player.matches!) {
+    for (PlMatchStats _match in widget.player.matches![gameweek]!) {
       PlMatch _plMatch = matches[_match.matchId]!;
       if (!_plMatch.started!) {
         if (_plMatch.homeTeamId == widget.player.teamId) {
@@ -116,15 +99,14 @@ class _PlayerState extends ConsumerState<Player> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.subHighlighted! == true) {
-      print("test");
-    }
+    Gameweek gameweek = ref.read(liveDataControllerProvider).gameweek!;
     Color bonusColour = Theme.of(context).canvasColor;
     matches = ref.watch(premierLeagueControllerProvider).matches;
     bool bonus = false;
     liveBonus = ref.watch(appSettingsRepositoryProvider
         .select((value) => value.bonusPointsEnabled));
-    for (PlMatchStats match in widget.player.matches!) {
+    for (PlMatchStats match
+        in widget.player.matches![gameweek.currentGameweek]!) {
       if (matches[match.matchId]!.started!) {
         matchesStarted = true;
       }
@@ -205,14 +187,15 @@ class _PlayerState extends ConsumerState<Player> {
                                 15,
                           ),
                         ),
-                        if(widget.subIcon)
+                        if (widget.subIcon)
                           Align(
                             alignment: Alignment.bottomRight,
                             child: Image(
-                              image: AssetImage('assets/images/substitution.png'),
+                              image:
+                                  AssetImage('assets/images/substitution.png'),
                               height: (MediaQuery.of(context).size.height -
-                                    AppBar().preferredSize.height) /
-                                60,
+                                      AppBar().preferredSize.height) /
+                                  60,
                             ),
                           ),
                       ],
@@ -258,7 +241,9 @@ class _PlayerState extends ConsumerState<Player> {
                               maxFontSize: 11,
                             ),
                             Column(children: [
-                              Column(children: getPlayerFixtures()),
+                              Column(
+                                  children: getPlayerFixtures(
+                                      gameweek.currentGameweek)),
                             ]),
                             if (matchesStarted)
                               Row(
@@ -266,7 +251,8 @@ class _PlayerState extends ConsumerState<Player> {
                                   children: [
                                     AutoSizeText.rich(
                                       TextSpan(
-                                          text: calculatePlayerScore()
+                                          text: calculatePlayerScore(
+                                                  gameweek.currentGameweek)
                                               .toString()),
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(

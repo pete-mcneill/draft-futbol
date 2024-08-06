@@ -1,5 +1,7 @@
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
+import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
+import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/match.dart';
 import 'package:draft_futbol/src/features/premier_league_matches/domain/stat.dart';
@@ -26,6 +28,7 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
   }
 
   List<Widget> getMatchStats() {
+    Gameweek gameweek = ref.read(liveDataControllerProvider).gameweek!;
     List<Widget> widgets = [];
     if (widget.player.matches!.isEmpty) {
       return [
@@ -43,7 +46,8 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
         )
       ];
     } else {
-      for (PlMatchStats _match in widget.player.matches!) {
+      for (PlMatchStats _match
+          in widget.player.matches![gameweek.currentGameweek]!) {
         int? matchId = _match.matchId;
         String matchTeams =
             "${livePlMatches![matchId]!.homeTeam} v ${livePlMatches![matchId]!.awayTeam}";
@@ -150,7 +154,9 @@ class _PlayerPopupState extends ConsumerState<PlayerPopup> {
     liveBonus = ref.watch(appSettingsRepositoryProvider
         .select((value) => value.bonusPointsEnabled));
     Color bonusColour = Theme.of(context).primaryColorDark;
-    for (PlMatchStats match in widget.player.matches!) {
+    Gameweek gameweek = ref.read(liveDataControllerProvider).gameweek!;
+    for (PlMatchStats match
+        in widget.player.matches![gameweek.currentGameweek]!) {
       for (Stat stat in match.stats!) {
         if (stat.statName == "Bonus") {
           if (stat.value == 3) {

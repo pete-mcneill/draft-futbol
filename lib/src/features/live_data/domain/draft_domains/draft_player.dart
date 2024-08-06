@@ -14,7 +14,7 @@ class DraftPlayer {
   int? playerCode;
   Map<int, String>? playerStatus;
   Map<int, int>? draftTeamId;
-  List<PlMatchStats>? matches;
+  Map<int, List<PlMatchStats>>? matches;
   List<String>? gameweekFixtures;
 
   DraftPlayer(
@@ -27,8 +27,16 @@ class DraftPlayer {
       this.draftTeamId,
       this.gameweekFixtures});
 
-  void updateMatches(List<PlMatchStats> _matches) {
-    matches = _matches;
+  void updateMatches(List<PlMatchStats> _matches, int gameweek) {
+    if (matches == null) {
+      matches = {gameweek: _matches};
+    } else {
+      if (matches![gameweek] == null) {
+        matches![gameweek] = _matches;
+      } else {
+        matches![gameweek]!.addAll(_matches);
+      }
+    }
   }
 
   factory DraftPlayer.fromJson(Map<String, dynamic> json) {

@@ -15,16 +15,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HeadToHeadScreen extends ConsumerWidget {
   final int leagueId;
-  const HeadToHeadScreen(
-      {Key? key, 
-       required this.leagueId}) 
-  : super(key: key);
-
-  
+  const HeadToHeadScreen({Key? key, required this.leagueId}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fixtures = ref.read(headToHeadScreenControllerProvider.notifier).getGameweekFixtures(leagueId);
+    final fixtures = ref
+        .read(headToHeadScreenControllerProvider.notifier)
+        .getGameweekFixtures(leagueId);
     return ListView(
       shrinkWrap: true,
       children: <Widget>[
@@ -34,40 +31,42 @@ class HeadToHeadScreen extends ConsumerWidget {
         //   child: TabBarTest()),
         buyaCoffeebutton(context),
         ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          itemCount: fixtures.length,
-          itemBuilder: (BuildContext context, int index) {
-            Fixture _fixture = fixtures![index];
-            final test = ref.watch(draftDataControllerProvider);
-            DraftTeam homeTeam = ref.watch(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.homeTeamId!);  
-            DraftTeam awayTeam =  ref.watch(headToHeadScreenControllerProvider.notifier).getTeam(_fixture.awayTeamId!);
-            return Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Pitch(
-                                  homeTeam: homeTeam,
-                                  awayTeam: awayTeam,
-                                  fixture: _fixture,
-                                )));
-                  },
-                  child: HeadToHeadSummary(
-                    homeTeam: homeTeam,
-                    awayTeam: awayTeam,
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: fixtures.length,
+            itemBuilder: (BuildContext context, int index) {
+              Fixture _fixture = fixtures![index];
+              final test = ref.watch(draftDataControllerProvider);
+              DraftTeam homeTeam = ref
+                  .watch(headToHeadScreenControllerProvider.notifier)
+                  .getTeam(_fixture.homeTeamId!);
+              DraftTeam awayTeam = ref
+                  .watch(headToHeadScreenControllerProvider.notifier)
+                  .getTeam(_fixture.awayTeamId!);
+              return Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Pitch(
+                                    homeTeam: homeTeam,
+                                    awayTeam: awayTeam,
+                                  )));
+                    },
+                    child: HeadToHeadSummary(
+                      homeTeam: homeTeam,
+                      awayTeam: awayTeam,
+                    ),
                   ),
-                ),
-                // const SizedBox(
-                //   height: 5,
-                // )
-              ],
-            );
-          }),
+                  // const SizedBox(
+                  //   height: 5,
+                  // )
+                ],
+              );
+            }),
       ],
     );
   }
-  
 }

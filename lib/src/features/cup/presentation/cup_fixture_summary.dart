@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:draft_futbol/src/features/cup/domain/cup_fixture.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_team.dart';
 import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
@@ -13,16 +14,43 @@ import 'package:draft_futbol/src/features/settings/data/settings_repository.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HeadToHeadSummary extends ConsumerWidget {
-  HeadToHeadSummary({Key? key, required this.homeTeam, required this.awayTeam})
+class CupFixtureSummary extends ConsumerWidget {
+  CupFixtureSummary(
+      {Key? key,
+      required this.homeTeam,
+      required this.awayTeam,
+      required this.fixture,
+      required this.multipleLegs})
       : super(key: key);
   final DraftTeam homeTeam;
   final DraftTeam awayTeam;
+  final CupFixture fixture;
+  final bool multipleLegs;
   bool liveBonus = false;
 
   List<Expanded> getTeamAndScores(DraftTeam team, String homeOrAway) {
+    String score = '';
+    String bonusScore = '';
+    if (multipleLegs) {
+      if (homeOrAway == "home") {
+        score = team.points.toString() +
+            " (${(team.points! + fixture.firstLegHomeScore!).toString()})";
+        bonusScore = team.points.toString() +
+            " (${(team.bonusPoints! + fixture.firstLegHomeScore!).toString()})";
+      } else {
+        score = "(${(team.points! + fixture.firstLegAwayScore!).toString()}) " +
+            team.points.toString();
+        bonusScore =
+            "(${(team.bonusPoints! + fixture.firstLegAwayScore!).toString()}) " +
+                team.bonusPoints.toString();
+      }
+    } else {
+      score = team.points.toString();
+      bonusScore = team.bonusPoints.toString();
+    }
+
     Expanded scoreWidget = Expanded(
-      flex: 1,
+      flex: multipleLegs ? 2 : 1,
       child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -31,9 +59,7 @@ class HeadToHeadSummary extends ConsumerWidget {
               height: 50,
               child: Center(
                 child: AutoSizeText(
-                  liveBonus
-                      ? team.bonusPoints.toString()
-                      : team.points.toString(),
+                  liveBonus ? bonusScore : score,
                   style: const TextStyle(fontFamily: 'Inter-Bold'),
                   minFontSize: 20,
                   maxLines: 1,

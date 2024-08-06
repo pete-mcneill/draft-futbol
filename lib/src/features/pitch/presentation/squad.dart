@@ -18,7 +18,6 @@ import 'package:hive/hive.dart';
 import '../../live_data/domain/draft_domains/draft_team.dart';
 import '../../substitutes/domain/sub.dart';
 
-
 class Squad extends ConsumerStatefulWidget {
   DraftTeam team;
   Squad({Key? key, required this.team}) : super(key: key);
@@ -66,8 +65,12 @@ class _SquadState extends ConsumerState<Squad> {
                 GestureDetector(
                   onTap: () {
                     cancelSubs();
-                    ref.read(subsControllerProvider.notifier).removeSub(widget.team);
-                    ref.read(subsControllerProvider.notifier).disableSubsMode(widget.team.id!);
+                    ref
+                        .read(subsControllerProvider.notifier)
+                        .removeSub(widget.team);
+                    ref
+                        .read(subsControllerProvider.notifier)
+                        .disableSubsMode(widget.team.id!);
                     Navigator.of(context).pop(true);
                   },
                   child: const Text("YES"),
@@ -81,19 +84,18 @@ class _SquadState extends ConsumerState<Squad> {
     }
   }
 
-
   void cancelSubs() {
-    for(Sub sub in subs){
+    for (Sub sub in subs) {
       widget.team.squad![sub.subInId] = sub.subInPosition;
       widget.team.squad![sub.subOutId] = sub.subOutPosition;
     }
     subs = [];
-    final sorted =  widget.team.squad!.entries.toList()..sort((a, b)=> a.value.compareTo(b.value));
+    final sorted = widget.team.squad!.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));
     final sortedSquad = {for (var entry in sorted) entry.key: entry.value};
     setState(() {
       widget.team.squad = sortedSquad;
     });
-    
   }
 
   void _showPlayerPopup(DraftPlayer player) async {
@@ -153,7 +155,7 @@ class _SquadState extends ConsumerState<Squad> {
     }
   }
 
-  GestureDetector generatePlayer(DraftPlayer player) {
+  GestureDetector generatePlayer(DraftPlayer player, int gameweek) {
     bool subAllowed = true;
     // bool validSubForPosition = true;
     bool subHighlighted = false;
@@ -165,7 +167,7 @@ class _SquadState extends ConsumerState<Squad> {
       subAllowed = false;
     }
     // Check if player played a match already
-    for (PlMatchStats match in player.matches!) {
+    for (PlMatchStats match in player.matches![gameweek]!) {
       for (Stat stat in match.stats!) {
         if (stat.statName == "Minutes played") {
           if (stat.value != 0) {
@@ -188,8 +190,11 @@ class _SquadState extends ConsumerState<Squad> {
               int subPosition = widget.team.squad![incomingSub.playerId!]!;
               widget.team.squad![player.playerId!] = subPosition;
               widget.team.squad![incomingSub.playerId!] = playerPosition;
-              final sorted =  widget.team.squad!.entries.toList()..sort((a, b)=> a.value.compareTo(b.value));
-              final sortedSquad = {for (var entry in sorted) entry.key: entry.value};
+              final sorted = widget.team.squad!.entries.toList()
+                ..sort((a, b) => a.value.compareTo(b.value));
+              final sortedSquad = {
+                for (var entry in sorted) entry.key: entry.value
+              };
               setState(() {
                 widget.team.squad = sortedSquad;
                 subsToSave = true;
@@ -238,10 +243,11 @@ class _SquadState extends ConsumerState<Squad> {
       }
       if (element.subOutId == player.playerId) {
         substitue = true;
-      } 
+      }
     }
     final storedSubs = Hive.box('subs').toMap();
-    int currentGameweek = ref.read(liveDataControllerProvider).gameweek!.currentGameweek;
+    int currentGameweek =
+        ref.read(liveDataControllerProvider).gameweek!.currentGameweek;
     final teamSubs = storedSubs;
     if (teamSubs[currentGameweek] != null) {
       if (teamSubs[currentGameweek]![widget.team.id] != null) {
@@ -258,58 +264,60 @@ class _SquadState extends ConsumerState<Squad> {
     return substitue;
   }
 
-  Widget generateSub(DraftPlayer player, Map<String, List<DraftPlayer>> _squad) {
-    bool substitue = checkForSubstituteIcon(player);  
-    if(subModeEnabled){
+  Widget generateSub(
+      DraftPlayer player, Map<String, List<DraftPlayer>> _squad) {
+    bool substitue = checkForSubstituteIcon(player);
+    if (subModeEnabled) {
       return LongPressDraggable<DraftPlayer>(
-                            data: player,
-                            dragAnchorStrategy: pointerDragAnchorStrategy,
-                            onDragStarted: () =>
-                                {_checkValidSubsForPositions(player, _squad)},
-                            onDragEnd: (details) => setState(() {
-                                  validSubPositions["GK"]["valid"] = true;
-                                  validSubPositions["DEF"]["valid"] = true;
-                                  validSubPositions["MID"]["valid"] = true;
-                                  validSubPositions["FWD"]["valid"] = true;
-                                }),
-                            feedback: DefaultTextStyle(
-                              style: Theme.of(context).textTheme.bodyMedium!,
-                              child: Player(
-                                  player: player,
-                                  subModeEnabled: false,
-                                  subValid: true,
-                                  subIcon: substitue,),
-                            ),
-                            child: GestureDetector(
-                                onTap: () => _showPlayerPopup(player),
-                                child: Player(
-                                    player: player,
-                                    subModeEnabled: subModeEnabled,
-                                    subValid: true,
-                                    subIcon: substitue)));
+          data: player,
+          dragAnchorStrategy: pointerDragAnchorStrategy,
+          onDragStarted: () => {_checkValidSubsForPositions(player, _squad)},
+          onDragEnd: (details) => setState(() {
+                validSubPositions["GK"]["valid"] = true;
+                validSubPositions["DEF"]["valid"] = true;
+                validSubPositions["MID"]["valid"] = true;
+                validSubPositions["FWD"]["valid"] = true;
+              }),
+          feedback: DefaultTextStyle(
+            style: Theme.of(context).textTheme.bodyMedium!,
+            child: Player(
+              player: player,
+              subModeEnabled: false,
+              subValid: true,
+              subIcon: substitue,
+            ),
+          ),
+          child: GestureDetector(
+              onTap: () => _showPlayerPopup(player),
+              child: Player(
+                  player: player,
+                  subModeEnabled: subModeEnabled,
+                  subValid: true,
+                  subIcon: substitue)));
     } else {
       return GestureDetector(
-                            onTap: () => _showPlayerPopup(player),
-                            child: Player(
-                                player: player,
-                                subModeEnabled: subModeEnabled,
-                                subValid: true,
-                                subIcon: substitue));
+          onTap: () => _showPlayerPopup(player),
+          child: Player(
+              player: player,
+              subModeEnabled: subModeEnabled,
+              subValid: true,
+              subIcon: substitue));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (ref.watch(subsControllerProvider).cancelSubs) {
-      cancelSubs(); 
+      cancelSubs();
     }
     _isLoading = ref.watch(subsControllerProvider).subsInProgress;
     subModeEnabled = ref.watch(subsControllerProvider).subsModeActive;
     players = ref.read(premierLeagueControllerProvider).players;
-    currentGameweek = ref.watch(liveDataControllerProvider).gameweek!.currentGameweek;
+    currentGameweek =
+        ref.watch(liveDataControllerProvider).gameweek!.currentGameweek;
     plMatches = ref.watch(premierLeagueControllerProvider).matches;
 
-     Map<String, List<DraftPlayer>> _squad = {
+    Map<String, List<DraftPlayer>> _squad = {
       "GK": [],
       "DEF": [],
       "MID": [],
@@ -358,7 +366,7 @@ class _SquadState extends ConsumerState<Squad> {
                 children: [
                   // Text("Row weird")
                   for (DraftPlayer player in _squad['GK']!)
-                    generatePlayer(player)
+                    generatePlayer(player, currentGameweek!),
                 ],
               ),
               // DEF
@@ -366,7 +374,7 @@ class _SquadState extends ConsumerState<Squad> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   for (DraftPlayer player in _squad['DEF']!)
-                    generatePlayer(player)
+                    generatePlayer(player, currentGameweek!),
                 ],
               ),
               // MID
@@ -374,7 +382,7 @@ class _SquadState extends ConsumerState<Squad> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   for (DraftPlayer player in _squad['MID']!)
-                    generatePlayer(player)
+                    generatePlayer(player, currentGameweek!),
                 ],
               ),
               // FWD
@@ -382,7 +390,7 @@ class _SquadState extends ConsumerState<Squad> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   for (DraftPlayer player in _squad['FWD']!)
-                    generatePlayer(player)
+                    generatePlayer(player, currentGameweek!),
                 ],
               ),
               Row(
@@ -400,8 +408,8 @@ class _SquadState extends ConsumerState<Squad> {
           ),
         ),
       ),
-      if (_isLoading)
-        ...[SizedBox(
+      if (_isLoading) ...[
+        SizedBox(
           height: MediaQuery.of(context).size.height,
           child: const Opacity(
             opacity: 1,
@@ -418,7 +426,7 @@ class _SquadState extends ConsumerState<Squad> {
                 ],
               )),
         ),
-        ]
+      ]
     ]);
   }
 }

@@ -26,14 +26,15 @@ import '../../live_data/domain/draft_domains/draft_team.dart';
 
 class ClassicLeagueStandings extends ConsumerStatefulWidget {
   final int leagueId;
-  const ClassicLeagueStandings({Key? key, required this.leagueId}) : super(key: key);
+  const ClassicLeagueStandings({Key? key, required this.leagueId})
+      : super(key: key);
 
   @override
   _ClassicLeagueStandingsState createState() => _ClassicLeagueStandingsState();
 }
 
-
-class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings> {
+class _ClassicLeagueStandingsState
+    extends ConsumerState<ClassicLeagueStandings> {
   Map<int, DraftTeam> teams = {};
   List<Fixture> fixtures = [];
   bool liveBps = false;
@@ -49,15 +50,26 @@ class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings>
   Widget build(BuildContext context) {
     // final themeProvider = Provider.of<ThemeProvider>(context);
     liveBps = ref.watch(appSettingsRepositoryProvider).bonusPointsEnabled;
-    Gameweek? gameweek = ref.watch(leagueStandingsScreenControllerProvider.notifier).gameweek;
-    players = ref.watch(premierLeagueControllerProvider.select((value) => value.players));
+    Gameweek? gameweek =
+        ref.watch(leagueStandingsScreenControllerProvider.notifier).gameweek;
+    players = ref.watch(
+        premierLeagueControllerProvider.select((value) => value.players));
     DraftRepository repo = ref.watch(draftRepositoryProvider);
-    staticStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.staticStandings!;
-    liveStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.liveStandings!; 
-    liveBpsStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.liveBpsStandings!; 
+    staticStandings = ref
+        .watch(draftDataControllerProvider)
+        .leagueStandings[widget.leagueId]!
+        .staticStandings!;
+    liveStandings = ref
+        .watch(draftDataControllerProvider)
+        .leagueStandings[widget.leagueId]!
+        .liveStandings!;
+    liveBpsStandings = ref
+        .watch(draftDataControllerProvider)
+        .leagueStandings[widget.leagueId]!
+        .liveBpsStandings!;
     // TODO Screen Controllers are not correct but work for now...
     teams = ref.watch(draftDataControllerProvider).teams;
-    String lastGw = ( gameweek.currentGameweek - 1).toString();
+    String lastGw = (gameweek.currentGameweek - 1).toString();
 
     rowColor = Theme.of(context).cardColor;
     secondaryColor = Theme.of(context).colorScheme.secondaryContainer;
@@ -166,7 +178,7 @@ class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings>
       customRowColor = Colors.red.shade900;
       weight = FontWeight.bold;
     }
-    
+
     return SizedBox(
       height: 50,
       child: Card(
@@ -187,7 +199,7 @@ class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings>
                   flex: 1,
                   child: Text(
                     standing.rank.toString(),
-                    style:  TextStyle(fontSize: 14, fontWeight: weight),
+                    style: TextStyle(fontSize: 14, fontWeight: weight),
                     textAlign: TextAlign.left,
                   )),
               Expanded(
@@ -216,76 +228,6 @@ class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings>
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget iconsSummary(LeagueStanding standing) {
-    if (standing.rank == 1) {
-      rowColor = Colors.green;
-    }
-
-    DraftTeam? team = teams[standing.teamId]!;
-    int goals = 0;
-    int assists = 0;
-    int cleanSheets = 0;
-    for (int _id in team.squad!.keys) {
-      if (team.squad![_id]! < 12) {
-        DraftPlayer player = players[_id]!;
-        for (PlMatchStats match in player.matches!) {
-          for (Stat stat in match.stats!) {
-            if (stat.statName == "Goals scored") {
-              goals += stat.value!;
-            }
-            if (stat.statName == "Assists") {
-              assists += stat.value!;
-            }
-            if (stat.statName == "Clean sheets" &&
-                (player.position == "DEF" || player.position == "GK")) {
-              cleanSheets += stat.value!;
-            }
-          }
-        }
-      }
-    }
-    return Container(
-      color: rowColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (goals > 0) ...[
-            FaIcon(
-              FontAwesomeIcons.futbol,
-              color: secondaryColor,
-            ),
-            if (goals > 1)
-              Text(goals > 1 ? "x" + goals.toString() : "" + goals.toString(),
-                  style: const TextStyle(fontSize: 15))
-          ],
-          if (assists > 0) ...[
-            FaIcon(
-              FontAwesomeIcons.adn,
-              color: secondaryColor,
-            ),
-            if (assists > 1)
-              Text(
-                  assists > 1
-                      ? "x" + assists.toString()
-                      : "" + assists.toString(),
-                  style: const TextStyle(fontSize: 15))
-          ],
-          if (cleanSheets > 0) ...[
-            FaIcon(
-              FontAwesomeIcons.shieldHalved,
-              color: secondaryColor,
-            ),
-            if (cleanSheets > 1)
-              Text("x" + cleanSheets.toString(),
-                  style: const TextStyle(fontSize: 15))
-          ]
-          // homeGoals == 0 && homeAssists == 0 && cleanSheets == 0 ?
-          // Icon(LineIcons.values['duck']);
-        ],
       ),
     );
   }
@@ -319,7 +261,7 @@ class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings>
                 badges.Badge(
                     toAnimate: false,
                     shape: BadgeShape.square,
-                    badgeColor:secondaryColor!,
+                    badgeColor: secondaryColor!,
                     borderRadius: BorderRadius.circular(8),
                     badgeContent: Row(
                       children: [
@@ -378,7 +320,7 @@ class _ClassicLeagueStandingsState extends ConsumerState<ClassicLeagueStandings>
     );
   }
 
-    @override
+  @override
   void initState() {
     super.initState();
   }
