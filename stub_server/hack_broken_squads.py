@@ -117,6 +117,6 @@ rootdir = 'stub_server/mock-api/squads'
 
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
-        if file == '3273.json':
+        if file == '86631.json':
             with open(os.path.join(subdir, file), 'w') as f:
                 json.dump(data, f)  

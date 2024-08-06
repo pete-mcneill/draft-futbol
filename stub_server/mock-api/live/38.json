@@ -168,12 +168,6 @@
             "explain": [
                 [
                     [
-                        {
-                            "name": "Minutes played",
-                            "points": 1,
-                            "value": 58,
-                            "stat": "minutes"
-                        }
                     ],
                     371
                 ]
@@ -36945,7 +36939,7 @@
     "fixtures": [
         {
             "id": 371,
-            "started": true,
+            "started": false,
             "stats": [
                 {
                     "s": "goals_scored",
@@ -37197,7 +37191,7 @@
         },
         {
             "id": 372,
-            "started": true,
+            "started": false,
             "stats": [
                 {
                     "s": "goals_scored",
@@ -37483,7 +37477,7 @@
                 }
             ],
             "code": 2367909,
-            "finished": true,
+            "finished": false,
             "finished_provisional": true,
             "kickoff_time": "2024-05-19T15:00:00Z",
             "minutes": 0,
@@ -37497,7 +37491,7 @@
         },
         {
             "id": 373,
-            "started": true,
+            "started": false,
             "stats": [
                 {
                     "s": "goals_scored",
@@ -37736,7 +37730,7 @@
                 }
             ],
             "code": 2367910,
-            "finished": true,
+            "finished": false,
             "finished_provisional": true,
             "kickoff_time": "2024-05-19T15:00:00Z",
             "minutes": 0,
