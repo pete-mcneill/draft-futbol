@@ -166,31 +166,30 @@ class _HomePageState extends ConsumerState<HomePage>
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            if (!loading) {
-              activeLeague =
-                  ref.read(appSettingsRepositoryProvider).activeLeagueId;
-              DraftLeague leagueData = draftRepository.leagues[activeLeague]!;
-              gameweek = liveDataRepository.gameweek;
-              String draftStatus = leagueData.draftStatus;
-              if (draftStatus == "pre" || gameweek!.currentGameweek == 0) {
-                showBottomNav = false;
+            activeLeague =
+                ref.read(appSettingsRepositoryProvider).activeLeagueId;
+            DraftLeague leagueData = draftRepository.leagues[activeLeague]!;
+            gameweek = liveDataRepository.gameweek;
+            String draftStatus = leagueData.draftStatus;
+            if (draftStatus == "pre" || gameweek!.currentGameweek == 0) {
+              showBottomNav = false;
+              _cupTabController = getCupTabController(1);
+            } else {
+              showBottomNav = true;
+              cupGameweek = cupController.isCupGameweek();
+              if (cupGameweek) {
+                int cups = ref
+                    .read(cupDataControllerProvider.notifier)
+                    .getCupsForCurrentGameweek()
+                    .length;
+                _cupTabController = getCupTabController(cups);
               } else {
-                showBottomNav = true;
-                cupGameweek = cupController.isCupGameweek();
-                if (cupGameweek) {
-                  int cups = ref
-                      .read(cupDataControllerProvider.notifier)
-                      .getCupsForCurrentGameweek()
-                      .length;
-                  _cupTabController = getCupTabController(cups);
-                } else {
-                  _cupTabController = getCupTabController(1);
-                }
+                _cupTabController = getCupTabController(1);
+              }
 
-                if (leagueData.scoring == "h") {
-                  fixtures = draftRepository.head2HeadFixtures[activeLeague]![
-                      gameweek!.currentGameweek];
-                }
+              if (leagueData.scoring == "h") {
+                fixtures = draftRepository.head2HeadFixtures[activeLeague]![
+                    gameweek!.currentGameweek];
               }
             }
             return Scaffold(
@@ -217,13 +216,12 @@ class _HomePageState extends ConsumerState<HomePage>
                   child: Container(
                     child: loading
                         ? const Loading()
-                        :
-                        // draftStatus == "pre" || gameweek!.currentGameweek == 0
-                        //     ? DraftPlaceholder(
-                        //         leagueData: leagueData,
-                        //       )
-                        //     :
-                        getLeagueWidgets()[navBarIndex],
+                        : leagueData.draftStatus == "pre" ||
+                                gameweek!.currentGameweek == 0
+                            ? DraftPlaceholder(
+                                leagueData: leagueData,
+                              )
+                            : getLeagueWidgets()[navBarIndex],
 
                     // RefreshIndicator(
                     //     color: Theme.of(context)

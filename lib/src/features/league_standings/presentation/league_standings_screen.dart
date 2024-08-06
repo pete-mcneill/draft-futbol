@@ -33,7 +33,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
   // int? widget.leagueId;
 
   Map<int, dynamic> customLeagues = {
-    145: {
+    357: {
       1: {
         "iconColour": Colors.green,
         "fontWeight": FontWeight.bold,
@@ -50,7 +50,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
         "rowColour": Colors.red.shade900
       }
     },
-    687: {
+    64: {
       1: {
         "iconColour": Colors.green,
         "fontWeight": FontWeight.bold,
@@ -69,131 +69,139 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
     }
   };
 
-
   @override
   Widget build(BuildContext context) {
     // TODO: Move to Controller Logic
-    liveBps = ref.watch(appSettingsRepositoryProvider.select((value) => value.bonusPointsEnabled));
-        
+    liveBps = ref.watch(appSettingsRepositoryProvider
+        .select((value) => value.bonusPointsEnabled));
+
     Gameweek? gameweek = ref.watch(liveDataControllerProvider).gameweek;
 
     // widget.leagueId = ref.watch(appSett
-    staticStandings = ref.watch(draftDataControllerProvider).leagueStandings[widget.leagueId]!.staticStandings!;
+    staticStandings = ref
+        .watch(draftDataControllerProvider)
+        .leagueStandings[widget.leagueId]!
+        .staticStandings!;
 
     if (gameweek!.gameweekFinished) {
       liveStandings = staticStandings;
       liveBpsStandings = staticStandings;
     } else {
-      liveStandings = ref.watch(draftDataControllerProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveStandings!;
-      liveBpsStandings = ref.watch(draftDataControllerProvider.select((value) => value.leagueStandings))[widget.leagueId]!.liveBpsStandings!;
+      liveStandings = ref
+          .watch(draftDataControllerProvider
+              .select((value) => value.leagueStandings))[widget.leagueId]!
+          .liveStandings!;
+      liveBpsStandings = ref
+          .watch(draftDataControllerProvider
+              .select((value) => value.leagueStandings))[widget.leagueId]!
+          .liveBpsStandings!;
     }
     teams = ref.watch(draftDataControllerProvider).teams;
 
     String lastGw = (gameweek.currentGameweek - 1).toString();
-    liveBps = ref.watch(appSettingsRepositoryProvider.select((value) => value.bonusPointsEnabled));
-
-
+    liveBps = ref.watch(appSettingsRepositoryProvider
+        .select((value) => value.bonusPointsEnabled));
 
     return ListView(
       children: [
-          buyaCoffeebutton(context),
-          if (!gameweek.gameweekFinished)
-            Center(
-              child: ToggleSwitch(
-                customWidths: const [120.0, 90.0, 120.0],
-                minHeight: 30.0,
-                activeFgColor: Colors.black,
-                activeBgColors: [
-                  [Theme.of(context).buttonTheme.colorScheme!.secondary],
-                  [Theme.of(context).buttonTheme.colorScheme!.secondary],
-                  [Theme.of(context).buttonTheme.colorScheme!.secondary]
-                ],
-                inactiveBgColor: Theme.of(context).cardColor,
-                inactiveFgColor: Colors.white,
-                borderColor: [Theme.of(context).dividerColor],
-                borderWidth: 1.0,
-                // inactiveFgColor: Colors.white,
-                initialLabelIndex: view,
-                totalSwitches: 2,
-                labels: ["GW $lastGw", 'Live'],
-                onToggle: (index) => updateView(index),
-              ),
-            ),
-          Container(
-            // color: Theme.of(context).cardColor,
-            child: const Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    "",
-                    style: TextStyle(fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    "Team",
-                    style: TextStyle(fontSize: 14),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    "+",
-                    style: TextStyle(fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    "Pts",
-                    style: TextStyle(fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                )
+        buyaCoffeebutton(context),
+        if (!gameweek.gameweekFinished)
+          Center(
+            child: ToggleSwitch(
+              customWidths: const [120.0, 90.0, 120.0],
+              minHeight: 30.0,
+              activeFgColor: Colors.black,
+              activeBgColors: [
+                [Theme.of(context).buttonTheme.colorScheme!.secondary],
+                [Theme.of(context).buttonTheme.colorScheme!.secondary],
+                [Theme.of(context).buttonTheme.colorScheme!.secondary]
               ],
+              inactiveBgColor: Theme.of(context).cardColor,
+              inactiveFgColor: Colors.white,
+              borderColor: [Theme.of(context).dividerColor],
+              borderWidth: 1.0,
+              // inactiveFgColor: Colors.white,
+              initialLabelIndex: view,
+              totalSwitches: 2,
+              labels: ["GW $lastGw", 'Live'],
+              onToggle: (index) => updateView(index),
             ),
           ),
-          if (view == 0)
-            ListView.separated(
+        Container(
+          // color: Theme.of(context).cardColor,
+          child: const Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  "",
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  "Team",
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  "+",
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  "Pts",
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            ],
+          ),
+        ),
+        if (view == 0)
+          ListView.separated(
               primary: false,
-                shrinkWrap: true,
-                itemBuilder: (context, index) =>
-                    getLeagueStanding(staticStandings[index]),
-                separatorBuilder: (context, index) => const Divider(
-                      height: 0.5,
-                      color: Colors.grey,
-                    ), // here u can customize the space.
-                itemCount: liveStandings.length)
-          else if (view == 1 && !liveBps)
-            ListView.separated(
+              shrinkWrap: true,
+              itemBuilder: (context, index) =>
+                  getLeagueStanding(staticStandings[index]),
+              separatorBuilder: (context, index) => const Divider(
+                    height: 0.5,
+                    color: Colors.grey,
+                  ), // here u can customize the space.
+              itemCount: liveStandings.length)
+        else if (view == 1 && !liveBps)
+          ListView.separated(
               primary: false,
-                shrinkWrap: true,
-                itemBuilder: (context, index) =>
-                    getLeagueStanding(liveStandings[index]),
-                separatorBuilder: (context, index) => const Divider(
-                      height: 0.5,
-                      color: Colors.grey,
-                    ), // here u can customize the space.
-                itemCount: liveStandings.length)
-          // for (LeagueStanding standing in liveStandings)
-          //   getLeagueStanding(standing)
-          else if (view == 1 && liveBps)
-            ListView.separated(
+              shrinkWrap: true,
+              itemBuilder: (context, index) =>
+                  getLeagueStanding(liveStandings[index]),
+              separatorBuilder: (context, index) => const Divider(
+                    height: 0.5,
+                    color: Colors.grey,
+                  ), // here u can customize the space.
+              itemCount: liveStandings.length)
+        // for (LeagueStanding standing in liveStandings)
+        //   getLeagueStanding(standing)
+        else if (view == 1 && liveBps)
+          ListView.separated(
               primary: false,
-                shrinkWrap: true,
-                itemBuilder: (context, index) =>
-                    getLeagueStanding(liveBpsStandings[index]),
-                separatorBuilder: (context, index) => const Divider(
-                      height: 0.5,
-                      color: Colors.grey,
-                    ), // here u can customize the space.
-                itemCount: liveStandings.length)
-        ],
+              shrinkWrap: true,
+              itemBuilder: (context, index) =>
+                  getLeagueStanding(liveBpsStandings[index]),
+              separatorBuilder: (context, index) => const Divider(
+                    height: 0.5,
+                    color: Colors.grey,
+                  ), // here u can customize the space.
+              itemCount: liveStandings.length)
+      ],
     );
   }
 
@@ -262,9 +270,6 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
   //   return options;
   // }
 
-
-
-
   Widget getLeagueStanding(LeagueStanding standing) {
     DraftTeam? team = teams[standing.teamId];
     Color rowColor = Theme.of(context).cardColor;
@@ -275,22 +280,21 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
       rowColor = Colors.red.shade900;
     }
 
-    if(customLeagues[widget.leagueId]?[standing.rank!]?["rowColour"] != null){
+    if (customLeagues[widget.leagueId]?[standing.rank!]?["rowColour"] != null) {
       rowColor = customLeagues[widget.leagueId]?[standing.rank!]?["rowColour"];
     }
 
     FaIcon? icon;
-    
+
     if (standing.rank! > standing.lastRank!) {
       Color iconColour = Colors.redAccent;
       icon = FaIcon(
         FontAwesomeIcons.arrowDown,
         color: iconColour,
-
       );
     }
-    if(standing.rank! < standing.lastRank!) {
-       Color iconColour = standing.rank == 1 ? Colors.black : Colors.green;
+    if (standing.rank! < standing.lastRank!) {
+      Color iconColour = standing.rank == 1 ? Colors.black : Colors.green;
       // if(customLeagues[widget.leagueId]?[standing.rank!]?["iconColour"] != null){
       //   iconColour = customLeagues[widget.leagueId]?[standing.rank!]?["iconColour"];
       // }
@@ -310,7 +314,7 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
         child: Row(
           children: [
             Expanded(flex: 1, child: getTeamRank(standing.rank!)),
-            if (icon != null )
+            if (icon != null)
               Expanded(
                 flex: 1,
                 child: Center(
@@ -329,7 +333,11 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                 flex: 4,
                 child: Text(
                   team!.teamName!,
-                  style: TextStyle(fontSize: 14, fontWeight: customLeagues[widget.leagueId]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: customLeagues[widget.leagueId]
+                              ?[standing.rank!]?["fontWeight"] ??
+                          FontWeight.normal),
                   textAlign: TextAlign.left,
                 )),
             Expanded(
@@ -341,7 +349,11 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)
-                      : TextStyle(fontSize: 14, fontWeight: customLeagues[widget.leagueId]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
+                      : TextStyle(
+                          fontSize: 14,
+                          fontWeight: customLeagues[widget.leagueId]
+                                  ?[standing.rank!]?["fontWeight"] ??
+                              FontWeight.normal),
                   textAlign: TextAlign.center,
                 )),
             Expanded(
@@ -353,7 +365,11 @@ class _LeagueStandingsState extends ConsumerState<LeagueStandings> {
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)
-                      : TextStyle(fontSize: 14, fontWeight: customLeagues[widget.leagueId]?[standing.rank!]?["fontWeight"] ?? FontWeight.normal),
+                      : TextStyle(
+                          fontSize: 14,
+                          fontWeight: customLeagues[widget.leagueId]
+                                  ?[standing.rank!]?["fontWeight"] ??
+                              FontWeight.normal),
                   textAlign: TextAlign.center,
                 ))
           ],

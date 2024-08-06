@@ -63,46 +63,49 @@ class BuyMeACoffeeButton extends StatelessWidget {
       "BuyMeACoffeeColor.Grey": Color(0xff9E9E9E)
     };
 
-    return ElevatedButton(
-      onPressed: !isEnabled
-          ? null
-          : () async {
-              try {
-                await (onLaunchURL != null
-                    ? onLaunchURL!(baseUrl + buyMeACoffeeName)
-                    : launchUrlString(baseUrl + buyMeACoffeeName));
-              } catch (e) {
-                debugPrint("Error: $e");
-              }
-              if (onDonation != null) {
-                onDonation!();
-              }
-            },
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        color != BuyMeACoffeeColor.Blue
-            ? Image.asset("assets/images/coffee.png", width: 30, height: 30)
-            : Image.asset("assets/images/coffee2.png", width: 30, height: 30),
-        Text(
-          text,
-          style: TextStyle(
-              color: color != BuyMeACoffeeColor.Draft
-                  ? Colors.white
-                  : Colors.black,
-              fontWeight: FontWeight.bold),
-        ),
-      ]),
-      style: style == null
-          ? ElevatedButton.styleFrom(
-              minimumSize: Size(100, 20),
-              fixedSize: Size(200, 42),
-              backgroundColor: isEnabled
-                  ? _colors[color.toString()]
-                  : _colors[BuyMeACoffeeColor.Grey.toString()])
-          : ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color?>(isEnabled
-                      ? _colors[color.toString()]
-                      : _colors[BuyMeACoffeeColor.Grey.toString()]))
-              .merge(style),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: !isEnabled
+            ? null
+            : () async {
+                try {
+                  await (onLaunchURL != null
+                      ? onLaunchURL!(baseUrl + buyMeACoffeeName)
+                      : launchUrlString(baseUrl + buyMeACoffeeName));
+                } catch (e) {
+                  debugPrint("Error: $e");
+                }
+                if (onDonation != null) {
+                  onDonation!();
+                }
+              },
+        child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+          color != BuyMeACoffeeColor.Blue
+              ? Image.asset("assets/images/coffee.png", width: 30, height: 30)
+              : Image.asset("assets/images/coffee2.png", width: 30, height: 30),
+          Text(
+            text,
+            style: TextStyle(
+                color: color != BuyMeACoffeeColor.Draft
+                    ? Colors.white
+                    : Colors.black,
+                fontWeight: FontWeight.bold),
+          ),
+        ]),
+        style: style == null
+            ? ElevatedButton.styleFrom(
+                minimumSize: Size(100, 20),
+                fixedSize: Size(200, 42),
+                backgroundColor: isEnabled
+                    ? _colors[color.toString()]
+                    : _colors[BuyMeACoffeeColor.Grey.toString()])
+            : ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color?>(isEnabled
+                        ? _colors[color.toString()]
+                        : _colors[BuyMeACoffeeColor.Grey.toString()]))
+                .merge(style),
+      ),
     );
   }
 }
