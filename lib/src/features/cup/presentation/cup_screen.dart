@@ -49,69 +49,103 @@ class _CupScreenState extends ConsumerState<CupScreen>
     super.dispose();
   }
 
-  List<Widget> getRounds() {
+  List<Widget> getRounds(Map rounds) {
     return <Widget>[
-      for (var round in widget.cup.rounds)
+      for (var round in widget.cup.rounds) ...[
         if (widget.cup.fixtures[round['id']] != null)
-          buildRound(round['id'].toString())
+          buildRound(round, rounds)
         else
-          Container(child: Text('No fixtures available for this round'))
+          Column(children: [
+            Text("GW(s): " +
+                round['gameweek'].toString() +
+                (round['secondGameweek'] != round['gameweek']
+                    ? " & " + round['secondGameweek'].toString()
+                    : "")),
+            Text('No fixtures available for this round yet.')
+          ])
+      ]
     ];
   }
 
-  ListView buildRound(String round) {
-    final test = widget.cup.fixtures[round];
-    return ListView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: widget.cup.fixtures[round]!.length,
-        itemBuilder: (BuildContext context, int index) {
-          CupFixture _fixture = widget.cup.fixtures[round]![index];
-          DraftTeam homeTeam = ref
-              .watch(draftDataControllerProvider)
-              .teams[_fixture.homeTeamId]!;
-          DraftTeam awayTeam = ref
-              .watch(draftDataControllerProvider)
-              .teams[_fixture.awayTeamId]!;
-          return Card(
-            child: Row(children: [
-              Expanded(
-                  flex: 6,
-                  child: Text(
-                    homeTeam.teamName!,
-                    textAlign: TextAlign.left,
-                  )),
-              Expanded(flex: 1, child: Text("vs")),
-              Expanded(
-                  flex: 6,
-                  child: Text(awayTeam.teamName!, textAlign: TextAlign.right)),
-            ]),
-          );
+  Column buildRound(dynamic round, Map rounds) {
+    return Column(
+      children: [
+        Text("GW(s): " +
+            round['gameweek'].toString() +
+            (round['secondGameweek'] != round['gameweek']
+                ? " & " + round['secondGameweek'].toString()
+                : "")),
+        ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: widget.cup.fixtures[round['id']]!.length,
+            itemBuilder: (BuildContext context, int index) {
+              CupFixture _fixture = widget.cup.fixtures[round['id']]![index];
+              if (rounds[round['id']] != null) {
+                _fixture = rounds[round['id']][index];
+              }
+              DraftTeam homeTeam = ref
+                  .watch(draftDataControllerProvider)
+                  .teams[_fixture.homeTeamId]!;
+              DraftTeam awayTeam = ref
+                  .watch(draftDataControllerProvider)
+                  .teams[_fixture.awayTeamId]!;
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Row(children: [
+                    Expanded(
+                        flex: 6,
+                        child: Text(
+                          homeTeam.teamName!,
+                          textAlign: TextAlign.left,
+                        )),
+                    if (_fixture.homeScore != null &&
+                        _fixture.awayScore != null)
+                      Expanded(
+                          flex: 3,
+                          child: Text(
+                            _fixture.homeScore.toString() +
+                                ' - ' +
+                                _fixture.awayScore.toString(),
+                            textAlign: TextAlign.center,
+                          ))
+                    else
+                      const Expanded(flex: 1, child: Text("vs")),
+                    Expanded(
+                        flex: 6,
+                        child: Text(awayTeam.teamName!,
+                            textAlign: TextAlign.right)),
+                  ]),
+                ),
+              );
 
-          // Column(
-          //   children: [
-          //     GestureDetector(
-          //       onTap: () {
-          //         Navigator.push(
-          //             context,
-          //             MaterialPageRoute(
-          //                 builder: (context) => Pitch(
-          //                       homeTeam: homeTeam,
-          //                       awayTeam: awayTeam,
-          //                     )));
-          //       },
-          //       child: CupFixtureSummary(
-          //           homeTeam: homeTeam,
-          //           awayTeam: awayTeam,
-          //           fixture: _fixture,
-          //           multipleLegs: round['multipleLegs']),
-          //     ),
-          //     // const SizedBox(
-          //     //   height: 5,
-          //     // )
-          //   ],
-          // );
-        });
+              // Column(
+              //   children: [
+              //     GestureDetector(
+              //       onTap: () {
+              //         Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //                 builder: (context) => Pitch(
+              //                       homeTeam: homeTeam,
+              //                       awayTeam: awayTeam,
+              //                     )));
+              //       },
+              //       child: CupFixtureSummary(
+              //           homeTeam: homeTeam,
+              //           awayTeam: awayTeam,
+              //           fixture: _fixture,
+              //           multipleLegs: round['multipleLegs']),
+              //     ),
+              //     // const SizedBox(
+              //     //   height: 5,
+              //     // )
+              //   ],
+              // );
+            })
+      ],
+    );
   }
 
   @override
@@ -133,6 +167,7 @@ class _CupScreenState extends ConsumerState<CupScreen>
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else {
+            Map rounds = snapshot.hasData ? snapshot.data as Map : {};
             return Scaffold(
               appBar: CupAppbar(tabController: _tabController, cup: widget.cup),
               body: Column(children: [
@@ -140,7 +175,7 @@ class _CupScreenState extends ConsumerState<CupScreen>
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
-                    children: getRounds(),
+                    children: getRounds(rounds),
                   ),
                 ),
               ]),
