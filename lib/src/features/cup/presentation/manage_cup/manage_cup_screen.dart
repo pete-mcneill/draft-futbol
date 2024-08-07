@@ -176,6 +176,7 @@ class _ManageCupState extends ConsumerState<ManageCup>
                                         onTap: () {
                                           setState(() {
                                             rounds.remove(round);
+                                            roundCounter = rounds.length + 1;
                                           });
                                         },
                                         child: Icon(Icons.delete),
