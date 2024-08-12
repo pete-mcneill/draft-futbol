@@ -37,53 +37,53 @@ teams = [
             "short_name": "BHA"
         },
         {
-            "code": 90,
-            "id": 6,
-            "name": "Burnley",
-            "pulse_id": 43,
-            "short_name": "BUR"
-        },
-        {
             "code": 8,
-            "id": 7,
+            "id": 6,
             "name": "Chelsea",
             "pulse_id": 4,
             "short_name": "CHE"
         },
         {
             "code": 31,
-            "id": 8,
+            "id": 7,
             "name": "Crystal Palace",
             "pulse_id": 6,
             "short_name": "CRY"
         },
         {
             "code": 11,
-            "id": 9,
+            "id": 8,
             "name": "Everton",
             "pulse_id": 7,
             "short_name": "EVE"
         },
         {
             "code": 54,
-            "id": 10,
+            "id": 9,
             "name": "Fulham",
             "pulse_id": 34,
             "short_name": "FUL"
         },
         {
-            "code": 14,
+            "code": 40,
+            "id": 10,
+            "name": "Ipswich",
+            "pulse_id": 8,
+            "short_name": "IPS"
+        },
+        {
+            "code": 13,
             "id": 11,
+            "name": "Leicester",
+            "pulse_id": 26,
+            "short_name": "LEI"
+        },
+        {
+            "code": 14,
+            "id": 12,
             "name": "Liverpool",
             "pulse_id": 10,
             "short_name": "LIV"
-        },
-        {
-            "code": 102,
-            "id": 12,
-            "name": "Luton",
-            "pulse_id": 163,
-            "short_name": "LUT"
         },
         {
             "code": 43,
@@ -114,11 +114,11 @@ teams = [
             "short_name": "NFO"
         },
         {
-            "code": 49,
+            "code": 20,
             "id": 17,
-            "name": "Sheffield Utd",
-            "pulse_id": 18,
-            "short_name": "SHU"
+            "name": "Southampton",
+            "pulse_id": 20,
+            "short_name": "SOU"
         },
         {
             "code": 6,

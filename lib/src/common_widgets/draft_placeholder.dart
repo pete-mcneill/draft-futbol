@@ -8,6 +8,7 @@ import 'package:draft_futbol/src/features/live_data/data/premier_league_reposito
 import 'package:draft_futbol/src/features/live_data/presentation/draft_data_controller.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
 import 'package:draft_futbol/src/features/squads/presentation/squad_view/squad_view.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,6 +53,26 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
     return squads;
   }
 
+  List<Widget> getPlayers(Map<int, DraftPlayer> players) {
+    List<Widget> playerWidgets = [];
+    for (var team in widget.leagueData.teams) {
+      List<DraftPlayer> teamPlayers = [];
+      for (DraftPlayer player in players.values) {
+        if (player.draftTeamId!.containsKey(widget.leagueData.leagueId)) {
+          if (player.draftTeamId![widget.leagueData.leagueId] ==
+              team['entry_id']) {
+            teamPlayers.add(player);
+          }
+        }
+      }
+      playerWidgets.add(expansionItem(
+          index: team['entry_id'],
+          teamName: team['name'],
+          players: teamPlayers));
+    }
+    return playerWidgets;
+  }
+
   @override
   Widget build(BuildContext context) {
     Map<int, DraftPlayer> players =
@@ -79,9 +100,30 @@ class _DraftPlaceholderState extends ConsumerState<DraftPlaceholder> {
           ),
         ),
         Container(
-          child: generatePlaceholder(
-              context, ref, players, false, widget.leagueData),
+            child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              Column(
+                children: [
+                  ...getPlayers(players),
+                  const SizedBox(
+                    height: 5,
+                  )
+                ],
+              ),
+            ],
+          ),
         )
+
+            // generatePlaceholder(
+            //     context, ref, players, false, widget.leagueData),
+            )
       ]),
     );
   }
