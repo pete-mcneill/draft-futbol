@@ -6,6 +6,7 @@ import 'package:draft_futbol/src/features/cup/presentation/cup_data_controller.d
 import 'package:draft_futbol/src/features/draft_app_bar/presentation/draft_app_bar_controller.dart';
 import 'package:draft_futbol/src/features/local_storage/data/hive_data_store.dart';
 import 'package:draft_futbol/src/features/local_storage/domain/local_league_metadata.dart';
+import 'package:draft_futbol/src/features/search/presentation/search_screen.dart';
 import 'package:draft_futbol/src/features/settings/data/settings_repository.dart';
 import 'package:draft_futbol/src/features/settings/presentation/settings_screen.dart';
 import 'package:draft_futbol/src/utils/async_value_ui.dart';
@@ -127,6 +128,19 @@ class DraftAppBarV1 extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: true,
       automaticallyImplyLeading: leading,
+      leading: !leading
+          ? IconButton(
+              icon: const Icon(FontAwesomeIcons.magnifyingGlass),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchScreen(),
+                  ),
+                );
+              },
+            )
+          : null,
       elevation: 3,
       title: Image.asset("assets/images/1024_1024-icon.png",
           height: 30, width: 30),
