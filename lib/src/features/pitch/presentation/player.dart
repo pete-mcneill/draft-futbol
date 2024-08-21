@@ -110,7 +110,8 @@ class _PlayerState extends ConsumerState<Player> {
       if (matches[match.matchId]!.started!) {
         matchesStarted = true;
       }
-      if (matches[match.matchId]!.finished!) {
+      if (matches[match.matchId]!.finishedProvisional! ||
+          matches[match.matchId]!.finished!) {
         matchesFinished = true;
       }
       for (Stat stat in match.stats!) {

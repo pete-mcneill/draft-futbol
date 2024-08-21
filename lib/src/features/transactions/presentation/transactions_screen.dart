@@ -103,11 +103,11 @@ class _TransactionsState extends ConsumerState<Transactions>
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(0.0)),
           margin: const EdgeInsets.all(0),
           elevation: 10,
           child: Column(
-            
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -130,7 +130,8 @@ class _TransactionsState extends ConsumerState<Transactions>
                     children: [
                       Text(
                         item.toString(),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                       CupertinoCheckbox(
                         value: isSelected,
@@ -205,7 +206,8 @@ class _TransactionsState extends ConsumerState<Transactions>
                     children: [
                       Text(
                         item.teamName!,
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                       CupertinoCheckbox(
                         value: isSelected,
@@ -284,8 +286,8 @@ class _TransactionsState extends ConsumerState<Transactions>
                       children: [
                         Text(
                           text,
-                          style:
-                              const TextStyle(color: Colors.white, fontSize: 16),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
                         ),
                         CupertinoCheckbox(
                           value: isSelected,
@@ -330,7 +332,10 @@ class _TransactionsState extends ConsumerState<Transactions>
                   child: Text("Reset Filters"),
                   onPressed: () {
                     Map<int, List<DraftTeam>> _selectedTeamIds = {};
-                    for (DraftLeague league in ref.read(draftDataControllerProvider).leagues.values) {
+                    for (DraftLeague league in ref
+                        .read(draftDataControllerProvider)
+                        .leagues
+                        .values) {
                       _selectedTeamIds[league.leagueId] = [];
                       List<DraftTeam> _teams = ref
                           .read(draftDataControllerProvider)
@@ -341,11 +346,16 @@ class _TransactionsState extends ConsumerState<Transactions>
                       for (DraftTeam team in _teams) {
                         _selectedTeamIds[league.leagueId]!.add(team);
                       }
-                    setState(() {
-                      selectedGameweeks = [ref.read(liveDataControllerProvider).gameweek!.currentGameweek];
-                      selectedTeamIds = _selectedTeamIds;
-                      selectedWaiverResults = ["a", "r"];
-                    });
+                      setState(() {
+                        selectedGameweeks = [
+                          ref
+                              .read(liveDataControllerProvider)
+                              .gameweek!
+                              .currentGameweek
+                        ];
+                        selectedTeamIds = _selectedTeamIds;
+                        selectedWaiverResults = ["a", "r"];
+                      });
                     }
                   },
                 ),
@@ -368,56 +378,59 @@ class _TransactionsState extends ConsumerState<Transactions>
             filterTransactions(league.leagueId),
             const SizedBox(height: 20),
             waiversFreeAgentsHeader(),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: waivers[league.leagueId]!
-                  .where(
-                      (element) => selectedGameweeks.contains(element.gameweek))
-                  .length,
-              itemBuilder: (context, i) {
-                List<Transaction> transactions = waivers[league.leagueId]!
+            if (waivers[league.leagueId]?.isNotEmpty ?? false)
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: waivers[league.leagueId]!
                     .where((element) =>
                         selectedGameweeks.contains(element.gameweek))
-                    .toList();
-                transactions.sort((a, b) =>
-                    int.parse(a.priority).compareTo(int.parse(b.priority)));
-                Transaction _transaction = transactions[i];
-                DraftPlayer playerIn =
-                    players[int.parse(_transaction.playerInId)]!;
-                DraftPlayer playerOut =
-                    players[int.parse(_transaction.playerOutId)]!;
-                DraftTeam? _team;
-                for (DraftTeam team in teams.values) {
-                  if (team.entryId.toString() ==
-                      _transaction.teamId.toString()) {
-                    _team = team;
+                    .length,
+                itemBuilder: (context, i) {
+                  List<Transaction> transactions = waivers[league.leagueId]!
+                      .where((element) =>
+                          selectedGameweeks.contains(element.gameweek))
+                      .toList();
+                  transactions.sort((a, b) =>
+                      int.parse(a.priority).compareTo(int.parse(b.priority)));
+                  Transaction _transaction = transactions[i];
+                  DraftPlayer playerIn =
+                      players[int.parse(_transaction.playerInId)]!;
+                  DraftPlayer playerOut =
+                      players[int.parse(_transaction.playerOutId)]!;
+                  DraftTeam? _team;
+                  for (DraftTeam team in teams.values) {
+                    if (team.entryId.toString() ==
+                        _transaction.teamId.toString()) {
+                      _team = team;
+                    }
                   }
-                }
-                String waiverResult = _transaction.result;
-                if (['di', 'do'].contains(waiverResult)) {
-                  waiverResult = 'r';
-                }
-                if (selectedTeamIds[league.leagueId]!.contains(_team) &&
-                    selectedWaiverResults.contains(waiverResult)) {
-                  return Column(
-                    children: [
-                      const Divider(
-                        thickness: 2,
-                      ),
-                      Waiver(
-                        transaction: _transaction,
-                        playerIn: playerIn,
-                        playerOut: playerOut,
-                        team: _team,
-                      ),
-                    ],
-                  );
-                } else {
-                  return const SizedBox();
-                }
-              },
-            ),
+                  String waiverResult = _transaction.result;
+                  if (['di', 'do'].contains(waiverResult)) {
+                    waiverResult = 'r';
+                  }
+                  if (selectedTeamIds[league.leagueId]!.contains(_team) &&
+                      selectedWaiverResults.contains(waiverResult)) {
+                    return Column(
+                      children: [
+                        const Divider(
+                          thickness: 2,
+                        ),
+                        Waiver(
+                          transaction: _transaction,
+                          playerIn: playerIn,
+                          playerOut: playerOut,
+                          team: _team,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                },
+              )
+            else
+              Text("No Waivers made for this League yet")
           ],
         ))
     ];
@@ -436,46 +449,49 @@ class _TransactionsState extends ConsumerState<Transactions>
             filterTransactions(league.leagueId),
             const SizedBox(height: 20),
             waiversFreeAgentsHeader(),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: freeAgents[league.leagueId]!
-                  .where(
-                      (element) => selectedGameweeks.contains(element.gameweek))
-                  .length,
-              itemBuilder: (context, i) {
-                List<Transaction> transactions = freeAgents[league.leagueId]!
+            if (freeAgents[league.leagueId]?.isNotEmpty ?? false)
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: freeAgents[league.leagueId]!
                     .where((element) =>
                         selectedGameweeks.contains(element.gameweek))
-                    .toList();
-                Transaction _transaction = transactions[i];
-                DraftPlayer playerIn =
-                    players[int.parse(_transaction.playerInId)]!;
-                DraftPlayer playerOut =
-                    players[int.parse(_transaction.playerOutId)]!;
-                DraftTeam? _team;
-                for (DraftTeam team in teams.values) {
-                  if (team.entryId.toString() ==
-                          _transaction.teamId.toString() &&
-                      selectedTeamIds[league.leagueId]!.contains(team)) {
-                    _team = team;
+                    .length,
+                itemBuilder: (context, i) {
+                  List<Transaction> transactions = freeAgents[league.leagueId]!
+                      .where((element) =>
+                          selectedGameweeks.contains(element.gameweek))
+                      .toList();
+                  Transaction _transaction = transactions[i];
+                  DraftPlayer playerIn =
+                      players[int.parse(_transaction.playerInId)]!;
+                  DraftPlayer playerOut =
+                      players[int.parse(_transaction.playerOutId)]!;
+                  DraftTeam? _team;
+                  for (DraftTeam team in teams.values) {
+                    if (team.entryId.toString() ==
+                            _transaction.teamId.toString() &&
+                        selectedTeamIds[league.leagueId]!.contains(team)) {
+                      _team = team;
+                    }
                   }
-                }
-                return Column(
-                  children: [
-                    const Divider(
-                      thickness: 2,
-                    ),
-                    Waiver(
-                      transaction: _transaction,
-                      playerIn: playerIn,
-                      playerOut: playerOut,
-                      team: _team,
-                    ),
-                  ],
-                );
-              },
-            ),
+                  return Column(
+                    children: [
+                      const Divider(
+                        thickness: 2,
+                      ),
+                      Waiver(
+                        transaction: _transaction,
+                        playerIn: playerIn,
+                        playerOut: playerOut,
+                        team: _team,
+                      ),
+                    ],
+                  );
+                },
+              )
+            else
+              Text("No Free Agents for this league yet")
           ],
         ))
     ];
@@ -494,81 +510,84 @@ class _TransactionsState extends ConsumerState<Transactions>
             filterTransactions(league.leagueId),
             const SizedBox(height: 20),
             waiversFreeAgentsHeader(),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: trades[league.leagueId]!
-                  .where(
-                      (element) => selectedGameweeks.contains(element.gameweek))
-                  .length,
-              itemBuilder: (context, i) {
-                List<Trade> _trades = trades[league.leagueId]!
+            if (trades[league.leagueId]?.isNotEmpty ?? false)
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: trades[league.leagueId]!
                     .where((element) =>
                         selectedGameweeks.contains(element.gameweek))
-                    .toList();
-                if (_trades.isEmpty) {
-                  return const Text("No Trades for the selected filter");
-                }
-                Trade _trade = _trades[i];
-                DraftTeam offeringTeam = teams.entries
-                    .firstWhere(
-                        (team) => team.value.entryId == _trade.offeringTeam)
-                    .value;
-                DraftTeam receivingTeam = teams.entries
-                    .firstWhere(
-                        (team) => team.value.entryId == _trade.receivingTeam)
-                    .value;
+                    .length,
+                itemBuilder: (context, i) {
+                  List<Trade> _trades = trades[league.leagueId]!
+                      .where((element) =>
+                          selectedGameweeks.contains(element.gameweek))
+                      .toList();
+                  if (_trades.isEmpty) {
+                    return const Text("No Trades for the selected filter");
+                  }
+                  Trade _trade = _trades[i];
+                  DraftTeam offeringTeam = teams.entries
+                      .firstWhere(
+                          (team) => team.value.entryId == _trade.offeringTeam)
+                      .value;
+                  DraftTeam receivingTeam = teams.entries
+                      .firstWhere(
+                          (team) => team.value.entryId == _trade.receivingTeam)
+                      .value;
 
-                return Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(0.0)),
-                  margin: const EdgeInsets.all(0),
-                  elevation: 10,
-                  child: Column(
-                    children: [
-                      Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                              child: Text("${offeringTeam.teamName}",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold))),
-                          Expanded(
-                            child: Column(
-                              children: [
-                                Text('GW${_trade.gameweek.toString()}'),
-                                IconButton(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondaryContainer,
-                                    // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
-                                    icon: const FaIcon(
-                                        FontAwesomeIcons.rightLeft),
-                                    onPressed: () {
-                                      print("Pressed");
-                                    }),
-                              ],
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0.0)),
+                    margin: const EdgeInsets.all(0),
+                    elevation: 10,
+                    child: Column(
+                      children: [
+                        Row(
+                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                                child: Text("${offeringTeam.teamName}",
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold))),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text('GW${_trade.gameweek.toString()}'),
+                                  IconButton(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer,
+                                      // Use the FaIcon Widget + FontAwesomeIcons class for the IconData
+                                      icon: const FaIcon(
+                                          FontAwesomeIcons.rightLeft),
+                                      onPressed: () {
+                                        print("Pressed");
+                                      }),
+                                ],
+                              ),
                             ),
-                          ),
-                          Expanded(
-                              child: Text("${receivingTeam.teamName}",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)))
-                        ],
-                      ),
-                      for (var set in _trade.players) getPlayers(set),
-                      const SizedBox(
-                        height: 5,
-                      )
-                    ],
-                  ),
-                );
-              },
-            ),
+                            Expanded(
+                                child: Text("${receivingTeam.teamName}",
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold)))
+                          ],
+                        ),
+                        for (var set in _trade.players) getPlayers(set),
+                        const SizedBox(
+                          height: 5,
+                        )
+                      ],
+                    ),
+                  );
+                },
+              )
+            else
+              Text("No Trades for this league yet")
           ],
         ))
     ];
@@ -957,6 +976,9 @@ class _TransactionsState extends ConsumerState<Transactions>
     selectedGameweeks.add(gameweek.currentGameweek);
     for (var i = gameweek.currentGameweek; i > 0; i--) {
       possibleGameweeks.add(i);
+    }
+    if (gameweek.gameweekFinished) {
+      possibleGameweeks.add(gameweek.currentGameweek + 1);
     }
     for (DraftLeague league in leagues) {
       selectedTeamIds[league.leagueId] = [];
