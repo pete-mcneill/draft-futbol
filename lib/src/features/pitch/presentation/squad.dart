@@ -1,5 +1,6 @@
 import 'package:draft_futbol/baguley-features/widgets/reset_subs.dart';
 import 'package:draft_futbol/src/features/live_data/domain/draft_domains/draft_player.dart';
+import 'package:draft_futbol/src/features/live_data/domain/gameweek.dart';
 import 'package:draft_futbol/src/features/live_data/domain/premier_league_domains/pl_match.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/live_data_controller.dart';
 import 'package:draft_futbol/src/features/live_data/presentation/premier_league_controller.dart';
@@ -236,6 +237,10 @@ class _SquadState extends ConsumerState<Squad> {
   }
 
   bool checkForSubstituteIcon(DraftPlayer player) {
+    Gameweek gw = ref.read(liveDataControllerProvider).gameweek!;
+    if (gw.gameweekFinished) {
+      return false;
+    }
     bool substitue = false;
     for (var element in subs) {
       if (element.subInId == player.playerId) {
@@ -246,8 +251,7 @@ class _SquadState extends ConsumerState<Squad> {
       }
     }
     final storedSubs = Hive.box('subs').toMap();
-    int currentGameweek =
-        ref.read(liveDataControllerProvider).gameweek!.currentGameweek;
+    int currentGameweek = gw.currentGameweek;
     final teamSubs = storedSubs;
     if (teamSubs[currentGameweek] != null) {
       if (teamSubs[currentGameweek]![widget.team.id] != null) {

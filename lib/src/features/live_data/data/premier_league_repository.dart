@@ -238,7 +238,7 @@ class PremierLeagueRepository {
         if (player.matches != null) {
           for (PlMatchStats match in player.matches![gameweek]!) {
             PlMatch plMatch = plMatches[match.matchId]!;
-            if (plMatch.started! && !plMatch.finished!) {
+            if (plMatch.started! && !plMatch.finishedProvisional!) {
               Map<int, List<Bps>> bps = plMatch.bpsPlayers;
               Iterable threeBps =
                   bps[3]!.where((Bps i) => i.element == player.playerId);
